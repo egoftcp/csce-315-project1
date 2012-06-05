@@ -32,15 +32,8 @@ private:
 	vector<string> Tokens;
 	string tok;
 	int level;
-
-	//void handleCorQ(string);
 	
 public:
-	/*
-	void handleCorQ(string);
-	bool handleCommand(string Cmd);
-	bool handleQuery(string Query);
-	*/
 	Parser(){
 		level=0;
 	}
@@ -73,14 +66,7 @@ public:
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		}
 	}
-	/*
-		char_separator<char> separator( "", "()+-" );
-		tokenizer<char_separator<char> > tok(content);
-		for(tokenizer<char_separator<char> >::iterator beg=tok.begin(); beg!=tok.end();++beg){
-		   cout << *beg << "\n";
-		}
-	*/
-
+	
 	vector<string> tokenizeLine(string line){
 		vector<string> tokens;
 		boost::char_separator<char> separator(" \n","\"()+<>=-;,");
@@ -122,7 +108,7 @@ public:
 		return true;
 	}
 	
-	
+	/*Old Funcs
 	void handleProgram(string prog){
 		cout<<"*******\nSOMEONE CALLED handleProgram\n********\n";
 	
@@ -140,24 +126,21 @@ public:
 				ln="";
 			}
 		}
-		
-		/*
-			cout<<"read line# "<<i<<endl;
+			// cout<<"read line# "<<i<<endl;
 			
-			int maxLineSize=1020;
-			char buff[maxLineSize];
-			string ln;
+			// int maxLineSize=1020;
+			// char buff[maxLineSize];
+			// string ln;
 			
-			//iss.get(buff,maxLineSize,';');
-			getline(iss, ln, ':');
-			cout<<"read:"<<iss.gcount()<<" chars"<<endl;
+			// iss.get(buff,maxLineSize,';');
+			// getline(iss, ln, ':');
+			// cout<<"read:"<<iss.gcount()<<" chars"<<endl;
 			
-			//string newLn(buff);
-			cout<<"adding newLine: "<<ln<<endl;
-			Lines.push_back(ln);
-		}
-		*/
-		//cout<<"done breaking apart program..."<<endl;
+			// string newLn(buff);
+			// cout<<"adding newLine: "<<ln<<endl;
+			// Lines.push_back(ln);
+				
+			//cout<<"done breaking apart program..."<<endl;
 		
 		for(vector<string>::iterator it=Lines.begin(); it!=Lines.end(); ++it){
 			cout<<"calling handle CorQ on string: "<<(*it)<<endl;
@@ -165,31 +148,6 @@ public:
 		}
 		
 	}
-	
-	//void handleCorQ(string line){
-		/* Moved to tokenizeLine
-		cout<<"******************************\n**Handling Line: "<<line<<endl;
-		boost::char_separator<char> separator(" \n","\"()+<>=-;,");
-		boost::tokenizer< boost::char_separator<char> > tok( (std::string::const_iterator)line.begin(), (std::string::const_iterator)line.end(), separator);
-		for(boost::tokenizer< boost::char_separator<char> >::iterator beg=tok.begin();
-			beg!=tok.end();
-			++beg)
-		{
-		   cout <<"["<<*beg<<"] ";
-		}
-		cout<<"\n**Done handling line\n****************************\n\n";
-		cout << "Press ENTER to continue";
-		cin.ignore(numeric_limits<streamsize>::max(), '\n');
-		*/
-		/*Decide if Command or Query 
-		if(!handleCommand(line)){
-			//not a command. handle it like a query.
-			if(!handleQuery(line)){
-				cerr<<"Error handling Query\nExiting\n";
-				exit(-1);
-			}
-		}*/
-	//}
 	
 	bool handleQuery(string Query){
 		cout<<"Handeling a query!!!!!\n"<<Query<<endl;
@@ -223,27 +181,26 @@ public:
 		}
 		return true;
 	}
+	*/
 	
 private:	
-	//Non-terminal Functions:
-	/*
+	/*Non-terminal Functions:
 	void query(); void relationName(); void identifier(); void alpha(); void digit(); void expr(); void atomicExpr(); void selection();
 	void condition(); void conjunction(); void comparison(); void op(); void operand(); void attributeName(); void literal(); 
 	void projection(); void attributeList(); void renaming(); void unionF(); void difference(); void product();  
 	*/
-	//Non-terminal helpers:
+	/*Non-terminal helpers:
 	bool isDigit(string);
 	bool isAlpha(string);
-	//Parser Specific Functions/Members:
-	//void getToke();
-	//Helper Funcs
-	/*
-	void errorS(string);
-	void enter(string);
-	void leave(string);
-	void spaces(int);
 	*/
+	/*Parser Specific Functions/Members:
+	void getToke();
+	Helper Funcs
+	*/
+
 	//Helper Funcs
+	bool isDigit(string);
+	bool isAlpha(string);
 	void errorS(string s) {
 	   cout<<"\n*** ERROR: "<<s<<endl;;
 	   exit(1);
@@ -266,26 +223,9 @@ private:
 		while (local_level-- > 0)
 			cout<<"| ";
 	}
-	//TODO: Kill getsym.
-	/*
-	void getsym(void) {
-		while (isspace(sym = getchar()))
-		;
-	}
-	*/
 	void getToke(){
 		
 	}
-	void parseQuery(string Query){
-		//string toks* = tokenize(Query);
-		query();
-		
-	}
-	void tokenize(string line){
-		stringstream lineSrt(line);
-		
-	}
-	//Non-terminal 'Recursive' Functions:
 
 	//query ::= relation-name <- expr ;
 	void query(){
@@ -530,38 +470,10 @@ private:
 };
 
 int main() {
-
-	//string exampleProg = "CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind); INSERT INTO animals VALUES FROM (\"Joe\", \"cat\", 4); INSERT INTO animals VALUES FROM (\"Spot\", \"dog\", 10); INSERT INTO animals VALUES FROM (\"Snoopy\", \"dog\", 3); INSERT INTO animals VALUES FROM (\"Tweety\", \"bird\", 1); INSERT INTO animals VALUES FROM (\"Joe\", \"bird\", 2); SHOW animals; dogs <- select (kind == \"dog\") animals; old_dogs <- select (age > 10) dogs; cats_or_dogs <- dogs + (select (kind == \"cat\") animals); CREATE TABLE species (kind VARCHAR(10)) PRIMARY KEY (kind); INSERT INTO species VALUES FROM RELATION project (kind) animals; a <- rename (aname, akind) (project (name, kind) animals); common_names <- project (name) (select (aname == name && akind != kind) (a * animals)); answer <- common_names; SHOW answer; WRITE animals; CLOSE animals; EXIT;";
-	
-	//Parser myP = new Parser();
-	
-	//Parser pp;
-	//pp.handleProgram(exampleProg);
-	
-	/*
-	Parser pp("testinput.txt");
-	pp.handleProgram("anystring");
-	*/
-	
-	cout<<"starting parser\n";
+	cout<<"-Starting Parser Main\n";
 	Parser* myP = new Parser("parser_milestone_good_inputs.txt");
-	//myP->handleProgram("anyStr");
+	cout<<"-Exiting Parser Main\n";
 	
-	cout<<"exiting\n";
-	
-
-/*
-	while (1){
-		cout<<">"<<endl;
-		//printf(">");
-		//getsym();//TODO: KILL, comment off
-		getToke();
-		//TODO: kickoff query/comment recursion
-		//E();
-		if (tok != ";") error(1); //Exit Condition
-		else cout<<"Successful parse\n";
-	}
-*/
 	return 0;
 }
 
