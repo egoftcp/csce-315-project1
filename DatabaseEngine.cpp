@@ -51,11 +51,15 @@ public:
 		return cells[index];
 	}
 	
+	void setElement(int spot, string value) {
+		cells[spot] = value;
+	}
+	
 	int getSize() {
 		return cells.size();
 	}
 	
-	void setCell(string old_value, string new_value) {
+	void setElementByName(string old_value, string new_value) {
 		cells[getCellIndex(old_value)] = new_value;
 	}
 };
@@ -93,11 +97,21 @@ public:
 		}
 	}
 	
+	void setElement(int x, int y, string value) {
+	
+		map<string, Attribute>::iterator iter = columns.begin();
+		for(int i = 0; i < x; i++) {
+			iter++;
+		}
+		(*iter).second.setElement(y, value);
+	
+	}
+	
 	string getName() {
 		return name;
 	}
 	
-	string stringify() {
+	string stringify() { //Incomplete
 	
 		return "0";
 		//Idea behind this is to convert the relation into a string
@@ -168,7 +182,20 @@ int main() {
 	input[1] = "dog";
 	input[2] = "343";
 	
+	vector<string> input2(3);
+	input2[0] = "bye";
+	input2[1] = "cat";
+	input2[2] = "404";
+
 	table.addTuple(input);
+	
+	table.print();
+
+	table.addTuple(input2);
+	
+	table.print();
+	
+	table.setElement(0, 1, "NEW");
 	
 	table.print();
 	
