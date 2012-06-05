@@ -107,6 +107,14 @@ public:
 	
 	}
 	
+	string getElement(int x, int y) {
+		map<string, Attribute>::iterator iter = columns.begin();
+		for(int i = 0; i < x; i++) {
+			iter++;
+		}
+		return (*iter).second.cells[y];	
+	}
+	
 	string getName() {
 		return name;
 	}
@@ -198,6 +206,8 @@ int main() {
 	table.setElement(0, 1, "NEW");
 	
 	table.print();
+	
+	cout << table.getElement(0,1);
 	
 	//table.deleteAttribute("Second");
 	
