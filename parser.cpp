@@ -48,9 +48,18 @@ public:
 		vector<string> Lines;
 		stringstream iss(prog);
 		
-		int i=0;
+		string ln="";
 		while(iss.good()){
-			i++;
+			char c;
+			iss>>c;
+			ln+=c;
+			if(c==';'){
+				Lines.push_back(ln);
+				cout<<"added line: "<<ln<<endl;
+				ln="";
+			}
+		}
+		/*
 			cout<<"read line# "<<i<<endl;
 			
 			int maxLineSize=1020;
@@ -65,6 +74,7 @@ public:
 			cout<<"adding newLine: "<<ln<<endl;
 			Lines.push_back(ln);
 		}
+		*/
 		cout<<"done breaking apart program..."<<endl;
 		
 		for(vector<string>::iterator it=Lines.begin(); it!=Lines.end(); ++it){
@@ -85,7 +95,7 @@ public:
 	}
 	
 	bool handleQuery(string Query){
-		cout<<"Handeling a string!!!!!\n"<<Query<<endl;
+		cout<<"Handeling a query!!!!!\n"<<Query<<endl;
 		return true;
 	}
 	
