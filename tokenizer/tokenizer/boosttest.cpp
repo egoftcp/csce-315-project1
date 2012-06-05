@@ -12,7 +12,7 @@ int main(){
    string end;
    string content((istreambuf_iterator<char>(inputFile)),
 				(istreambuf_iterator<char>()));
-   char_separator<char> separator( "", " ();,");
+   char_separator<char> separator(" \n","\"()+<>=-;");
    vector<string> tokens;
    
    tokenizer<char_separator<char> > tok(content, separator);
