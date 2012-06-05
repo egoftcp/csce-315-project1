@@ -23,7 +23,8 @@ int main(){
 	   cout << tokens.back() << "\n";
    }
    
-   cout<<"\nPress Enter to Exit...";
-   cin>>end;
+   
+	cout << "Press ENTER to quit";
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
