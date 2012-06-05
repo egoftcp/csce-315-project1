@@ -4,9 +4,6 @@
 #include<boost/tokenizer.hpp>
 #include<string>
 
-
-
-
 int main(){
    using namespace std;
    using namespace boost;
@@ -15,16 +12,15 @@ int main(){
    string end;
    string content((istreambuf_iterator<char>(inputFile)),
 				(istreambuf_iterator<char>()));
-   char_separator<char> separator( "", "()+-" );
-
-
-
+   char_separator<char> separator( "", " ();,");
+   vector<string> tokens;
    
-
-   tokenizer<char_separator<char> > tok(content);
+   tokenizer<char_separator<char> > tok(content, separator);
    for(tokenizer<char_separator<char> >::iterator beg=tok.begin(); beg!=tok.end();++beg)
    {
-       cout << *beg << "\n";
+
+		   tokens.push_back(*beg);
+	   cout << tokens.back() << "\n";
    }
    
    cout<<"\nPress Enter to Exit...";
