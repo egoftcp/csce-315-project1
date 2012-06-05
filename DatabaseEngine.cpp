@@ -15,17 +15,17 @@ using namespace std;
 
 class Attribute {
 
+public:
+
 	string name;
 	vector<string> cells;
-	
-public:
 
 	Attribute(string input_name) {
 		name = input_name;
 	}
 	
-	string* getName() {
-		return &name;
+	string getName() {
+		return name;
 	}
 	
 	void addCell(string value) {
@@ -35,7 +35,6 @@ public:
 	int getCellIndex(string value) {
 	
 		int i = 0;
-		
 		while( strcmp(cells[i].c_str(), value.c_str()) != 0)  {
 			i++;
 		}
@@ -48,82 +47,52 @@ public:
 		}
 	}
 	
+	string getElement(int index) {
+		return cells[index];
+	}
+	
+	int getSize() {
+		return cells.size();
+	}
+	
 	void setCell(string old_value, string new_value) {
 		cells[getCellIndex(old_value)] = new_value;
 	}
-	
 };
 
 class Tuple {
-	
-	//vector<string*> cells;
-	//Gonna try and have these cells point to the ones inside the attributes vector
-	//Should cause updates/changes to be smoother
-	
 public:
-
-	vector<string*> cells;
-
-	void add(Attribute* attr) {
-		cells.push_back( attr->getName() );
-	}
-	
-	int getCellIndex(string value) {
-		//copy-pasted from attribute, might just inherit these from the same place
-	
-		int i = 0;
-				
-		while( strcmp(((string*)cells[i])->c_str(), value.c_str()) != 0 && i < cells.size())  {
-			i++;
-		}
-	
-		if(i < cells.size()) {
-			return i;
-		} else {
-			return -1;
-			//error value, watch out for vector[-1] results
-		}
-	}
-	
 };
 
 class Relation {
 
+public:
+
 	string name;
 	map<string, Attribute> columns;
-	vector<Tuple> rows;
-	
-public:
+	map<string, Attribute>::iterator start;
 
 	Relation(string input_name) {
 		name = input_name;
 	}
 	
 	void addAttribute(string name) {
-	
 		Attribute attr(name);
 		columns.insert( pair<string,Attribute>(name, attr) );
-		
-		//columns[name]
-	
 	}
 	
 	void deleteAttribute(string name) {
-	
-		//deletes the cell pointer in every row inside the row vector
-		for(int i = 0; i < rows.size(); i++) {
-			rows[i].cells.erase(rows[i].cells.begin()+rows[i].getCellIndex(name));
-		}
-	
-		//deltes the named column
 		columns.erase(name);
-	
-	}
-	
-	void addTuple(Tuple row) {
-		
 	}
 
+	void addTuple(vector<string> input) {
+		int i = 0;
+		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
+			(*iter).second.cells.push_back(input[i]);
+			i++;
+		}
+	}
+	
 	string getName() {
 		return name;
 	}
@@ -135,7 +104,26 @@ public:
 		//The string can then be written to a file
 	}
 	
-
+	void print() {
+		
+		//Prints the header (name of attributes)
+		cout << '\t';
+		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
+				cout << (*iter).second.getName() << '\t';
+			}
+		cout << '\n';
+		
+		//Prints values of elements
+		start = columns.begin();
+		for(int i = 0; i < (*start).second.getSize(); i++) {
+			cout << i << '\t';
+			for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
+				cout << (*iter).second.getElement(i) << '\t';
+			}
+			cout << '\n';
+		}
+		cout << '\n';
+	}
 };
 
 class Domain {
@@ -169,6 +157,24 @@ void readFromFile(string input) {
 }
 
 int main() {
+
+	Relation table("test");
+	table.addAttribute("First");
+	table.addAttribute("Second");
+	table.addAttribute("Third");
+	
+	vector<string> input(3);
+	input[0] = "hello";
+	input[1] = "dog";
+	input[2] = "343";
+	
+	table.addTuple(input);
+	
+	table.print();
+	
+	//table.deleteAttribute("Second");
+	
+	//table.print();
 
 	return 0;
 }
