@@ -14,5 +14,8 @@ int main(){
    for(tokenizer<char_separator<char> >::iterator beg=tok.begin(); beg!=tok.end();++beg){
        cout << *beg << "\n";
    }
+   
+   cout<<"\nPress Enter to Exit...";
    cin>>end;
 }
+
