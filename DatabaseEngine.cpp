@@ -119,9 +119,20 @@ public:
 		name = input_name;
 	}
 	
+	Relation(string input_name, vector<string> input) {
+		name = input_name;
+		for(int i = 0; i < input.size(); i = i + 2) {
+			addAttribute(input[i], input[i+1]);
+		}
+	}
+	
 	void addAttribute(string name) {
 		Attribute attr(name);
 		columns.insert( pair<string,Attribute>(name, attr) );
+	}
+	
+	void addAttribute(string name, string type) {
+		Attribute attr(name, type);
 	}
 	
 	void deleteAttribute(string name) {
@@ -173,6 +184,8 @@ public:
 		//Idea behind this is to convert the relation into a string
 		//The string can then be written to a file
 	}
+	
+	
 	
 	void print() {
 		
