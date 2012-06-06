@@ -18,10 +18,18 @@ enum dataType { VARCHAR, INTEGER, DATE };
 class myDataTypes {
 };
 
+
 class varChar {
+	int size;
 public:
-	varChar(int size) {
+	varChar(int input_size) {
+		size = input_size;
 	}
+	
+	int getSize() {
+		return size;
+	}
+	
 };
 
 class Attribute {
@@ -128,6 +136,14 @@ public:
 		}
 	}
 	
+	Attribute findAttribute(string input_name) {
+		map<string, Attribute>::iterator iter = columns.begin();
+		while( strcmp( (*iter).second.name.c_str(), input_name.c_str()) != 0 && iter != columns.end()) {
+			iter++;
+		}
+		return (*iter).second;
+	}
+	
 	void setElement(int x, int y, string value) {
 	
 		map<string, Attribute>::iterator iter = columns.begin();
@@ -139,6 +155,7 @@ public:
 	}
 	
 	string getElement(int x, int y) {
+	
 		map<string, Attribute>::iterator iter = columns.begin();
 		for(int i = 0; i < x; i++) {
 			iter++;
@@ -239,6 +256,8 @@ int main() {
 	table.print();
 	
 	cout << table.getElement(0,1);
+	
+	cout << '\n' << table.findAttribute("Second").name << '\n';
 	
 	//table.deleteAttribute("Second");
 	
