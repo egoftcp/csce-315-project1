@@ -13,26 +13,56 @@
 
 using namespace std;
 
+enum dataType { VARCHAR, INTEGER, DATE };
+
+class myDataTypes {
+};
+
+class varChar {
+public:
+	varChar(int size) {
+	}
+};
+
 class Attribute {
 
 public:
 
+	//dataType type;
 	string name;
+	string type;
 	vector<string> cells;
 
 	Attribute(string input_name) {
 		name = input_name;
+		type = "NULL";
+	}
+	
+	Attribute(string input_name, string input_type) {
+		name = input_name;
+		type = input_type;
+	}
+	
+	//Probably a rare case use of this constructor
+	Attribute(string input_name, string input_type, vector<string> input_cells) {
+		name = input_name;
+		type = input_type;
+		cells = input_cells;
 	}
 	
 	string getName() {
 		return name;
 	}
 	
+	void setName(string input_name) {
+		name = input_name;
+	}
+	
 	void addCell(string value) {
 		cells.push_back(value);
 	}
 	
-	int getCellIndex(string value) {
+	int findCellIndex(string value) {
 	
 		int i = 0;
 		while( strcmp(cells[i].c_str(), value.c_str()) != 0)  {
@@ -60,7 +90,7 @@ public:
 	}
 	
 	void setElementByName(string old_value, string new_value) {
-		cells[getCellIndex(old_value)] = new_value;
+		cells[findCellIndex(old_value)] = new_value;
 	}
 };
 
@@ -75,6 +105,7 @@ public:
 	string name;
 	map<string, Attribute> columns;
 	map<string, Attribute>::iterator start;
+	int primaryKey;
 
 	Relation(string input_name) {
 		name = input_name;
