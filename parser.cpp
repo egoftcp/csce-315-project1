@@ -382,7 +382,7 @@ private:
 	bool atomicExpr(){ //TODO: PROBLEMS IN HERE!!!
 		bool isAE = relationName();
 		if(isAE){
-			addPTok(sTok); //add relation-name to parserTokens
+			//addPTok(sTok); //add relation-name to parserTokens
 			getSTok();
 		}else{
 			isAE = sTok=="(";
@@ -592,7 +592,8 @@ private:
 		atomicExpr();
 		if(sTok == "+" ){
 			getSTok(); //clear "+"
-		}else{ errorS("Expected +"); }
+		}else{ //errorS("Expected +"); 
+		}
 		atomicExpr();
 		leave("Union");
 		return isUnionF;
@@ -615,19 +616,21 @@ private:
 	bool product(){
 		enter("Product");
 		bool isProd = atomicExpr();
+		cout<<"DEBUG: isProd:"<<isProd<<endl;
 		if(isProd){
 			
 			//addPTok(sTok
 			isProd= pTokens[sTokI+1]=="*";
+			cout<<"DEBUG: isProd:"<<isProd<<endl;
 			if(sTok == "*" ){
 				getSTok(); //clear "*"
 			}else{ 
 				
-				errorS("Expected *"); 
+				//errorS("Expected *"); 
 			}
 			atomicExpr();
 		}	
-		
+		cout<<"DEBUG: isProd:"<<isProd<<endl;
 		leave("Product");
 		return isProd;
 	}
