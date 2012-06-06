@@ -199,13 +199,20 @@ public:
 	}
 	
 	string stringify() {
-		string table = "";
-		
-		table = table + "\t";
+		string table = "(";
 		
 		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-			table = table + (*iter).second.getName();
-			table = table + '\t';
+			if( !(*iter).second.type.isInt()) {
+				if( iter == columns.end() ) {
+					table = table + "\"" + (*iter).second.getName(); + "\")";
+				} else {
+					table = table + "\"" + (*iter).second.getName(); + "\", ";
+				}
+				
+				table = table + "(\"" + (*iter).second.getName(); + "\", ";
+			} else {
+			
+			}
 		}
 		table = table + "\n";
 		
@@ -235,7 +242,7 @@ public:
 		cout << '\t';
 		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
 				cout << (*iter).second.getName() << '\t';
-			}
+		}
 		cout << '\n';
 		
 		//Prints values of elements
