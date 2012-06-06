@@ -10,49 +10,59 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
-enum dataType { VARCHAR, INTEGER, DATE };
+string intToString(int number) {
+	stringstream ss;
+	ss << number;
+	return ss.str();
+}
 
-class myDataTypes {
-};
+class dataType {
 
-
-class varChar {
-	int size;
+	bool _isInt;
+	int length;
+	
 public:
-	varChar(int input_size) {
-		size = input_size;
+
+	dataType() {}
+
+	dataType(bool isInt, int size = 0) {
+		_isInt = isInt;
+		length = size;
+	}
+
+	bool isInt() {
+		return _isInt;
 	}
 	
-	int getSize() {
-		return size;
+	int size() {
+		return length;
 	}
-	
 };
 
 class Attribute {
 
 public:
 
-	//dataType type;
+	dataType type;
 	string name;
-	string type;
+	//string type;
 	vector<string> cells;
 
 	Attribute(string input_name) {
 		name = input_name;
-		type = "NULL";
 	}
 	
-	Attribute(string input_name, string input_type) {
+	Attribute(string input_name, dataType inputType) {
 		name = input_name;
-		type = input_type;
+		type = inputType;
 	}
 	
 	//Probably a rare case use of this constructor
-	Attribute(string input_name, string input_type, vector<string> input_cells) {
+	Attribute(string input_name, dataType input_type, vector<string> input_cells) {
 		name = input_name;
 		type = input_type;
 		cells = input_cells;
@@ -101,7 +111,7 @@ public:
 		bool repeat = false;
 		for(int i = 0; i < cells.size(); i++) {
 			for(int j = 0; j < cells.size(); j++) {
-				if(i != j && strcp(cells[i], cells[j]) == 0) {
+				if(i != j && strcmp(cells[i].c_str(), cells[j].c_str()) == 0) {
 					repeat = true;
 				}				
 			}
@@ -112,10 +122,6 @@ public:
 	void setElementByName(string old_value, string new_value) {
 		cells[findCellIndex(old_value)] = new_value;
 	}
-};
-
-class Tuple {
-public:
 };
 
 class Relation {
@@ -132,22 +138,20 @@ public:
 	}
 	
 	Relation(string input_name, vector<string> input) {
-		name = input_name;
-		for(int i = 0; i < input.size(); i = i + 2) {
-			addAttribute(input[i], input[i+1]);
-		}
+		//wip
 	}
 	
 	bool isUniqueColumn(Attribute column) {
 		return true;
 	}
 	
+	
 	void addAttribute(string name) {
 		Attribute attr(name);
 		columns.insert( pair<string,Attribute>(name, attr) );
 	}
 	
-	void addAttribute(string name, string type) {
+	void addAttribute(string name, dataType type) {
 		Attribute attr(name, type);
 	}
 	
@@ -194,9 +198,31 @@ public:
 		return name;
 	}
 	
-	string stringify() { //Incomplete
-	
-		return "0";
+	string stringify() {
+		string table = "";
+		
+		table = table + "\t";
+		
+		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
+			table = table + (*iter).second.getName();
+			table = table + '\t';
+		}
+		table = table + "\n";
+		
+		start = columns.begin();
+		for(int i = 0; i < (*start).second.getSize(); i++) {
+			table = table + intToString(i);
+			table = table + "\t";
+		
+			for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
+				table = table + (*iter).second.getElement(i);
+				table = table + "\t";
+			}
+			table = table + "\n";
+		}
+		table = table + "\n";
+		
+		return table;
 		//Idea behind this is to convert the relation into a string
 		//The string can then be written to a file
 	}
@@ -235,9 +261,11 @@ class Value {
 
 template <class DB_type>
 void writeToFile(DB_type writeFrom) {
-
+	string filename = writeFrom.getName();
+	filename = filename + ".db";
+	
 	ofstream outputFile;
-	outputFile.open(writeFrom.getName() + ".db");
+	outputFile.open(filename.c_str());
 	outputFile << writeFrom.stringify();
 	outputFile.close();
 	
@@ -254,6 +282,8 @@ void readFromFile(string input) {
 	inputFile.close();
 	
 }
+
+
 
 int main() {
 
@@ -287,6 +317,10 @@ int main() {
 	cout << table.getElement(0,1);
 	
 	cout << '\n' << table.findAttribute("Second").name << '\n';
+	
+	cout << table.stringify();
+	
+	writeToFile<Relation>(table);
 	
 	//table.deleteAttribute("Second");
 	
