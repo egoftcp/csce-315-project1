@@ -7,11 +7,11 @@
 using namespace std;
 using namespace boost;	//The boost c++ library provides the tokenizer function and its other boost dependants
 
-/*
+/***********************************************************************************************************
 dbTokens takes a string and breaks it into a vector such that each vector entry is a recognizable token for 
 a database engine that utilizes SQL commands and queries.  The function uses the boost library to tokenize
 the passed string with specified separators and ignored characters.
-*/
+************************************************************************************************************/
 vector<string> dbTokens(string commandLine){
 //FUNCTION DECLARATIONS  
 	string first;

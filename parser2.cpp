@@ -38,7 +38,7 @@ class TypedAttribute{ //TODO: change to struct
 public:
 	string attrName;
 	DType dType;
-}
+};
 
 vector<string> dbTokens(string commandLine){
 //FUNCTION DECLARATIONS  
@@ -281,13 +281,20 @@ public:
 	
 	//TODO: (re)Implement:
 	bool isAtomicExpr(){
+		/*if terminal symbol
+			return true;
+		  if any nonterminal symbol, or the empty string
+		    return true;
+		  else
+		    return false;
+		*/
 		return false;
 	}
 	string AtomicExpr(){
 		return "NULL";
 	}
 	vector<TypedAttribute> TypedAttributeList(){ //TODO: Question: perhaps take in a POINTER to a !COPY! of sTokI and manipulate/return it to represent end of TypedAttributeList?
-		vector<TypedAttributes> attrList;
+		vector<TypedAttribute> attrList;
 		
 		return attrList;
 	}
@@ -458,11 +465,11 @@ public:
 										
 										
 									
-									}else{errOut(" Expected \"KEY\" After \"CREATE TABLE "<<relName<<" ( <typed-attribute-list> ) PRIMARY \""); }
-								}else{errOut(" Expected \"PRIMARY\" After \"CREATE TABLE "<<relName<<" ( <typed-attribute-list> )\""); }
-							}else{errOut("After \"CREATE TABLE "<<relName<<" ( <typed-attribute-list> \" , Expected closing-paren."); }
-						}else{errOut("After \"CREATE TABLE "<<relName<<"(\", Expected typed-attribute-list. Error in typed-attribute-list, or did not find typed-attribute-list"); }
-					}else{errOut("After \"CREATE TABLE "<<relName<<"\", Expected open-paren then typed-attribute-list. Did not find open-paren");}
+									}else{errOut(" Expected \"KEY\" After \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY \""); }
+								}else{errOut(" Expected \"PRIMARY\" After \"CREATE TABLE "+relName+" ( <typed-attribute-list> )\""); }
+							}else{errOut("After \"CREATE TABLE "+relName+" ( <typed-attribute-list> \" , Expected closing-paren."); }
+						}else{errOut("After \"CREATE TABLE "+relName+"(\", Expected typed-attribute-list. Error in typed-attribute-list, or did not find typed-attribute-list"); }
+					}else{errOut("After \"CREATE TABLE "+relName+"\", Expected open-paren then typed-attribute-list. Did not find open-paren");}
 				}else{ errOut("Expected 'relation-name' after \"CREATE TABLE\" command."); }
 			}else{errOut("Expected \"TABLE\" to follow \"CREATE\"");}
 		}
@@ -528,8 +535,9 @@ public:
 		getSTok();
 	}
 
-	void ParseQuery(){
+	bool ParseQuery(){
 		query();
+		return true;//temporary return for compiling-curtis
 	}
 	
 	//query ::= relation-name <- expr ;
@@ -919,7 +927,9 @@ int main() {
 	cout<<"-Starting Parser Main\n";
 	Parser* myP = new Parser("parser_milestone_good_inputs_Orig.txt");
 	cout<<"-Exiting Parser Main\n";
-	
+	cout<<"**Done handling line\n****************************\n";
+	cout << "Press ENTER to continue";
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');	
 	return 0;
 }
 

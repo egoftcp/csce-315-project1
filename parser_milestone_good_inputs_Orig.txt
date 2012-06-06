@@ -1,3 +1,4 @@
+SHOW product_test;
 CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
 INSERT INTO animals VALUES FROM ("Joe", "cat", 4);
 INSERT INTO animals VALUES FROM ("Spot", "dog", 10);
