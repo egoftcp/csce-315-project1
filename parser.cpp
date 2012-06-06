@@ -29,15 +29,26 @@ using namespace std;
 
 class Parser{
 private:
-	vector<string> Tokens;
-	string tok;
+	vector<string> sTokens; //ScannerTokens  i.e. [dog] [<] [-] ... ["] [joe] [bob] ... [;]
+	vector<string> pTokens; //Completed Parser Tokens i.e. [dog] [<-] ... ["] [joe bob] ["] ... [;]  //perhaps no special chars like [<-] and ["] ?
+	int sTokI;
+	string sTok;
+	
+	string tok; //TODO: kill off
 	int level;
+	
+	
+	void getSTok(){
+		sTokI++;
+		sTok = sTokens[sTokI];
+	}
 	
 public:
 	Parser(){
 		level=0;
 	}
 	Parser(string fileName){
+		level=0;
 		ifstream inFile( fileName.c_str() );
 		//Need to put in loop, splitting prog on '\n' or ';' , then handle each CorQ
 		while(inFile.good() ){ //assuming infile will be newLine seperated
@@ -55,12 +66,14 @@ public:
 			
 			//Parse
 			if(isCommand(toks[0])){
-				
+				cout<<"Need To implement Command Parsing.. Skipping\n";
 			}else{
-				
+				sTokens = toks;
+				sTokI = 0;
+				sTok= sTokens[0];
+				ParseQuery();
 			}
-			
-			
+						
 			cout<<"\n**Done handling line\n****************************\n\n";
 			cout << "Press ENTER to continue";
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -199,8 +212,8 @@ private:
 	*/
 
 	//Helper Funcs
-	bool isDigit(string);
-	bool isAlpha(string);
+	bool isDigit(string a){return true;}
+	bool isAlpha(string a){return true;}
 	void errorS(string s) {
 	   cout<<"\n*** ERROR: "<<s<<endl;;
 	   exit(1);
@@ -208,7 +221,7 @@ private:
 	void enter(string name) {
 		spaces(level++);
 		cout<<"+-"<<name<<": Enter, \t";
-		cout<<"Tok == "<<tok<<endl;
+		cout<<"Tok == "<<sTok<<endl;
 		//printf("+-%c: Enter, \t", name);
 		//printf("Sym == %s\n", sym);
 	}
@@ -223,18 +236,23 @@ private:
 		while (local_level-- > 0)
 			cout<<"| ";
 	}
-	void getToke(){
-		
+	void getToke(){ //TODO: fix this repetition
+		getSTok();
 	}
 
+	void ParseQuery(){
+		query();
+	}
+	
 	//query ::= relation-name <- expr ;
 	void query(){
 		enter("Query");
 		relationName();
 		if(tok == "<-"){
-			getToke();
+			getSTok();
 			expr();
 		}else errorS("Expected \"<-\"");
+		leave("Query");
 	}
 
 	//relation-name ::= identifier
@@ -246,6 +264,9 @@ private:
 	//identifier ::= alpha { ( alpha | digit ) }
 	void identifier(){
 		enter("Idenfitier");
+		string identif = sTok;
+		
+		for(int i=0; i<identif.size(); i++)
 		alpha();
 		
 		while(isDigit(tok) || isAlpha(tok) ) {
@@ -261,6 +282,17 @@ private:
 	void alpha(){
 
 	}
+	
+	//alpha ::= a | … | z | A | … | Z | _
+	bool isAlpha(char c){
+		
+	}
+	
+	//digit ::= 0 | … | 9
+	bool isDigit(char c){
+		
+	}
+	
 
 	//digit ::= 0 | … | 9
 	void digit(){
