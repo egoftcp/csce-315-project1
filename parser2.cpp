@@ -14,6 +14,7 @@
  * aalap[AT]cse[DOT]tamu[DOT]edu
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -21,12 +22,23 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-//#include <deque>
 #include <vector>
 #include<boost/tokenizer.hpp>
 
 using namespace std;
 
+
+class DType{ //TODO: change to struct
+public:
+	bool isVARCHAR; //false means dType is INTEGER
+	int charCnt; //meaningless if !isVARCHAR
+};
+
+class TypedAttribute{ //TODO: change to struct
+public:
+	string attrName;
+	DType dType;
+}
 
 vector<string> dbTokens(string commandLine){
 //FUNCTION DECLARATIONS  
@@ -231,7 +243,7 @@ public:
 	
 	bool ParseTokens(){
 		bool passedParse;
-		if(isCommand(sTok)){
+		if(isFWordCommand(sTok)){
 			passedParse = isCommand();
 			cout<<"Need To implement Command Parsing.. Skipping\n";
 		}else{
@@ -240,7 +252,8 @@ public:
 		return passedParse;
 	}
 	
-	bool isCommand(string fWord){
+	//TODO: can probably kill now
+	bool isFWordCommand(string fWord){
 		if(fWord=="OPEN"){
 		
 		}else if(fWord=="CLOSE"){
@@ -264,6 +277,211 @@ public:
 		}
 		return true;
 	}
+
+	
+	//TODO: (re)Implement:
+	bool isAtomicExpr(){
+		return false;
+	}
+	string AtomicExpr(){
+		return "NULL";
+	}
+	vector<TypedAttribute> TypedAttributeList(){ //TODO: Question: perhaps take in a POINTER to a !COPY! of sTokI and manipulate/return it to represent end of TypedAttributeList?
+		vector<TypedAttributes> attrList;
+		
+		return attrList;
+	}
+	bool isTypedAttributeList(){
+		return false;
+	}
+	
+	//TODO: test functionality
+	string retUpper(string inStr){
+		string upp = inStr;
+		for(string::iterator it = upp.begin(); it!=upp.end(); ++it){
+			*it = std::toupper((unsigned char)(*it));
+		}
+		return upp;
+	}
+	
+	
+	
+// command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
+// open-cmd ::== OPEN relation-name
+// close-cmd ::== CLOSE relation-name
+// write-cmd ::== WRITE relation-name
+// exit-cmd ::== EXIT
+// show-cmd ::== SHOW atomic-expr
+// create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
+// update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
+// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } )
+		   // | INSERT INTO relation-name VALUES FROM RELATION expr
+// delete-cmd ::= DELETE FROM relation-name WHERE condition
+// typed-attribute-list ::= attribute-name type { , attribute-name type }
+// type ::= VARCHAR ( integer ) | INTEGER
+// integer ::= digit { digit }
+
+	//command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
+	bool isCommand(){
+		bool isCmd=false;
+		const bool allowNonCaps = false;
+		string fWord = (allowNonCaps?retUpper(sTok):sTok);
+		
+		//TODO: kill off
+		//if(allowNonCaps){ for(string::iterator it = fWord.begin(); it!=fWord.end(); ++it){ *it = std::toupper((unsigned char)(*it));}}
+		
+		// open-cmd ::== OPEN relation-name
+		if(fWord=="OPEN"){
+			enter("OPEN");
+			addPTok(fWord); //Add "OPEN" to parserTokens // note: if allowNonCaps, capital "OPEN" will still be added to parseTokens. //Similarly with all following command funcs
+			getSTok();
+			if(relationName()){ //NOTE: current implementation of relationName should suffice. unless things change, will not need 'isRelationName' function.
+				string relName=sTok;
+				addPTok(sTok);
+				getSTok();
+				if(sTok==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'OPEN' relation with name '"<<relName<<"'\n";
+					//addPTok(); //Question: is it needed to add ";" to parseTokens? //how will we be handeling dbEng function calls? parserTree, dbEng.interpret(string sql), ...?
+					//TODO: DBENG: this is where we can call dbEng.Open(relName);
+				}else{ errOut("Expected semi-colon (';') at end of \"OPEN\" command."); }
+			}else{ errOut("Expected 'relation-name' after \"OPEN\" command."); }
+			leave("OPEN");
+		}
+		
+		// close-cmd ::== CLOSE relation-name
+		else if(fWord=="CLOSE"){
+			enter("CLOSE");
+			addPTok(fWord); //Add "CLOSE" to parserTokens // note: if allowNonCaps, capital "CLOSE" will still be added to parseTokens. //Similarly with all following command funcs
+			getSTok();
+			if(relationName()){
+				string relName=sTok;
+				addPTok(sTok);
+				getSTok();
+				if(sTok==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'CLOSE' relation with name '"<<relName<<"'\n";
+					//addPTok(); //Question: is it needed to add ";" to parseTokens? //how will we be handeling dbEng function calls? parserTree, dbEng.interpret(string sql), ...?
+					//TODO: DBENG: this is where we can call dbEng.CLOSE(relName);
+				}else{ errOut("Expected semi-colon (';') at end of \"CLOSE\" command."); }
+			}else{ errOut("Expected 'relation-name' after \"CLOSE\" command."); }
+			leave("CLOSE");
+		}
+		
+		//write-cmd ::== WRITE relation-name
+		else if(fWord=="WRITE"){
+			enter("WRITE");
+			addPTok(fWord); //Add "WRITE" to parserTokens // note: if allowNonCaps, capital "WRITE" will still be added to parseTokens. //Similarly with all following command funcs
+			getSTok();
+			if(relationName()){
+				string relName=sTok;
+				addPTok(sTok);
+				getSTok();
+				if(sTok==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'WRITE' relation with name '"<<relName<<"'\n";
+					//addPTok(); //Question: is it needed to add ";" to parseTokens? //how will we be handeling dbEng function calls? parserTree, dbEng.interpret(string sql), ...?
+					//TODO: DBENG: this is where we can call dbEng.WRITE(relName);
+				}else{ errOut("Expected semi-colon (';') at end of \"WRITE\" command."); }
+			}else{ errOut("Expected 'relation-name' after \"WRITE\" command."); }
+			leave("WRITE");
+		}
+		
+		// exit-cmd ::== EXIT
+		else if(fWord=="EXIT"){
+			enter("EXIT");
+			addPTok(fWord); //Add "EXIT" to parserTokens // note: if allowNonCaps, capital "EXIT" will still be added to parseTokens. //Similarly with all following command funcs
+			getSTok();
+			if(sTok==";"){
+				isCmd=true;
+				cout<<"xxx Well-formed Command to 'EXIT'\n";
+				//addPTok(); //Question: is it needed to add ";" to parseTokens? //how will we be handeling dbEng function calls? parserTree, dbEng.interpret(string sql), ...?
+				//TODO: DBENG: this is where we can call dbEng.EXIT();
+			}else{ errOut("Expected semi-colon (';') at end of \"EXIT\" command."); }
+			leave("EXIT");
+		}
+
+		// show-cmd ::== SHOW atomic-expr		
+		else if(fWord=="SHOW"){ //TODO: Need to implement isAtomicExpr(), AtomicExpr(), and figure out issue with not having correct token at end ( ';' )
+			enter("SHOW");
+			addPTok(fWord); //Add "SHOW" to parserTokens // note: if allowNonCaps, capital "SHOW" will still be added to parseTokens. //Similarly with all following command funcs
+			getSTok();
+			if(isAtomicExpr()){
+				string atomicExpr=AtomicExpr();
+				//addPTok(sTok); //TODO: decide/figure out how we will handle this type of situation.
+				//OR?
+				//addPTok(atomicExpr);
+				getSTok(); //TODO: Question: how can we guarantee sTok (current token) will be pointing to end (i.e. ';')?
+				if(sTok==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'SHOW' atomic-expression '"<<atomicExpr<<"'\n";
+					//addPTok(); //Question: is it needed to add ";" to parseTokens? //how will we be handeling dbEng function calls? parserTree, dbEng.interpret(string sql), ...?
+					//TODO: DBENG: this is where we can call dbEng.atomicExp(atomicExpr);
+				}else{ errOut("Expected semi-colon (';') at end of \"SHOW\" command."); }
+			}else{ errOut("Expected 'atomic-expression' after \"SHOW\" command."); }
+			leave("SHOW");
+		}
+		
+		// create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
+		else if(fWord=="CREATE"){
+			addPTok(fWord);
+			getSTok();
+			string sWord = (allowNonCaps?retUpper(sTok):sTok);
+			if(sWord == "TABLE"){
+				addPTok(sWord);
+				getSTok();
+				if(relationName()){ //NOTE: current implementation of relationName should suffice. unless things change, will not need 'isRelationName' function.
+				string relName=sTok;
+				addPTok(relName);
+				getSTok();
+					if(sTok == "(" ){
+						addPTok(sTok);
+						getSTok();
+						if(isTypedAttributeList()){
+							vector<TypedAttribute> typedAttrs = TypedAttributeList();
+							addPTok(sTok);	//TODO: HACK: BROKEN: WONT WORK: want to properly handle token list. see vector<TypedAttribute> TypedAttributeList();  for idea
+							getSTok();		//|---want to end up with sTok pointing to closing paren
+							if(sTok==")"){
+								addPTok(sTok); //add ")" to parserTokens
+								getSTok();
+								string tempP = (allowNonCaps?retUpper(sTok):sTok); //TODO: IDEA: should we combine 'primary' and 'key' as they should never be apart?
+								if(tempP=="PRIMARY"){
+									addPTok(tempP);
+									getSTok();
+									string tempK = (allowNonCaps?retUpper(sTok):sTok);
+									if(tempK=="KEY"){
+										addPTok(tempK);
+										getSTok();
+										//look for open paren
+										
+										
+										
+										
+									
+									}else{errOut(" Expected \"KEY\" After \"CREATE TABLE "<<relName<<" ( <typed-attribute-list> ) PRIMARY \""); }
+								}else{errOut(" Expected \"PRIMARY\" After \"CREATE TABLE "<<relName<<" ( <typed-attribute-list> )\""); }
+							}else{errOut("After \"CREATE TABLE "<<relName<<" ( <typed-attribute-list> \" , Expected closing-paren."); }
+						}else{errOut("After \"CREATE TABLE "<<relName<<"(\", Expected typed-attribute-list. Error in typed-attribute-list, or did not find typed-attribute-list"); }
+					}else{errOut("After \"CREATE TABLE "<<relName<<"\", Expected open-paren then typed-attribute-list. Did not find open-paren");}
+				}else{ errOut("Expected 'relation-name' after \"CREATE TABLE\" command."); }
+			}else{errOut("Expected \"TABLE\" to follow \"CREATE\"");}
+		}
+		
+		else if(fWord=="UPDATE"){
+		
+		}
+		
+		else if(fWord=="INSERT"){
+		
+		}
+		
+		else if(fWord=="DELETE" ){
+		
+		}
+		
+		else{isCmd=false;}
+		return isCmd;
+	}
 	
 	
 	/*Non-terminal Functions:
@@ -281,8 +499,11 @@ public:
 	*/
 
 	//Helper Funcs
+	void errOut(string s) {
+		cout<<"\n\n*** ERROR: "<<s<<endl<<endl;
+	}
 	void errorS(string s) {
-	   cout<<"\n*** ERROR: "<<s<<endl;;
+	   cout<<"\n*** ERROR: "<<s<<endl;
 	   exit(1);
 	}
 	void enter(string name) {
@@ -348,6 +569,13 @@ public:
 		leave("RelationName");
 		return isRel;
 	}
+	bool isRelationName(){
+		enter("RelationName");
+			bool isRel = identifier();
+		leave("RelationName");
+		return isRel;
+	}
+	
 
 	//identifier ::= alpha { ( alpha | digit ) }
 	bool identifier(){
@@ -367,6 +595,7 @@ public:
 		leave("Idenfitier");
 		return isIdentifier;
 	}
+	
 
 	/*Old digit/alpha stuff
 	//alpha ::= a | … | z | A | … | Z | _
@@ -688,7 +917,7 @@ public:
 
 int main() {
 	cout<<"-Starting Parser Main\n";
-	Parser* myP = new Parser("parser_milestone_good_inputs.txt");
+	Parser* myP = new Parser("parser_milestone_good_inputs_Orig.txt");
 	cout<<"-Exiting Parser Main\n";
 	
 	return 0;
