@@ -1,9 +1,13 @@
-CREATE TABLE tools (kind VARCHAR(8), weight INTEGER, cost INTEGER) PRIMARY KEY (kind);
-INSERT INTO tools VALUES FROM ("hammer", 3, 10);
-INSERT INTO tools VALUES FROM ("screw driver", 1, 2);
-INSERT INTO tools VALUES FROM ("plane", 2, 10);
-INSERT INTO tools VALUES FROM ("hand saw", 2, 22);
-INSERT INTO tools VALUES FROM ("blow torch", 3, 25);
-INSERT INTO tools VALUES FROM ("jack hammer", 55, 300);
-INSERT INTO tools VALUES FROM ("plow", 300, 500);
-SHOW tools;
+CREATE TABLE points (x INTEGER, y INTEGER, z INTEGER) PRIMARY KEY (x, y, z);
+INSERT INTO points VALUES FROM (0, 0, 0);
+INSERT INTO points VALUES FROM (1, 1, 1);
+INSERT INTO points VALUES FROM (0, 1, 2);
+INSERT INTO points VALUES FROM (-1, 20, 3);
+INSERT INTO points VALUES FROM (-15, 0, 5);
+
+CREATE TABLE dots (x1 INTEGER, y1 INTEGER, z1 INTEGER) PRIMARY KEY (x1, y1, z1);
+INSERT INTO dots VALUES FROM (-1, 0, 20);
+INSERT INTO dots VALUES FROM (3, 2, 5);
+INSERT INTO dots VALUES FROM (0, 0, 0);
+
+SHOW no_such_relation;
