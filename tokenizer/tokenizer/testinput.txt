@@ -6,3 +6,5 @@ SHOW dinosaur_players;
 
 high_hit_pirates <- select (team == "Pirates") (select (homeruns >= 40) baseball_players);
 SHOW high_hit_pirates;
+
+
