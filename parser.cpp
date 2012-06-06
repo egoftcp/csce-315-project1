@@ -33,10 +33,22 @@ private:
 	vector<string> pTokens; //Completed Parser Tokens i.e. [dog] [<-] ... ["] [joe bob] ["] ... [;]  //perhaps no special chars like [<-] and ["] ?
 	int sTokI;
 	string sTok;
-	
-	string tok; //TODO: kill off
 	int level;
 	
+	void addPTok(string pTok){
+		pTokens.push_back(pTok);
+		cout<<"**Parser Tokens: ";
+		for(vector<string>::iterator it=pTokens.begin(); it!=pTokens.end(); ++it){
+			cout<<"["<<(*it)<<"] ";
+		}cout<<endl;
+	}
+	
+	void printPTok(){
+		cout<<"**Parser Tokens: ";
+		for(vector<string>::iterator it=pTokens.begin(); it!=pTokens.end(); ++it){
+			cout<<"["<<(*it)<<"] ";
+		}cout<<endl;
+	}
 	
 	void getSTok(){
 		sTokI++;
@@ -52,6 +64,12 @@ public:
 		ifstream inFile( fileName.c_str() );
 		//Need to put in loop, splitting prog on '\n' or ';' , then handle each CorQ
 		while(inFile.good() ){ //assuming infile will be newLine seperated
+			sTokens.clear();
+			pTokens.clear();
+			sTokI=0;
+			sTok="";
+			level=0;
+			
 			string line;
 			getline(inFile, line);	//function in/of <string> lib
 			if(line==""){continue;} //Skip blank Lines
@@ -59,7 +77,7 @@ public:
 			//Get Tokens
 			vector<string> toks = tokenizeLine(line);
 			//Print Tokens
-			cout<<"**Tokens: ";
+			cout<<"**Scanner Tokens: ";
 			for(vector<string>::iterator it=toks.begin(); it!=toks.end(); ++it){
 				cout<<"["<<(*it)<<"] ";
 			}cout<<endl;
@@ -69,12 +87,14 @@ public:
 				cout<<"Need To implement Command Parsing.. Skipping\n";
 			}else{
 				sTokens = toks;
-				sTokI = 0;
+				//sTokI = 0;
 				sTok= sTokens[0];
 				ParseQuery();
+				cout<<"***Query Parsed Successfully:\n";
+				printPTok();
 			}
 						
-			cout<<"\n**Done handling line\n****************************\n\n";
+			cout<<"**Done handling line\n****************************\n\n";
 			cout << "Press ENTER to continue";
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		}
@@ -212,8 +232,6 @@ private:
 	*/
 
 	//Helper Funcs
-	bool isDigit(string a){return true;}
-	bool isAlpha(string a){return true;}
 	void errorS(string s) {
 	   cout<<"\n*** ERROR: "<<s<<endl;;
 	   exit(1);
@@ -228,7 +246,7 @@ private:
 	void leave(string name) {
 		spaces(--level);
 		cout<<"+-"<<name<<": Leave, \t";
-		cout<<"Tok == "<<tok<<endl;
+		cout<<"Tok == "<<sTok<<endl;
 		//printf("+-%c: Leave, \t", name);
 		//printf("Sym == %c\n", sym);
 	}
@@ -245,39 +263,63 @@ private:
 	}
 	
 	//query ::= relation-name <- expr ;
-	void query(){
+	bool query(){
 		enter("Query");
-		relationName();
-		if(tok == "<-"){
+		bool success = relationName();
+		if(success){
+			addPTok(sTok); //dbEng: This is the relation-name
 			getSTok();
-			expr();
-		}else errorS("Expected \"<-\"");
+			success = sTok == "<";
+			if(success){ //TODO: try if(success = sTok == "<")
+				getSTok();
+				success = sTok == "-";
+				if(success){
+					addPTok("<-");
+					getSTok();
+					success = expr();
+					if(success){
+						cout<<"***Successful Expression in Query\n"; //dbEng: This is where the successful expression returns...
+					}else{errorS("Error in Expression");}
+				}else{errorS("Expected \"-\""); }
+			}else{errorS("Expected \"<\""); }
+		}else{errorS("Invalid Relation Name");}
+		success= sTok==";";
+		if(success){
+			addPTok(sTok);
+			//getSTok(); //Do not getSTok at the end of a query!
+		}else{errorS("Expected semi-colon after query");}
 		leave("Query");
+		return success;
 	}
 
 	//relation-name ::= identifier
-	void relationName(){
+	bool relationName(){
 		enter("RelationName");
-		identifier();
+		bool isRel = identifier();
+		leave("RelationName");
+		return isRel;
 	}
 
 	//identifier ::= alpha { ( alpha | digit ) }
-	void identifier(){
+	bool identifier(){
+		bool isIdentifier=false;
 		enter("Idenfitier");
 		string identif = sTok;
-		
-		for(int i=0; i<identif.size(); i++)
-		alpha();
-		
-		while(isDigit(tok) || isAlpha(tok) ) {
-			if(isDigit(tok)){
-				digit();
-			}else{
-				alpha();
+		if(isalpha(identif[0]) || identif[0]=='_' ){
+			isIdentifier=true;
+			for(int i=1; i<identif.size(); i++){
+				char c=identif[i];
+				if( !(isalpha(c) || c=='_' || isdigit(c)) ){
+					isIdentifier = false;
+					break;
+				}
 			}
 		}
+		leave("Idenfitier");
+		return isIdentifier;
 	}
 
+	/*Old digit/alpha stuff
 	//alpha ::= a | … | z | A | … | Z | _
 	void alpha(){
 
@@ -298,7 +340,7 @@ private:
 	void digit(){
 
 	}
-	/* bool isDigit(Token t){
+	bool isDigit(Token t){
 		try{
 			int dig = atoi(t); 
 			if(dig<10 && dig>=0){
@@ -311,54 +353,93 @@ private:
 	*/
 
 	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
-	void expr() {
+	bool expr() {
 		enter("Expression");
-		atomicExpr();//...
+		bool isExpr = projection();
+		if(!isExpr){
+			isExpr=selection();
+			if(!isExpr){
+				isExpr=product();
+				if(!isExpr){
+					isExpr=renaming();
+					if(!isExpr){
+						isExpr=unionF();
+						if(!isExpr){
+							isExpr=difference();
+							if(!isExpr){
+								isExpr=atomicExpr();
+							}
+						}
+					}
+				}
+			}
+		}
+		leave("Expression");
+		return isExpr;
 	}
 
 	//atomic-expr ::= relation-name | ( expr )
-	void atomicExpr(){
-		if(tok=="("){
-			getToke();
-			expr();
-			if(tok!=")"){
-				errorS("expected closing paren");
-			}
-			getToke();
+	bool atomicExpr(){ //TODO: PROBLEMS IN HERE!!!
+		bool isAE = relationName();
+		if(isAE){
+			addPTok(sTok); //add relation-name to parserTokens
+			getSTok();
 		}else{
-			relationName();
+			isAE = sTok=="(";
+			if(isAE){
+				addPTok(sTok); //add comma to parsertokens
+				getSTok();
+				isAE = expr();
+				if(!isAE){
+					errorS("expected expression within paren in atomic-expression");
+					return isAE; //TODO: HACK: should not return in func like this...
+				}
+				isAE= sTok==")";
+				if(isAE){
+					addPTok(sTok);// add closing paren to parserTokens
+					getSTok();
+				}else{errorS("expected closing paren in atomic-expression");}
+			}else{errorS("Error in atomic expression. atomic-exp is neither a relation nor an expression");}
 		}
+		return isAE;
 	}
 
 	//selection ::= select ( condition ) atomic-expr
-	void selection(){
-
+	bool selection(){
+		bool isSel = false;
+		
+		return isSel;
 	}
 
 	//condition ::= conjunction { || conjunction }
-	void condition(){
+	bool condition(){
+		bool isCond = false;
 		enter("Condition");
 		conjunction();
-		if(tok == "||"){
-			getToke();
+		if(sTok == "||"){
+			getSTok();
 			conjunction();
 		}
 		leave("Condition");
+		return isCond;
 	}
 
 	//conjunction ::= comparison { && comparison }
-	void conjunction(){
+	bool conjunction(){
+		bool isConj = false;
 		enter("Conjunction");
 		comparison();
-		while(tok=="&&"){
-			getToke();
+		while(sTok=="&&"){
+			getSTok();
 			comparison();
 		}
 		leave("Conjuction");
+		return isConj;
 	}
 
 	//comparison ::= operand op operand | ( condition )
-	void comparison(){
+	bool comparison(){
+		bool isComp = false;
 		/* Old
 		enter("Comparison");
 		Operand();
@@ -371,132 +452,184 @@ private:
 		leave("Comparison");
 		*/
 		enter("Comparison");
-		if(tok=="("){
-			getToke();//clear "("
+		if(sTok=="("){
+			getSTok();//clear "("
 			condition();
-			if(tok!=")"){
+			if(sTok!=")"){
 				errorS("expected closing paren"); 
 			}
-			getToke();//clear ")"
+			getSTok();//clear ")"
 		}else{
 			operand();
 			op();
 			operand();
 		}
 		leave("Comparison");
+		return isComp;
 	}
 
 	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
-	void op(){
-		if(tok == "=="){
+	bool op(){
+		bool isOp = false;
+		if(sTok == "=="){
 		
-		}else if(tok == "!="){
 		
-		}else if(tok == "<"){
+		}else if(sTok == "!="){
 		
-		}else if(tok == ">"){
+		}else if(sTok == "<"){
 		
-		}else if(tok == "<="){
+		}else if(sTok == ">"){
 		
-		}else if(tok == ">="){
+		}else if(sTok == "<="){
+		
+		}else if(sTok == ">="){
 		
 		}else{
 			//Not an 'op'
 		}
+		return isOp;
 	}
 
 	//operand ::= attribute-name | literal
-	void operand(){
-
-	}
-
-	// attribute-name ::= identifier
-	void attributeName(){
-		enter("attributeName");
-		identifier();
-		leave("attributeName");
+	bool operand(){
+		bool isOperand = false;
+		return isOperand;
 	}
 
 	// literal ::= intentionally left unspecified
-	void literal(){
+	bool literal(){
+		bool isLiteral = false;
 		//... require futher clarification
+		return isLiteral;
 	}
 
 	// projection ::= project ( attribute-list ) atomic-expr
-	void projection(){
+	bool projection(){
 		enter("Projection");
-		if(tok=="project"){
-		
-			while(tok == "(" ){
-				getToke(); //clear "("
-				attributeList();
-				if(tok != ")" ){
-					errorS("Expected closing paren");
-				} getToke(); //clear ")"
+		bool isProject = sTok=="project";
+		if(isProject){
+			addPTok(sTok);
+			getSTok();
+			if(sTok == "(" ){ //Question: should this be an if, since there can only be 1 attribute-list?
+				addPTok(sTok);
+				getSTok(); 
+				isProject = attributeList();
+				if(!isProject){
+					errorS("Error parsing attribute-list");
+					return isProject; //TODO: should not return in middle of func like this...
+				}
+				isProject = sTok == ")";
+				if(!isProject){
+					errorS("Expected closing paren after attribute-list");
+					return isProject; //TODO: should not return in middle of func like this...
+				}
+				addPTok(sTok);
+				getSTok(); //clear ")"
 			}		
-			atomicExpr();
-			leave("Projection");
+			isProject = atomicExpr();
 		}
+		leave("Projection");
+		return isProject;
 	}
 
 	// attribute-list ::= attribute-name { , attribute-name } 
-	void attributeList(){
+	bool attributeList(){
 		enter("AttributeList");
-		attributeName();
-		while(tok==","){
-			getToke();
-			attributeName();
+		bool isAttribList = attributeName();
+		if(isAttribList){
+			addPTok(sTok); //add first attribute-name to parserTokens
+			getSTok(); 
+		}
+		while(sTok==","){
+			addPTok(sTok); // add comma to parser tokens
+			getSTok();
+			isAttribList = attributeName();
+			if(!isAttribList){
+				errorS("Error while parsing attribute-list, attribute name was not as expected");
+				break;
+			}else{
+				addPTok(sTok); // add next attribute-name to parserTokens
+				getSTok();
+			}
 		}
 		leave("AttributeList");
+		return isAttribList;
+	}
+	
+	// attribute-name ::= identifier
+	bool attributeName(){
+		enter("AttributeName");
+		bool isAttrib = identifier();
+		if(isAttrib){
+			
+		}
+		leave("AttributeName");
+		return isAttrib;
 	}
 
 	// renaming ::= rename ( attribute-list ) atomic-expr
-	void renaming(){
+	bool renaming(){
+		bool isRenaming = false;
 		enter("Renaming");
-		if(tok == "rename"){
-			while(tok == "(" ){
-				getToke(); //clear "("
+		if(sTok == "rename"){
+			while(sTok == "(" ){
+				getSTok(); //clear "("
 				attributeList();
-				if(tok != ")" ){
+				if(sTok != ")" ){
 					errorS("Expected closing paren");
-				} getToke(); //clear ")"
+				} getSTok(); //clear ")"
 			}
 			atomicExpr();
 		}
 		leave("Renaming");
+		return isRenaming;
 	}
 
 	// union ::= atomic-expr + atomic-expr
-	void unionF(){
+	bool unionF(){
+		bool isUnionF = false;
 		enter("Union");
 		atomicExpr();
-		if(tok == "+" ){
-			getToke(); //clear "+"
+		if(sTok == "+" ){
+			getSTok(); //clear "+"
 		}else{ errorS("Expected +"); }
 		atomicExpr();
 		leave("Union");
+		return isUnionF;
 	}
 
 	// difference ::= atomic-expr - atomic-expr
-	void difference(){
+	bool difference(){
+		bool isDiff = false;
 		enter("Difference");
 		atomicExpr();
-		if(tok == "-" ){
-			getToke(); //clear "-"
+		if(sTok == "-" ){
+			getSTok(); //clear "-"
 		}else{ errorS("Expected -"); }
 		atomicExpr();
 		leave("Difference");
+		return isDiff;
 	}
 
 	// product ::= atomic-expr * atomic-expr 
-	void product(){
+	bool product(){
 		enter("Product");
-		atomicExpr();
-		if(tok == "*" ){
-			getToke(); //clear "*"
-		}else{ errorS("Expected *"); }
-		atomicExpr();
+		bool isProd = atomicExpr();
+		if(isProd){
+			
+			//addPTok(sTok
+			isProd= pTokens[sTokI+1]=="*";
+			if(sTok == "*" ){
+				getSTok(); //clear "*"
+			}else{ 
+				
+				errorS("Expected *"); 
+			}
+			atomicExpr();
+		}	
+		
 		leave("Product");
+		return isProd;
 	}
 	
 };
