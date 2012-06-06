@@ -97,6 +97,18 @@ public:
 		return cells.size();
 	}
 	
+	bool hasRepeats() {
+		bool repeat = false;
+		for(int i = 0; i < cells.size(); i++) {
+			for(int j = 0; j < cells.size(); j++) {
+				if(i != j && strcp(cells[i], cells[j]) == 0) {
+					repeat = true;
+				}				
+			}
+		}
+		return repeat;
+	}
+	
 	void setElementByName(string old_value, string new_value) {
 		cells[findCellIndex(old_value)] = new_value;
 	}
@@ -124,6 +136,10 @@ public:
 		for(int i = 0; i < input.size(); i = i + 2) {
 			addAttribute(input[i], input[i+1]);
 		}
+	}
+	
+	bool isUniqueColumn(Attribute column) {
+		return true;
 	}
 	
 	void addAttribute(string name) {
