@@ -26,6 +26,17 @@ public:
 	DType dType;
 };
 
+/* token consumption information
+"primitive" functions which consume all of their input:
+isLiteral();
+isIdentifier();
+isInteger();
+
+Additionally all terminal/special tokens (i.e. '(' , '||' , ',' , 'SELECT' , etc ) will be comsumed in the highest level non-terminal function in which they appear 
+
+//isType() is a good example. it must consume all tokens EXCEPT for <integer> if it is a VARCHAR
+*/
+
 vector<string> dbTokens(string commandLine){
 //FUNCTION DECLARATIONS  
 	string first;
@@ -163,6 +174,8 @@ public:
 	int sI;
 	//string sTok(){retrn sToks[sI];}
 
+#pragma region MYREGION
+
 	vector<string> sTokens;
 	vector<string> pTokens;
 	int sTokI;
@@ -176,6 +189,7 @@ public:
 			cout<<"["<<(*it)<<"] ";
 		}cout<<endl;
 	}
+#pragma endregion
 
 	void printPTok(){
 		cout<<"**Parser Tokens: ";
@@ -282,12 +296,12 @@ public:
 
 	//TODO: (re)Implement:
 	bool isAtomicExpr(){
-		int aeSi = sI;
+		//int aeSi = sI;
 		if(isRelationName() || isExpr()){
 			return true;
 		}
 		else{
-			sI=aeSi;
+			//sI=aeSi;
 			return false;
 		}
 	}
@@ -339,21 +353,24 @@ public:
 	
 	//identifier ::= alpha { ( alpha | digit ) }
 	bool isIdentifier(){
-		bool isIdentifier=false;
+		bool isIdent=false;
 		enter("isIdenfitier");
 		string identif = sToks[sI];
 		if(isalpha(identif[0]) || identif[0]=='_' ){
-			isIdentifier=true;
+			isIdent=true;
 			for(int i=1; i<identif.size(); i++){
 				char c=identif[i];
 				if( !(isalpha(c) || c=='_' || isdigit(c)) ){
-					isIdentifier = false;
+					isIdent = false;
 					break;
 				}
 			}
 		}
+		if(isIdent){
+			sI++;
+		}
 		leave("isIdenfitier");
-		return isIdentifier;
+		return isIdent;
 	}
 	
 	//attribute-list ::= attribute-name { , attribute-name } 
@@ -363,12 +380,12 @@ public:
 		if(isAttributeName()){
 			isAL =true;
 			int atNameSI = sI; //TODO: NOTE: this will be the first attribute name
-			sI++;
+			//sI++;
 			while(sToks[sI]==","){
 				sI++;
 				if(isAttributeName()){
 					int atNamesSI = sI; //TODO: NOTE: these will be indexes to any following attribute names
-					sI++;
+					//sI++;
 				}else{isAL=false; errOut("Error within attribute-list, expected attribute name after comma");}
 			}
 		}else{errOut("Expected at least 1 attribute name in attribute-list");}
@@ -435,10 +452,19 @@ public:
 
 	bool isLiteral(){//TODO: enhance, currently only supports single word literals with no quotes. i.e.  UPDATE dots SET x1 = 0 WHERE x1 < 0;  // 0 is literal
 		enter("isLiteral");
+		int literalStartIndex = sI; //NOTE: These indicies include quotations if they exist! 
+		int literalEndIndex = sI;
 		bool isLit=false;
-		if(sToks[sI]=="\""){
-			cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! quotations around literals needs to be implemented\n";
-		}else{
+		if(sToks[sI]=="\""){ //Quoted literal
+			sI++; //consume open "
+			while(sToks[sI]!="\""){
+				sI++; //consume literal bit
+			}
+			literalEndIndex = sI;
+			sI++; // consume end "
+			isLit=true;
+		}else{ //Unquoted literal
+			sI++; //consume unquoted literal 
 			isLit=true;
 		}
 		leave("isLiteral");
@@ -452,17 +478,13 @@ public:
 		bool isTA=false;
 		//TODO: change to do-while
 		if(isAttributeName()){
-			sI++;
 			if(isType()){
-				//sI++;
-				//cout<<"&&&&&&&&&&&&&&&: "<<sToks[sI]<<endl;
 				isTA=true;
 				while(sToks[sI]==","){
 					sI++;
 					if(isAttributeName()){
-						sI++;
 						if(isType()){
-							//sI++;
+							;
 						}else{isTA=false; errOut("Expected type after attribute name");}	
 					}else{isTA=false; errOut("Expected typed-attribute-list");}
 				}
@@ -483,12 +505,10 @@ public:
 		bool isCond = false;
 		if(isConjunction()){
 			isCond=true;
-			//sI++;
 			while(sToks[sI]=="||"){
 				sI++;
 				if(isConjunction()){
 					isCond = true;
-					//sI++;
 				}else{isCond=false; errOut("Expected conjunction after \"||\"");}
 			}
 		}else{errOut("Expected at least 1 conjunction in condition");}
@@ -502,12 +522,10 @@ public:
 		bool isConj = false;
 		if(isComparison()){
 			isConj=true;
-			//sI++;
 			while(sToks[sI]=="&&"){
 				sI++;
 				if(isComparison()){
 					isConj=true;
-					//sI++;
 				}else{isConj=false; errOut("Expected comparison after \"&&\"");}
 			}
 		}else{errOut("Expected at least 1 comparison in conjunction");}
@@ -529,15 +547,14 @@ public:
 				}else{errOut("Expected closing paren on condition within comparison");}
 			}else{errOut("Expected condition after open-paren of comparison");}
 		}else if(isOperand()){
-			string operand=sToks[sI];
-			sI++;
+			string operand1=sToks[sI-1];
+			cout<<"FOUND Operand1: "<<operand1<<endl;
 			if(isOp()){
-				string op=sToks[sI];
+				string op=sToks[sI-1];
 				cout<<"FOUND OP: "<<op<<endl;
-				sI++;
 				if(isOperand()){
-					string operand2 = sToks[sI];
-					sI++;
+					string operand2 = sToks[sI-1];
+					cout<<"FOUND Operand2: "<<operand2<<endl;
 					isComp=true;
 				}
 			}
@@ -565,6 +582,10 @@ public:
 		}else{
 			isop=false;
 			//Not an 'op'
+		}
+		
+		if(isop){
+			sI++;
 		}
 		leave("isOp");
 		return isop;
@@ -614,8 +635,7 @@ public:
 			enter("OPEN");
 			sI++;
 			if(isRelationName()){
-				string relName=sToks[sI];
-				sI++;
+				string relName=sToks[sI-1];
 				if(sToks[sI]==";"){
 					isCmd=true;
 					cout<<"xxx Well-formed Command to 'OPEN' relation with name '"<<relName<<"'\n";
@@ -630,8 +650,7 @@ public:
 			enter("CLOSE");
 			sI++;
 			if(isRelationName()){
-				string relName=sToks[sI];
-				sI++;
+				string relName=sToks[sI-1];
 				if(sToks[sI]==";"){
 					isCmd=true;
 					cout<<"xxx Well-formed Command to 'CLOSE' relation with name '"<<relName<<"'\n";
@@ -646,8 +665,7 @@ public:
 			enter("WRITE");
 			sI++;
 			if(isRelationName()){
-				string relName=sToks[sI];
-				sI++;
+				string relName=sToks[sI-1];
 				if(sToks[sI]==";"){
 					isCmd=true;
 					cout<<"xxx Well-formed Command to 'WRITE' relation with name '"<<relName<<"'\n";
@@ -673,11 +691,12 @@ public:
 		else if(fWord=="SHOW"){ //TODO: Need to implement isExpr() from isAtomicExpr()
 			enter("SHOW");
 			sI++;
+			int atomicExprSI=sI;
 			if(isAtomicExpr()){
-				sI++;
+				int atomicExprEI=sI-1;
 				if(sToks[sI]==";"){
 					isCmd=true;
-					cout<<"xxx Well-formed Command to 'SHOW' atomic-expression '\n"; //<<atomicExpr<<"'\n";
+					cout<<"xxx Well-formed Command to 'SHOW' atomic-expression. atomicExpStartI("<<atomicExprSI<<") aExpEndI("<<atomicExprEI<<")\n"; //<<atomicExpr<<"'\n";
 					//TODO: DBENG: this is where we can call dbEng.atomicExp(atomicExpr);  sToks[cmdSi] sToks[sI-1]
 				}else{ errOut("Expected semi-colon (';') at end of \"SHOW\" command."); }
 			}else{ errOut("Expected 'atomic-expression' after \"SHOW\" command."); }
@@ -692,11 +711,12 @@ public:
 			if(sWord == "TABLE"){
 				sI++;
 				if(isRelationName()){
-					string relName=sToks[sI];
-					sI++;
+					string relName=sToks[sI-1];
 					if(sToks[sI] == "(" ){
 						sI++;
+						int typedAttrLstSI=sI;
 						if(isTypedAttributeList()){
+							int typedAttrLstEI=sI-1;
 							//vector<TypedAttribute> typedAttrs = TypedAttributeList();
 							if(sToks[sI]==")"){
 								sI++;
@@ -712,7 +732,7 @@ public:
 												if(sToks[sI]==")"){
 													sI++;
 													isCmd=true;
-													cout<<"xxx Well-formed 'CREATE' command on: "<<relName<<endl;;
+													cout<<"xxx Well-formed 'CREATE' command on: "<<relName<<"  ...TypedAttributeListSI("<<typedAttrLstSI<<") TypedAttributeListEI("<<typedAttrLstEI<<")\n";
 												}else{errOut(" Expected closing-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (<attribute-list>\"");}							
 											}else{ errOut(" Error in attribute list after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (\"");}		
 										}else{ errOut(" Expected open-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY\"");}
@@ -732,24 +752,22 @@ public:
 			enter("UPDATE");
 			sI++;
 			if(isRelationName()){
-				string relName=sToks[sI];
-				sI++;
+				string relName=sToks[sI-1];
 				if(sToks[sI]=="SET"){
 					sI++;
 					//loop look here
 					if(isAttributeName()){
-						string attrName=sToks[sI];
-						sI++;
+						string attrName=sToks[sI-1];
 						if(sToks[sI]== "="){
 							sI++;
 							if(isLiteral()){
 								//some looping needed 
 								while(sToks[sI]==","){ cout<<"\n\n\nERROR, NO SUPPORT FOR MULTIPLE ATTRIBUTE-NAME ASSIGNMENTS YET\n\n\n"; return false; sI++;}
-								sI++;
+								//sI++;
 								if(sToks[sI]=="WHERE"){
 									sI++;
 									if(isCondition()){
-										sI++;
+										//sI++;
 										isCmd=true;
 										cout<<"xxx Well-formed 'Update' command on: "<<relName<<endl;;
 									}else{errOut("error in condition");}
@@ -768,6 +786,8 @@ public:
 		else if(fWord=="DELETE" ){
 		
 		}
+		
+		//if(sToks[sI]!=";"){ isCmd=false;} 
 		
 		else{isCmd=false;}
 		if(!isCmd){sI=cmdSi;}
