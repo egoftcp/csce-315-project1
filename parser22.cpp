@@ -632,33 +632,6 @@ public:
 	}
 	*/
 
-	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
-	bool expr() {
-		enter("Expression");
-		bool isExpr = projection();
-		if(!isExpr){
-			isExpr=selection();
-			if(!isExpr){
-				isExpr=product();
-				if(!isExpr){
-					isExpr=renaming();
-					if(!isExpr){
-						isExpr=unionF();
-						if(!isExpr){
-							isExpr=difference();
-							if(!isExpr){
-								isExpr=atomicExpr();
-							}
-						}
-					}
-				}
-			}
-		}
-		leave("Expression");
-		return isExpr;
-	}
-
-	//atomic-expr ::= relation-name | ( expr )
 	bool atomicExpr(){ //TODO: PROBLEMS IN HERE!!!
 		bool isAE = relationName();
 		if(isAE){
@@ -903,7 +876,42 @@ public:
 		leave("Product");
 		return isProd;
 	}
-	
+
+	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
+	bool expr() {
+		enter("Expression");
+		if(atomicExpr()||selection()||projection()||renaming()||unionF()||difference()||product())
+			return true;
+		else
+			return false;
+	}
+/*	bool expr() {
+		enter("Expression");
+		bool isExpr = projection();
+		if(!isExpr){
+			isExpr=selection();
+			if(!isExpr){
+				isExpr=product();
+				if(!isExpr){
+					isExpr=renaming();
+					if(!isExpr){
+						isExpr=unionF();
+						if(!isExpr){
+							isExpr=difference();
+							if(!isExpr){
+								isExpr=atomicExpr();
+							}
+						}
+					}
+				}
+			}
+		}
+		leave("Expression");
+		return isExpr;
+	}*/
+
+	//atomic-expr ::= relation-name | ( expr )
+
 	};//end of parser class
 
 int main() 
