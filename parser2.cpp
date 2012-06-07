@@ -412,7 +412,7 @@ public:
 			addPTok(fWord); //Add "SHOW" to parserTokens // note: if allowNonCaps, capital "SHOW" will still be added to parseTokens. //Similarly with all following command funcs
 			getSTok();
 			if(isAtomicExpr()){
-				string atomicExpr=AtomicExpr();
+				string atomicExpr=isAtomicExpr();
 				//addPTok(sTok); //TODO: decide/figure out how we will handle this type of situation.
 				//OR?
 				//addPTok(atomicExpr);

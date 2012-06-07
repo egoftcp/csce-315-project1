@@ -251,7 +251,6 @@ public:
 		return passedParse;
 	}
 
-
 	bool isFWordCommand(string fWord){
 		if(fWord=="OPEN"){
 		
@@ -279,7 +278,10 @@ public:
 
 	//TODO: (re)Implement:
 	bool isAtomicExpr(){
-		return false;
+		if(relationName()||expr())
+			return true;
+		else
+			return false;
 	}
 	string AtomicExpr(){
 		return "NULL";
@@ -301,8 +303,6 @@ public:
 		}
 		return upp;
 	}
-	
-	
 	
 // command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
 // open-cmd ::== OPEN relation-name
@@ -571,12 +571,12 @@ public:
 		leave("RelationName");
 		return isRel;
 	}
-	bool isRelationName(){
+/*	bool isRelationName(){
 		enter("RelationName");
-			bool isRel = identifier();
+		bool isRel = identifier();
 		leave("RelationName");
 		return isRel;
-	}
+	}*/
 	
 
 	//identifier ::= alpha { ( alpha | digit ) }
