@@ -15,6 +15,11 @@
 
 using namespace std;
 
+void wait() {
+	char a;
+	cin >> a;
+}
+
 string intToString(int number) {
 	stringstream ss;
 	ss << number;
@@ -30,6 +35,11 @@ public:
 
 	dataType() {}
 
+	/*
+	dataType(bool isInt) {
+		_isInt = isInt;
+	}*/
+	
 	dataType(bool isInt, int size = 0) {
 		_isInt = isInt;
 		length = size;
@@ -167,7 +177,7 @@ public:
 	}
 	
 	bool isUniqueColumn(Attribute column) {
-		return true;
+		return true;  //wip
 	}
 	
 	
@@ -208,7 +218,6 @@ public:
 			iter++;
 		}
 		(*iter).second.setElement(y, value);
-	
 	}
 	
 	string getElement(int x, int y) {
@@ -242,13 +251,13 @@ public:
 			j = 0;
 			for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
 				if(j == (*start).second.getSize()) {
-					if( (*start).second.isInt() ) {
+					if( (*iter).second.isInt() ) {
 						table = table + (*iter).second.getElement(i) + ")\n";
 					} else {
 						table = table + "\"" + (*iter).second.getElement(i) + "\")\n";
 					}
 				} else {
-					if( (*start).second.isInt() ) {
+					if( (*iter).second.isInt() ) {
 						table = table + (*iter).second.getElement(i) + ", ";
 					} else {
 						table = table + "\"" + (*iter).second.getElement(i) + "\", ";
@@ -326,21 +335,22 @@ int main() {
 
 	Relation table("test");
 
-	dataType testType(20);
+	dataType charType(false, 20);
+	dataType intType(true);
 
-	table.addAttribute("First", testType);
-	table.addAttribute("Second", testType);
-	table.addAttribute("Third", testType);
+	table.addAttribute("First", charType);
+	table.addAttribute("Second", intType);
+	table.addAttribute("Third", charType);
 	
 	vector<string> input(3);
 	input[0] = "hello";
-	input[1] = "dog";
-	input[2] = "343";
+	input[1] = "343";
+	input[2] = "dog";
 	
 	vector<string> input2(3);
 	input2[0] = "bye";
-	input2[1] = "cat";
-	input2[2] = "404";
+	input2[1] = "404";
+	input2[2] = "cat";
 
 	table.addTuple(input);
 	
@@ -352,7 +362,7 @@ int main() {
 	
 	cout << table.stringify();
 	
-	//writeToFile<Relation>(table);
+	writeToFile<Relation>(table);
 	
 	//table.deleteAttribute("Second");
 	
