@@ -162,9 +162,7 @@ public:
 	vector<string> sToks;
 	int sI;
 	//string sTok(){retrn sToks[sI];}
-	
 
-#pragma region MYREGION
 	vector<string> sTokens;
 	vector<string> pTokens;
 	int sTokI;
@@ -178,8 +176,6 @@ public:
 			cout<<"["<<(*it)<<"] ";
 		}cout<<endl;
 	}
-	
-#pragma endregion
 
 	void printPTok(){
 		cout<<"**Parser Tokens: ";
@@ -332,7 +328,7 @@ public:
 		
 		return attrList;
 	}*/
-	
+
 	//relation-name ::= identifier
 	bool isRelationName(){
 		enter("isRelationName");
@@ -778,7 +774,6 @@ public:
 		return isCmd;
 	}
 
-	
 	/*Non-terminal Functions:
 	void query(); void relationName(); void identifier(); void alpha(); void digit(); void expr(); void atomicExpr(); void selection();
 	void condition(); void conjunction(); void comparison(); void op(); void operand(); void attributeName(); void literal(); 
@@ -831,11 +826,10 @@ public:
 		return query();
 	}
 	
-	
 	//query ::= relation-name <- expr ;
 	bool query(){
 		enter("Query");
-		bool success = relationName();
+		bool success = isRelationName();
 		if(success){
 			addPTok(sTok); //dbEng: This is the relation-name
 			getSTok();
@@ -862,21 +856,6 @@ public:
 		return success;
 	}
 
-	//relation-name ::= identifier
-	bool relationName(){
-		enter("RelationName");
-		bool isRel = identifier();
-		leave("RelationName");
-		return isRel;
-	}
-/*	bool isRelationName(){
-		enter("RelationName");
-		bool isRel = identifier();
-		leave("RelationName");
-		return isRel;
-	}*/
-	
-
 	//identifier ::= alpha { ( alpha | digit ) }
 	bool identifier(){
 		bool isIdentifier=false;
@@ -896,7 +875,6 @@ public:
 		return isIdentifier;
 	}
 	
-
 	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
 	bool expr() {
 		enter("Expression");
@@ -904,7 +882,6 @@ public:
 			return true;
 		else
 			return false;
-	}
 /*	bool expr() {
 		enter("Expression");
 		bool isExpr = projection();
@@ -929,10 +906,11 @@ public:
 		leave("Expression");
 		return isExpr;
 	}*/
+	}
 
 	//atomic-expr ::= relation-name | ( expr )
 	bool atomicExpr(){ //TODO: PROBLEMS IN HERE!!!
-		bool isAE = relationName();
+		bool isAE = isRelationName();
 		if(isAE){
 			//addPTok(sTok); //add relation-name to parserTokens
 			getSTok();
