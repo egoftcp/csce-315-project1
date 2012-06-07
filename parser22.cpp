@@ -748,32 +748,24 @@ public:
 		return isComp;
 	}
 
-	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
+	// op ::= {"==", "!=", "<" , ">", "<=", ">="}
 	bool op(){
-		bool isOp = false;
-		if(sTok == "=="){
-		
-		
-		}else if(sTok == "!="){
-		
-		}else if(sTok == "<"){
-		
-		}else if(sTok == ">"){
-		
-		}else if(sTok == "<="){
-		
-		}else if(sTok == ">="){
-		
-		}else{
-			//Not an 'op'
-		}
-		return isOp;
-	}
+		bool isOp;
+		if(sTok=="=="||sTok=="!="||sTok=="<"||sTok==">"||sTok=="<="||sTok==">=")
+			isOp = true;		
+		else					//We only use six possible opperators and use this if statement	
+			isOp = false;		//to determine if the token is a valid opperator.			
+	}							
 
-	//operand ::= attribute-name | literal
-	bool operand(){
-		bool isOperand = false;
-		return isOperand;
+	// attribute-name ::= identifier
+	bool attributeName(){
+		enter("AttributeName");
+		bool isAttrib = identifier();
+		if(isAttrib){
+			
+		}
+		leave("AttributeName");
+		return isAttrib;
 	}
 
 	// literal ::= intentionally left unspecified
@@ -781,6 +773,14 @@ public:
 		bool isLiteral = false;
 		//... require futher clarification
 		return isLiteral;
+	}
+
+	//operand ::= attribute-name | literal
+	bool operand(){
+		if(attributeName()||literal())
+			return true;
+		else
+			return false;
 	}
 
 	// projection ::= project ( attribute-list ) atomic-expr
@@ -836,17 +836,6 @@ public:
 		return isAttribList;
 	}
 	
-	// attribute-name ::= identifier
-	bool attributeName(){
-		enter("AttributeName");
-		bool isAttrib = identifier();
-		if(isAttrib){
-			
-		}
-		leave("AttributeName");
-		return isAttrib;
-	}
-
 	// renaming ::= rename ( attribute-list ) atomic-expr
 	bool renaming(){
 		bool isRenaming = false;
@@ -915,7 +904,7 @@ public:
 		return isProd;
 	}
 	
-	};
+	};//end of parser class
 
 int main() 
 {
