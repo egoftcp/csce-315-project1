@@ -308,7 +308,6 @@ public:
 	
 	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
 	bool isExpr() {
-		return false;
 		enter("Expression");
 		bool isExpr = projection();
 		if(!isExpr){
@@ -497,7 +496,6 @@ public:
 		leave("isTypedAttributeList");
 		return isTA;
 	}
-
 	
 	//condition ::= conjunction { || conjunction }
 	bool isCondition(){
@@ -778,9 +776,54 @@ public:
 				}else{errOut("Expected \"SET\" after \"UPDATE "+relName+"\"");}
 			}else{errOut("Expected relation-name after UPDATE");}
 		}
-		
+
+		// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } )
+			// | INSERT INTO relation-name VALUES FROM RELATION expr
+
 		else if(fWord=="INSERT"){
-		
+			sI++;
+			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'INTO'
+			if(sToks[sI]=="INTO"){
+				sI++;
+				if(isRelationName()){
+					sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'VALUES'
+					if(sToks[sI]=="VALUES"){
+						sI++;
+						sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'FROM'
+						if(sToks[sI] =="FROM"){
+							sI++;
+							string temp= (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for !!possible!! 'RELATION' token
+							cout<<"6666666"<<endl;
+							if(temp=="RELATION"){
+								cout<<"7777777"<<endl;
+								//This is < VALUES FROM RELATION expr > case of 'INSERT'
+								sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'RELATION' token
+								sI++; //consume 'RELATION'
+								if(isExpr()){
+									isCmd=true;
+									cout<<"xxx Well-formed 'INSERT INTO relation-name VALUES FROM RELATION expr' command"<<endl;
+								}else{errOut("Expected expression to follow \"INSERT INTO relation-name VALUES FROM RELATION\"");}
+							}else if(sToks[sI]=="("){
+								//This is the < VALUES FROM (literal{,literal}) > case of 'INSERT'
+								sI++;
+								if(isLiteral()){
+									while(sToks[sI]==","){
+										sI++;
+										if(isLiteral()){
+											; //TODO: POSSIBILITY: can handle individuals literals here.
+										}else{isCmd=false; errOut("Expected Literal to follow ',' in \"INSERT INTO relation-name VALUES FROM ( literal { , literal } )\"");}
+									}
+								}
+								if(sToks[sI]==")"){
+										sI++;
+										isCmd=true;
+										cout<<"xxx Well-formed 'INSERT INTO relation-name VALUES FROM ( literal { , literal } )' command"<<endl;;
+								}else{errOut("Expected ')' to follow 'INSERT INTO relation-name VALUES FROM ( literal { , literal } '");}
+							}else{errOut("Expected 'RELATION' or '( literal { , literal } )' after \"INSERT INTO <relation-name> VALUES FROM\"");}
+						}else{errOut("Expected 'FROM' after \"INSERT INTO <relation-name> VALUES\"");}
+					}else{errOut("Expected 'VALUES' after \"INSERT INTO <relation-name>\"");}
+				}else{errOut("expected <relation-name> after 'INSERT INTO'");}
+			}else{errOut("expected 'INTO' after 'INSERT'");}		
 		}
 		
 		else if(fWord=="DELETE" ){
