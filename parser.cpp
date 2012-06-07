@@ -337,8 +337,6 @@ public:
 		return isRel;
 	}
 	
-
-
 	//identifier ::= alpha { ( alpha | digit ) }
 	bool isIdentifier(){
 		bool isIdentifier=false;
@@ -860,25 +858,6 @@ public:
 		leave("Query");
 		return success;
 	}  unnecessary parsing of the <- as separate tokens */
-
-	//identifier ::= alpha { ( alpha | digit ) }
-	bool identifier(){
-		bool isIdentifier=false;
-		enter("Idenfitier");
-		string identif = sTok;
-		if(isalpha(identif[0]) || identif[0]=='_' ){
-			isIdentifier=true;
-			for(int i=1; i<identif.size(); i++){
-				char c=identif[i];
-				if( !(isalpha(c) || c=='_' || isdigit(c)) ){
-					isIdentifier = false;
-					break;
-				}
-			}
-		}
-		leave("Idenfitier");
-		return isIdentifier;
-	}
 	
 	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
 	bool expr() {
@@ -924,10 +903,14 @@ public:
 	bool query(){
 		enter("Query");
 		bool success = isRelationName();
-		if(isRelationName())
+		if(isRelationName()){
+			leave("Query");
 			return isAssignSym();
-		else
+		}
+		else{
+			leave("Query");
 			return false;
+		}
 	}
 
 	//atomic-expr ::= relation-name | ( expr )
@@ -1100,7 +1083,7 @@ public:
 	// attribute-name ::= identifier
 	bool attributeName(){
 		enter("AttributeName");
-		bool isAttrib = identifier();
+		bool isAttrib = isIdentifier();
 		if(isAttrib){
 			
 		}
