@@ -163,13 +163,14 @@ public:
 	int sI;
 	//string sTok(){retrn sToks[sI];}
 	
-	
+
+#pragma region MYREGION
 	vector<string> sTokens;
 	vector<string> pTokens;
 	int sTokI;
 	string sTok;
 	int level;
-	
+
 	void addPTok(string pTok){
 		pTokens.push_back(pTok);
 		cout<<"**Parser Tokens: ";
@@ -178,6 +179,8 @@ public:
 		}cout<<endl;
 	}
 	
+#pragma endregion
+
 	void printPTok(){
 		cout<<"**Parser Tokens: ";
 		for(vector<string>::iterator it=pTokens.begin(); it!=pTokens.end(); ++it){
@@ -281,8 +284,6 @@ public:
 		return true;
 	}
 
-	
-	
 	//TODO: (re)Implement:
 	bool isAtomicExpr(){
 		int aeSi = sI;
@@ -800,6 +801,7 @@ public:
 	   cout<<"\n*** ERROR: "<<s<<endl;
 	   exit(1);
 	}
+
 	void enter(string name) {
 		spaces(level++);
 		cout<<"+-"<<name<<": Enter, \t";
@@ -807,6 +809,7 @@ public:
 		//printf("+-%c: Enter, \t", name);
 		//printf("Sym == %s\n", sym);
 	}
+
 	void leave(string name) {
 		spaces(--level);
 		cout<<"+-"<<name<<": Leave, \t";
@@ -814,10 +817,12 @@ public:
 		//printf("+-%c: Leave, \t", name);
 		//printf("Sym == %c\n", sym);
 	}
+
 	void spaces(int local_level) {
 		while (local_level-- > 0)
 			cout<<"| ";
 	}
+
 	void getToke(){ //TODO: fix this repetition
 		getSTok();
 	}
@@ -892,41 +897,15 @@ public:
 	}
 	
 
-	/*Old digit/alpha stuff
-	//alpha ::= a | … | z | A | … | Z | _
-	void alpha(){
-
-	}
-	
-	//alpha ::= a | … | z | A | … | Z | _
-	bool isAlpha(char c){
-		
-	}
-	
-	//digit ::= 0 | … | 9
-	bool isDigit(char c){
-		
-	}
-	
-
-	//digit ::= 0 | … | 9
-	void digit(){
-
-	}
-	bool isDigit(Token t){
-		try{
-			int dig = atoi(t); 
-			if(dig<10 && dig>=0){
-				return true;	
-			}
-		}
-		catch(e){ return false; }
-		return false;
-	}
-	*/
-
 	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
 	bool expr() {
+		enter("Expression");
+		if(atomicExpr()||selection()||projection()||renaming()||unionF()||difference()||product())
+			return true;
+		else
+			return false;
+	}
+/*	bool expr() {
 		enter("Expression");
 		bool isExpr = projection();
 		if(!isExpr){
@@ -949,7 +928,7 @@ public:
 		}
 		leave("Expression");
 		return isExpr;
-	}
+	}*/
 
 	//atomic-expr ::= relation-name | ( expr )
 	bool atomicExpr(){ //TODO: PROBLEMS IN HERE!!!
@@ -1041,7 +1020,16 @@ public:
 		return isComp;
 	}
 
-	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
+	// op ::= {"==", "!=", "<" , ">", "<=", ">="}
+	bool op(){
+		bool isOp;
+		if(sTok=="=="||sTok=="!="||sTok=="<"||sTok==">"||sTok=="<="||sTok==">=")
+			isOp = true;		
+		else					//We only use six possible opperators and use this if statement	
+			isOp = false;		//to determine if the token is a valid opperator.			
+	}	
+
+/*	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
 	bool op(){
 		bool isOp = false;
 		if(sTok == "=="){
@@ -1061,7 +1049,7 @@ public:
 			//Not an 'op'
 		}
 		return isOp;
-	}
+	}replaced with the code above */ 
 
 	//operand ::= attribute-name | literal
 	bool operand(){
