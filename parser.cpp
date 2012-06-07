@@ -792,6 +792,7 @@ public:
 	void errOut(string s) {
 		cout<<"\n\n*** ERROR: "<<s<<endl<<endl;
 	}
+
 	void errorS(string s) {
 	   cout<<"\n*** ERROR: "<<s<<endl;
 	   exit(1);
@@ -936,9 +937,12 @@ public:
 
 	//selection ::= select ( condition ) atomic-expr
 	bool selection(){
-		bool isSel = false;
-		
-		return isSel;
+		if(condition())
+			return true;
+		else 
+			return false;
+		/*bool isSel = false; changed the above code, simple recursion to condition()
+		return isSel;*/
 	}
 
 	//condition ::= conjunction { || conjunction }
@@ -1006,28 +1010,6 @@ public:
 		else					//We only use six possible opperators and use this if statement	
 			isOp = false;		//to determine if the token is a valid opperator.			
 	}	
-
-/*	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
-	bool op(){
-		bool isOp = false;
-		if(sTok == "=="){
-		
-		
-		}else if(sTok == "!="){
-		
-		}else if(sTok == "<"){
-		
-		}else if(sTok == ">"){
-		
-		}else if(sTok == "<="){
-		
-		}else if(sTok == ">="){
-		
-		}else{
-			//Not an 'op'
-		}
-		return isOp;
-	}replaced with the code above */ 
 
 	//operand ::= attribute-name | literal
 	bool operand(){
