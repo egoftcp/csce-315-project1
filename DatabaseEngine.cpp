@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 
 using namespace std;
 
@@ -34,6 +35,11 @@ public:
 		length = size;
 	}
 
+	dataType(int size) {
+		length = size;
+		_isInt = false;
+	}
+
 	bool isInt() {
 		return _isInt;
 	}
@@ -41,6 +47,15 @@ public:
 	int size() {
 		return length;
 	}
+
+	string getType() {
+		if(_isInt) {
+			return "INTEGER";
+		} else {
+			return "VARCHAR(" + intToString(length) + ")";
+		}
+	}
+
 };
 
 class Attribute {
@@ -49,7 +64,6 @@ public:
 
 	dataType type;
 	string name;
-	//string type;
 	vector<string> cells;
 
 	Attribute(string input_name) {
@@ -90,6 +104,8 @@ public:
 		if(i < cells.size()) {
 			return i;
 		} else {
+			cout << "Error in findCellIndex, i is " << i << ", exiting program\n";
+			exit(1);
 			return -1;
 			//error value, watch out for vector[-1] results
 		}
@@ -122,6 +138,15 @@ public:
 	void setElementByName(string old_value, string new_value) {
 		cells[findCellIndex(old_value)] = new_value;
 	}
+
+	string getType() {
+		return type.getType();
+	}
+
+	bool isInt() {
+		return type.isInt();
+	}
+
 };
 
 class Relation {
@@ -153,6 +178,7 @@ public:
 	
 	void addAttribute(string name, dataType type) {
 		Attribute attr(name, type);
+		columns.insert( pair<string,Attribute>(name, attr) );
 	}
 	
 	void deleteAttribute(string name) {
@@ -200,32 +226,36 @@ public:
 	
 	string stringify() {
 		string table = "(";
-		
+		int j = 0;	
 		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-			if( !(*iter).second.type.isInt()) {
-				if( iter == columns.end() ) {
-					table = table + "\"" + (*iter).second.getName(); + "\")";
-				} else {
-					table = table + "\"" + (*iter).second.getName(); + "\", ";
-				}
-				
-				table = table + "(\"" + (*iter).second.getName(); + "\", ";
+			j++;
+			if( j == columns.size() ) {
+				table = table + (*iter).second.getName() + " " + (*iter).second.getType() + ")\n";
 			} else {
-			
+				table = table + (*iter).second.getName() + " " + (*iter).second.getType() + ", ";
 			}
 		}
-		table = table + "\n";
-		
+	
 		start = columns.begin();
 		for(int i = 0; i < (*start).second.getSize(); i++) {
-			table = table + intToString(i);
-			table = table + "\t";
-		
+			table = table + "(";	
+			j = 0;
 			for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-				table = table + (*iter).second.getElement(i);
-				table = table + "\t";
+				if(j == (*start).second.getSize()) {
+					if( (*start).second.isInt() ) {
+						table = table + (*iter).second.getElement(i) + ")\n";
+					} else {
+						table = table + "\"" + (*iter).second.getElement(i) + "\")\n";
+					}
+				} else {
+					if( (*start).second.isInt() ) {
+						table = table + (*iter).second.getElement(i) + ", ";
+					} else {
+						table = table + "\"" + (*iter).second.getElement(i) + "\", ";
+					}
+				}	
+				j++;
 			}
-			table = table + "\n";
 		}
 		table = table + "\n";
 		
@@ -295,9 +325,12 @@ void readFromFile(string input) {
 int main() {
 
 	Relation table("test");
-	table.addAttribute("First");
-	table.addAttribute("Second");
-	table.addAttribute("Third");
+
+	dataType testType(20);
+
+	table.addAttribute("First", testType);
+	table.addAttribute("Second", testType);
+	table.addAttribute("Third", testType);
 	
 	vector<string> input(3);
 	input[0] = "hello";
@@ -311,23 +344,15 @@ int main() {
 
 	table.addTuple(input);
 	
-	table.print();
-
 	table.addTuple(input2);
-	
-	table.print();
 	
 	table.setElement(0, 1, "NEW");
 	
 	table.print();
 	
-	cout << table.getElement(0,1);
-	
-	cout << '\n' << table.findAttribute("Second").name << '\n';
-	
 	cout << table.stringify();
 	
-	writeToFile<Relation>(table);
+	//writeToFile<Relation>(table);
 	
 	//table.deleteAttribute("Second");
 	
