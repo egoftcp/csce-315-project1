@@ -252,7 +252,6 @@ public:
 		return passedParse;
 	}
 	
-	//TODO: can probably kill now
 	bool isFWordCommand(string fWord){
 		if(fWord=="OPEN"){
 		
@@ -278,8 +277,7 @@ public:
 		return true;
 	}
 
-	
-	//TODO: (re)Implement:
+		//TODO: (re)Implement:
 	bool isAtomicExpr(){
 		/*if terminal symbol
 			return true;

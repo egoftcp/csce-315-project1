@@ -47,11 +47,11 @@ vector<string> dbTokens(string commandLine){
 							//be necessary to concatenate them with adjoining tokens to keep appropriate values within
 							//the the command together.
 	bool openSymbol=false,closeSymbol=false,openQuote=false;	//these boolean variable are utilized to keep track of symbols
-															//that may have multiple parts and to ensure that text within 
-															//quotations is held together as one token, regardless of 
-															//punctuation or spaces.
+																//that may have multiple parts and to ensure that text within 
+																//quotations is held together as one token, regardless of 
+																//punctuation or spaces.
 	boost::char_separator<char> separator(" \n","\"()+<>=-;,!");	//the tokenizer function allows for the declaration of ignored and
-														//returned symbols with the ignored before the comma
+																	//returned symbols with the ignored before the comma
 	vector<string> tokens;	//a vector of type string to store the tokens so they may be returned to the calling program
 	boost::tokenizer< boost::char_separator<char> > possibleTokens(commandLine, separator);	//the boost library supplies this function
 	//END OF FUNCTION DECLARATIONS
@@ -277,7 +277,6 @@ public:
 		return true;
 	}
 
-
 	//TODO: (re)Implement:
 	bool isAtomicExpr(){
 		return false;
@@ -452,13 +451,13 @@ public:
 									if(tempK=="KEY"){
 										addPTok(tempK);
 										getSTok();
-										if(STok=="("){
+										if(sTok=="("){
 											addPTok(sTok);
 											getSTok();
 											if(attributeList()){
 												
 											
-											else{ errOut(" Error in attribute list after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (\"");}		
+											}else{ errOut(" Error in attribute list after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (\"");}		
 										}else{ errOut(" Expected close-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY\"");}
 									}else{errOut(" Expected \"KEY\" After \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY \""); }
 								}else{errOut(" Expected \"PRIMARY\" After \"CREATE TABLE "+relName+" ( <typed-attribute-list> )\""); }
@@ -916,13 +915,15 @@ public:
 		return isProd;
 	}
 	
-};
+	};
 
-int main() {
+int main() 
+{
 	cout<<"-Starting Parser Main\n";
 	Parser* myP = new Parser("parser_milestone_good_inputs_Orig.txt");
 	cout<<"-Exiting Parser Main\n";
-	
+	cout << "Press ENTER to quit";
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	return 0;
 }
 
