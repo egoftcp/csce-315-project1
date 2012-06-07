@@ -337,6 +337,8 @@ public:
 		return isRel;
 	}
 	
+
+
 	//identifier ::= alpha { ( alpha | digit ) }
 	bool isIdentifier(){
 		bool isIdentifier=false;
@@ -826,9 +828,11 @@ public:
 	bool ParseQuery(){
 		return query();
 	}
-	
+
+
+
 	//query ::= relation-name <- expr ;
-	bool query(){
+/*	bool query(){
 		enter("Query");
 		bool success = isRelationName();
 		if(success){
@@ -855,7 +859,7 @@ public:
 		}else{errorS("Expected semi-colon after query");}
 		leave("Query");
 		return success;
-	}
+	}  unnecessary parsing of the <- as separate tokens */
 
 	//identifier ::= alpha { ( alpha | digit ) }
 	bool identifier(){
@@ -909,6 +913,23 @@ public:
 	}*/
 	}
 
+	bool isAssignSym(){
+		if(sTok=="<-")
+			return expr();
+		else
+			return false;
+	}
+
+	//query ::= relation-name <- expr ;
+	bool query(){
+		enter("Query");
+		bool success = isRelationName();
+		if(isRelationName())
+			return isAssignSym();
+		else
+			return false;
+	}
+
 	//atomic-expr ::= relation-name | ( expr )
 	bool atomicExpr(){ //TODO: PROBLEMS IN HERE!!!
 		bool isAE = isRelationName();
@@ -938,7 +959,7 @@ public:
 	//selection ::= select ( condition ) atomic-expr
 	bool selection(){
 		if(condition())
-			return true;
+			return atomicExpr();
 		else 
 			return false;
 		/*bool isSel = false; changed the above code, simple recursion to condition()
@@ -1004,11 +1025,10 @@ public:
 
 	// op ::= {"==", "!=", "<" , ">", "<=", ">="}
 	bool op(){
-		bool isOp;
 		if(sTok=="=="||sTok=="!="||sTok=="<"||sTok==">"||sTok=="<="||sTok==">=")
-			isOp = true;		
+			return true;		
 		else					//We only use six possible opperators and use this if statement	
-			isOp = false;		//to determine if the token is a valid opperator.			
+			return false;		//to determine if the token is a valid opperator.			
 	}	
 
 	//operand ::= attribute-name | literal
@@ -1156,7 +1176,7 @@ public:
 		return isProd;
 	}
 	
-	};
+	};//end of parser class
 
 int main(){
 	cout<<"-Starting Parser Main\n";
