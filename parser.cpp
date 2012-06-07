@@ -1,17 +1,4 @@
-/* parse.c: simple parser -- no output
- * grammar:
- *  expression = ["+"|"-"] term {("+"|"-”) term} .
- *	term = factor {("*"|"/”) factor}
- *	factor = ident | number | "(" expression ")”'
- * Motivation & more examples at: http://www.cs.utsa.edu/~wagner/CS3723/rdparse/rdparser.html, http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm
- * See txt file for some sample runs.
- * 
- * This program is to demonstrate recursive descent parsing. It expects input
- * expressions at > followed by DOT(.). Look at slides (pg 7) for grammar. Exit
- * safely with Ctrl-C. In case input expression does not meet grammar, the
- * program generates Error and exits. 
- * Feel free to point out errors if any (and fixes!) to 
- * aalap[AT]cse[DOT]tamu[DOT]edu
+/* parser.cpp:
  */
 
 #include <stdio.h>
@@ -21,16 +8,164 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
-//#include <deque>
 #include <vector>
 #include<boost/tokenizer.hpp>
 
 using namespace std;
 
+
+class DType{ //TODO: change to struct
+public:
+	bool isVARCHAR; //false means dType is INTEGER
+	int charCnt; //meaningless if !isVARCHAR
+};
+
+class TypedAttribute{ //TODO: change to struct
+public:
+	string attrName;
+	DType dType;
+};
+
+vector<string> dbTokens(string commandLine){
+//FUNCTION DECLARATIONS  
+	string first;
+	string temp="";			//the temp string is needed in order to store tokens produced by tokenizer when it may
+							//be necessary to concatenate them with adjoining tokens to keep appropriate values within
+							//the the command together.
+	bool openSymbol=false,closeSymbol=false,openQuote=false;	//these boolean variable are utilized to keep track of symbols
+																//that may have multiple parts and to ensure that text within 
+																//quotations is held together as one token, regardless of 
+																//punctuation or spaces.
+	boost::char_separator<char> separator(" \n","\"()+<>=-;,!");	//the tokenizer function allows for the declaration of ignored and
+																	//returned symbols with the ignored before the comma
+	vector<string> tokens;	//a vector of type string to store the tokens so they may be returned to the calling program
+	boost::tokenizer< boost::char_separator<char> > possibleTokens(commandLine, separator);	//the boost library supplies this function
+	//END OF FUNCTION DECLARATIONS
+   
+	for( boost::tokenizer< boost::char_separator<char> >::iterator position=possibleTokens.begin();
+		position!=possibleTokens.end();
+		++position){
+	   if(openQuote==true)							//With each pass through this for loop, the position is iterated
+	   {											//If statements are used to check each token against possible 
+			if(*position=="\"")						//conjunctive symbols such as <=, ==, >==, etc.
+			{										//The first priority of the conditional checking is for an open quotation.
+				tokens.push_back(temp);				//If the passed command has quotations around two otherwise separated words,
+				tokens.push_back(*position);		//such as "two words", the openQuote boolean flag will stay true until the
+				temp="";							//quote is finished and the strings within are concatenated into a token.
+				openSymbol=false;
+				closeSymbol=false;
+				openQuote=false;
+			}
+			else
+				if(temp=="")
+					temp=*position;
+				else
+				{
+					first=*position;
+					if(!isalpha(first[0]))
+						temp=temp+*position;		//if the current string is a symbol and still within the quotation then
+					else							//no space will be added.
+						temp=temp+" "+*position;	//the temp string is storing the concatenated strings within the quotes,
+				}									//using a space between if both strings are text.
+	   }
+	   else if(openSymbol==true)					//There are four types of data that this chain handles: openSybols, 
+	   {											//closeSymbols, quotations, and strings that would be data or commands.
+			if(*position=="\"")						//When the openSymbol was previously set to true, the current position
+			{										//is then checked for another openSymbol that may need to be joined with the
+				tokens.push_back(temp);				//previous or if the current position requires that a new flag be set to true.
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;
+				openQuote=true;						//In this case a quotation is found and determined to be an opening quote.
+			}
+			else if(*position=="<"||*position=="="||*position=="-")
+			{
+				openSymbol=true;					//In this case an adjoining openSymbol is found and concatenated to the previous.
+				temp=temp+*position;				//This conditional check handles <=, ==, and <- symbols.
+			}
+			else
+			{
+				tokens.push_back(temp);
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;					//when no symbols are found in this case, the previous open symbol is tokenized
+			}										//and the current string is tokenized as well.
+	   }
+	   else if(closeSymbol==true)
+	   {
+		   if(*position=="\"")
+			{
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;		
+				openQuote=true;						//When the prior string was a closeSymbol and a quotation is found it can be
+			}										//assumed this is an open quotation.
+		   else if(*position==">"||*position=="=")
+			{
+				closeSymbol=true;					//Here an adjoining closeSymbol is found and concatenated to the previous symbol.
+				temp=temp+*position;				//This handles the >= symbol.
+			}
+		   else if(*position=="-")
+			{
+				closeSymbol=false;					//If the previous symbol was a closeSymbol then <- will be accounted for.
+				openSymbol=true;
+				tokens.push_back(temp);
+				temp=*position;
+
+			}
+		   else
+			{
+				tokens.push_back(temp);
+				tokens.push_back(*position);		//Lastely, when the previous string was a closeSymbol and the current string is not 
+				closeSymbol=false;					//a symbol, the previous symbol will be tokenized and the current string will be tokenized.
+				temp="";
+			}
+	   }
+	   else
+	   {
+		   if(*position=="\"")
+		   {
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;
+				openQuote=true;						//If the previous string was not a symbol and there was no previous openQuote, this quote
+		   }										//will be treated as an opening quote.
+		   else if(*position=="<"||*position=="="||*position=="-"||*position=="!")		//As with the previous conditional checks, this check
+			{																			//accounts for all possible openSymbols.
+				openSymbol=true;
+				temp=temp+*position;
+			}
+		   else if(*position==">")
+			{
+				closeSymbol=true;
+				temp=*position;
+			}
+		   else
+		   {
+				closeSymbol=false;
+				openSymbol=false;
+				tokens.push_back(*position);		//All other strings are tokenized.
+				temp="";
+		   }
+	   }
+   }
+   return tokens;			//A vector full of the tokens ready for translation by the database engine.
+}
+
 class Parser{
-private:
-	vector<string> sTokens; //ScannerTokens  i.e. [dog] [<] [-] ... ["] [joe] [bob] ... [;]
-	vector<string> pTokens; //Completed Parser Tokens i.e. [dog] [<-] ... ["] [joe bob] ["] ... [;]  //perhaps no special chars like [<-] and ["] ?
+public:
+	bool allowNonCaps;
+	vector<string> sToks;
+	int sI;
+	//string sTok(){retrn sToks[sI];}
+	
+	
+	vector<string> sTokens;
+	vector<string> pTokens;
 	int sTokI;
 	string sTok;
 	int level;
@@ -50,73 +185,78 @@ private:
 		}cout<<endl;
 	}
 	
+	void printSTok(){
+		cout<<"**Scanner Tokens: ";
+		for(vector<string>::iterator it=sToks.begin(); it!=sToks.end(); ++it){
+			cout<<"["<<(*it)<<"] ";
+		}cout<<endl;
+	}
+	
 	void getSTok(){
 		sTokI++;
 		sTok = sTokens[sTokI];
 	}
 	
-public:
 	Parser(){
 		level=0;
 	}
 	Parser(string fileName){
 		level=0;
+		allowNonCaps = true;
 		ifstream inFile( fileName.c_str() );
 		//Need to put in loop, splitting prog on '\n' or ';' , then handle each CorQ
 		while(inFile.good() ){ //assuming infile will be newLine seperated
+			
+			//--
 			sTokens.clear();
 			pTokens.clear();
 			sTokI=0;
 			sTok="";
-			level=0;
+			//--
+			sToks.clear();
+			sI=0;
 			
+			
+			level=0;
 			string line;
 			getline(inFile, line);	//function in/of <string> lib
 			if(line==""){continue;} //Skip blank Lines
-			cout<<"******************************\n**Handling Line: "<<line<<endl;
-			//Get Tokens
-			vector<string> toks = tokenizeLine(line);
+			cout<<"\n\n\n******************************\n**Handling Line: "<<line<<endl;
+			
+			/*Get Tokens
+			sTokens = dbTokens(line);
+			sTok= sTokens[0];
+			*/
+			sToks=dbTokens(line);
+			
+			
+			
 			//Print Tokens
-			cout<<"**Scanner Tokens: ";
-			for(vector<string>::iterator it=toks.begin(); it!=toks.end(); ++it){
-				cout<<"["<<(*it)<<"] ";
-			}cout<<endl;
+			printSTok(); cout<<endl;
 			
 			//Parse
-			if(isCommand(toks[0])){
-				cout<<"Need To implement Command Parsing.. Skipping\n";
-			}else{
-				sTokens = toks;
-				//sTokI = 0;
-				sTok= sTokens[0];
-				ParseQuery();
-				cout<<"***Query Parsed Successfully:\n";
-				printPTok();
-			}
-						
-			cout<<"**Done handling line\n****************************\n\n";
+			bool passedParse = ParseTokens();
+			
+			cout<<"\n\n"<< (passedParse?"PASSED":"FAILED") << " on input line:\n"<<line<<endl;
+			cout<<"**Done handling line\n****************************\n";
 			cout << "Press ENTER to continue";
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		}
 	}
 	
-	vector<string> tokenizeLine(string line){
-		vector<string> tokens;
-		boost::char_separator<char> separator(" \n","\"()+<>=-;,");
-		boost::tokenizer< boost::char_separator<char> > tok( (std::string::const_iterator)line.begin(), (std::string::const_iterator)line.end(), separator);
-		for(boost::tokenizer< boost::char_separator<char> >::iterator beg=tok.begin(); beg!=tok.end(); ++beg){
-		   tokens.push_back( *beg );
+	bool ParseTokens(){
+		bool passedParse;
+		if(isFWordCommand(sToks[sI])){
+			passedParse = isCommand();
+		}else{
+			passedParse = ParseQuery();
 		}
-		return tokens;
+		return passedParse;
 	}
-	
-	void lex(vector<string> tokens){
-		while(1){
-			;
-		}		
-	}
-	
-	bool isCommand(string fWord){
+
+	bool isFWordCommand(string fWord){
+		fWord = (allowNonCaps?retUpper(fWord):fWord);
+		
 		if(fWord=="OPEN"){
 		
 		}else if(fWord=="CLOSE"){
@@ -140,83 +280,504 @@ public:
 		}
 		return true;
 	}
+
 	
-	/*Old Funcs
-	void handleProgram(string prog){
-		cout<<"*******\nSOMEONE CALLED handleProgram\n********\n";
 	
-		vector<string> Lines;
-		stringstream iss(prog);
-		
-		string ln="";
-		while(iss.good()){
-			char c;
-			iss>>c;
-			ln+=c;
-			if(c==';'){
-				Lines.push_back(ln);
-				cout<<"added line: "<<ln<<endl;
-				ln="";
+	//TODO: (re)Implement:
+	bool isAtomicExpr(){
+		int aeSi = sI;
+		if(isRelationName() || isExpr()){
+			return true;
+		}
+		else{
+			sI=aeSi;
+			return false;
+		}
+	}
+	
+	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
+	bool isExpr() {
+		return false;
+		enter("Expression");
+		bool isExpr = projection();
+		if(!isExpr){
+			isExpr=selection();
+			if(!isExpr){
+				isExpr=product();
+				if(!isExpr){
+					isExpr=renaming();
+					if(!isExpr){
+						isExpr=unionF();
+						if(!isExpr){
+							isExpr=difference();
+							if(!isExpr){
+								isExpr=atomicExpr();
+							}
+						}
+					}
+				}
 			}
 		}
-			// cout<<"read line# "<<i<<endl;
-			
-			// int maxLineSize=1020;
-			// char buff[maxLineSize];
-			// string ln;
-			
-			// iss.get(buff,maxLineSize,';');
-			// getline(iss, ln, ':');
-			// cout<<"read:"<<iss.gcount()<<" chars"<<endl;
-			
-			// string newLn(buff);
-			// cout<<"adding newLine: "<<ln<<endl;
-			// Lines.push_back(ln);
-				
-			//cout<<"done breaking apart program..."<<endl;
+		leave("Expression");
+		return isExpr;
+	}
+
+	/*
+	string AtomicExpr(){
+		return "NULL";
+	}
+	vector<TypedAttribute> TypedAttributeList(){ //TODO: Question: perhaps take in a POINTER to a !COPY! of sTokI and manipulate/return it to represent end of TypedAttributeList?
+		vector<TypedAttribute> attrList;
 		
-		for(vector<string>::iterator it=Lines.begin(); it!=Lines.end(); ++it){
-			cout<<"calling handle CorQ on string: "<<(*it)<<endl;
-			//handleCorQ(*it);
-		}
-		
+		return attrList;
+	}*/
+	
+	//relation-name ::= identifier
+	bool isRelationName(){
+		enter("isRelationName");
+		bool isRel = isIdentifier();
+		leave("isRelationName");
+		return isRel;
 	}
 	
-	bool handleQuery(string Query){
-		cout<<"Handeling a query!!!!!\n"<<Query<<endl;
-		return true;
+	//identifier ::= alpha { ( alpha | digit ) }
+	bool isIdentifier(){
+		bool isIdentifier=false;
+		enter("isIdenfitier");
+		string identif = sToks[sI];
+		if(isalpha(identif[0]) || identif[0]=='_' ){
+			isIdentifier=true;
+			for(int i=1; i<identif.size(); i++){
+				char c=identif[i];
+				if( !(isalpha(c) || c=='_' || isdigit(c)) ){
+					isIdentifier = false;
+					break;
+				}
+			}
+		}
+		leave("isIdenfitier");
+		return isIdentifier;
 	}
+	
+	//attribute-list ::= attribute-name { , attribute-name } 
+	bool isAttributeList(){
+		enter("isAttributeList");
+		bool isAL = false;
+		if(isAttributeName()){
+			isAL =true;
+			int atNameSI = sI; //TODO: NOTE: this will be the first attribute name
+			sI++;
+			while(sToks[sI]==","){
+				sI++;
+				if(isAttributeName()){
+					int atNamesSI = sI; //TODO: NOTE: these will be indexes to any following attribute names
+					sI++;
+				}else{isAL=false; errOut("Error within attribute-list, expected attribute name after comma");}
+			}
+		}else{errOut("Expected at least 1 attribute name in attribute-list");}
 		
-	bool handleCommand(string Cmd){
-		stringstream iss(Cmd);
-		string fWord;
-		iss>>fWord;
-		if(fWord=="OPEN"){
+		leave("isAttributeList");
+		return isAL;
+	}
+	
+	//attribute-name ::= identifier
+	bool isAttributeName(){
+		enter("isAttributeName");
+		bool isAttrib = false;
+		isAttrib = isIdentifier();
+		leave("isAttributeName");
+		return isAttrib;
+	}
+	
+	//type ::= VARCHAR ( integer ) | INTEGER
+	bool isType(){
+		enter("isType");
+		bool isType = false;
+		int tSi = sI;
 		
-		}else if(fWord=="CLOSE"){
-		
-		}else if(fWord=="WRITE"){
-		
-		}else if(fWord=="EXIT"){
-		
-		}else if(fWord=="SHOW"){
+		if(sToks[sI]=="INTEGER"){
+			isType=true;
+			sI++;
+		}
+		else if(sToks[sI]=="VARCHAR"){
+			sI++;
+			if(sToks[sI]=="("){
+				sI++;
+				if(isInteger()){
+					int VarCountIndex=sI; //TODO: NOTE: this will be the index of the token representing the varchar count
+					sI++;
+					if(sToks[sI]==")"){
+						sI++;
+						isType=true;
+					}else{errOut("Expected closing-paren following VARCHAR");}
+				}else{errOut("Expected number following VARCHAR(");}
+			}else{errOut("Expected open-paren after VARCHAR");}
+		}
+			
+		if(!isType){
+			sI = tSi;
+		}
+		leave("isType");
+		return isType;
+	}
+	
+	//integer ::= digit { digit }
+	bool isInteger(){
+		enter("isInteger");
+		bool isInt=true;
+		string intS = sToks[sI];
+		for(int i=0; i<intS.size(); i++){
+			if( !isdigit(intS[i]) ){
+				isInt = false;
+				break;
+			}
+		}
+		leave("isInteger");
+		return isInt;	
+	}
 
-		}else if(fWord=="CREATE"){
+	bool isLiteral(){//TODO: enhance, currently only supports single word literals with no quotes. i.e.  UPDATE dots SET x1 = 0 WHERE x1 < 0;  // 0 is literal
+		enter("isLiteral");
+		bool isLit=false;
+		if(sToks[sI]=="\""){
+			cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! quotations around literals needs to be implemented\n";
+		}else{
+			isLit=true;
+		}
+		leave("isLiteral");
+		return isLit;
+	}
+	
+	//typed-attribute-list ::= attribute-name type { , attribute-name type }
+	bool isTypedAttributeList(){
+		enter("isTypedAttributeList");
+		int taSi = sI;
+		bool isTA=false;
+		//TODO: change to do-while
+		if(isAttributeName()){
+			sI++;
+			if(isType()){
+				//sI++;
+				//cout<<"&&&&&&&&&&&&&&&: "<<sToks[sI]<<endl;
+				isTA=true;
+				while(sToks[sI]==","){
+					sI++;
+					if(isAttributeName()){
+						sI++;
+						if(isType()){
+							//sI++;
+						}else{isTA=false; errOut("Expected type after attribute name");}	
+					}else{isTA=false; errOut("Expected typed-attribute-list");}
+				}
+			}else{errOut("Expected type after attribute name");}		
+		}else{errOut("Expected typed-attribute-list");}
+		
+		if(!isTA){
+			sI=taSi;
+		}
+		leave("isTypedAttributeList");
+		return isTA;
+	}
 
-		}else if(fWord=="UPDATE"){
+	
+	//condition ::= conjunction { || conjunction }
+	bool isCondition(){
+		enter("isCondition");
+		bool isCond = false;
+		if(isConjunction()){
+			isCond=true;
+			//sI++;
+			while(sToks[sI]=="||"){
+				sI++;
+				if(isConjunction()){
+					isCond = true;
+					//sI++;
+				}else{isCond=false; errOut("Expected conjunction after \"||\"");}
+			}
+		}else{errOut("Expected at least 1 conjunction in condition");}
+		leave("isCondition");
+		return isCond;
+	}
+
+	//conjunction ::= comparison { && comparison }
+	bool isConjunction(){
+		enter("isConjunction");
+		bool isConj = false;
+		if(isComparison()){
+			isConj=true;
+			//sI++;
+			while(sToks[sI]=="&&"){
+				sI++;
+				if(isComparison()){
+					isConj=true;
+					//sI++;
+				}else{isConj=false; errOut("Expected comparison after \"&&\"");}
+			}
+		}else{errOut("Expected at least 1 comparison in conjunction");}
+		leave("isConjunction");
+		return isConj;
+	}
+
+	//comparison ::= operand op operand | ( condition )
+	bool isComparison(){
+		enter("isComparison");
+		bool isComp = false;
 		
-		}else if(fWord=="INSERT"){
+		if(sToks[sI]=="("){
+			sI++;
+			if(isCondition()){
+				if(sToks[sI]==")"){
+					sI++;
+					isComp=true;
+				}else{errOut("Expected closing paren on condition within comparison");}
+			}else{errOut("Expected condition after open-paren of comparison");}
+		}else if(isOperand()){
+			string operand=sToks[sI];
+			sI++;
+			if(isOp()){
+				string op=sToks[sI];
+				cout<<"FOUND OP: "<<op<<endl;
+				sI++;
+				if(isOperand()){
+					string operand2 = sToks[sI];
+					sI++;
+					isComp=true;
+				}
+			}
+		}
+		leave("isComparison");
+		return isComp;
+	}
+
+	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
+	bool isOp(){
+		enter("isOp");
+		bool isop = true;
+		if(sToks[sI] == "=="){
+			
+		}else if(sToks[sI] == "!="){
 		
-		}else if(fWord=="DELETE" ){
+		}else if(sToks[sI] == "<"){
+		
+		}else if(sToks[sI] == ">"){
+		
+		}else if(sToks[sI] == "<="){
+		
+		}else if(sToks[sI] == ">="){
 		
 		}else{
-			return false;
+			isop=false;
+			//Not an 'op'
 		}
-		return true;
+		leave("isOp");
+		return isop;
 	}
-	*/
+
+	//operand ::= attribute-name | literal
+	bool isOperand(){
+		enter("isOpand");
+		bool isOpand = false;
+		if(isAttributeName()){
+			//sI++;
+			isOpand=true;
+		}else if(isLiteral()){
+			//sI++;
+			isOpand=true;
+		}
+		leave("isOperand");
+		return isOpand;
+	}
+
 	
-private:	
+	//TODO: test functionality
+	string retUpper(string inStr){
+		string upp = inStr;
+		for(string::iterator it = upp.begin(); it!=upp.end(); ++it){
+			*it = std::toupper((unsigned char)(*it));
+		}
+		return upp;
+	}
+	
+	
+// create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
+// update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
+// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } )
+		   // | INSERT INTO relation-name VALUES FROM RELATION expr
+// delete-cmd ::= DELETE FROM relation-name WHERE condition
+
+
+	//command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
+	bool isCommand(){
+		bool isCmd=false;
+		int cmdSi = sI;		
+		string fWord = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+	
+		// open-cmd ::== OPEN relation-name
+		if(fWord=="OPEN"){
+			enter("OPEN");
+			sI++;
+			if(isRelationName()){
+				string relName=sToks[sI];
+				sI++;
+				if(sToks[sI]==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'OPEN' relation with name '"<<relName<<"'\n";
+					//TODO: DBENG: this is where we can call dbEng.Open(relName);
+				}else{ errOut("Expected semi-colon (';') at end of \"OPEN\" command."); }
+			}else{ errOut("Expected 'relation-name' after \"OPEN\" command."); }
+			leave("OPEN");
+		}
+		
+		// close-cmd ::== CLOSE relation-name
+		else if(fWord=="CLOSE"){
+			enter("CLOSE");
+			sI++;
+			if(isRelationName()){
+				string relName=sToks[sI];
+				sI++;
+				if(sToks[sI]==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'CLOSE' relation with name '"<<relName<<"'\n";
+					//TODO: DBENG: this is where we can call dbEng.CLOSE(relName);
+				}else{ errOut("Expected semi-colon (';') at end of \"CLOSE\" command."); }
+			}else{ errOut("Expected 'relation-name' after \"CLOSE\" command."); }
+			leave("CLOSE");
+		}
+		
+		//write-cmd ::== WRITE relation-name
+		else if(fWord=="WRITE"){
+			enter("WRITE");
+			sI++;
+			if(isRelationName()){
+				string relName=sToks[sI];
+				sI++;
+				if(sToks[sI]==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'WRITE' relation with name '"<<relName<<"'\n";
+					//TODO: DBENG: this is where we can call dbEng.WRITE(relName);
+				}else{ errOut("Expected semi-colon (';') at end of \"WRITE\" command."); }
+			}else{ errOut("Expected 'relation-name' after \"WRITE\" command."); }
+			leave("WRITE");
+		}
+		
+		// exit-cmd ::== EXIT
+		else if(fWord=="EXIT"){
+			enter("EXIT");
+			sI++;
+			if(sToks[sI]==";"){
+				isCmd=true;
+				cout<<"xxx Well-formed Command to 'EXIT'\n";
+				//TODO: DBENG: this is where we can call dbEng.EXIT();
+			}else{ errOut("Expected semi-colon (';') at end of \"EXIT\" command."); }
+			leave("EXIT");
+		}
+
+		// show-cmd ::== SHOW atomic-expr		
+		else if(fWord=="SHOW"){ //TODO: Need to implement isExpr() from isAtomicExpr()
+			enter("SHOW");
+			sI++;
+			if(isAtomicExpr()){
+				sI++;
+				if(sToks[sI]==";"){
+					isCmd=true;
+					cout<<"xxx Well-formed Command to 'SHOW' atomic-expression '\n"; //<<atomicExpr<<"'\n";
+					//TODO: DBENG: this is where we can call dbEng.atomicExp(atomicExpr);  sToks[cmdSi] sToks[sI-1]
+				}else{ errOut("Expected semi-colon (';') at end of \"SHOW\" command."); }
+			}else{ errOut("Expected 'atomic-expression' after \"SHOW\" command."); }
+			leave("SHOW");
+		}
+		
+		// create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
+		else if(fWord=="CREATE"){
+			enter("CREATE");
+			sI++;
+			string sWord = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+			if(sWord == "TABLE"){
+				sI++;
+				if(isRelationName()){
+					string relName=sToks[sI];
+					sI++;
+					if(sToks[sI] == "(" ){
+						sI++;
+						if(isTypedAttributeList()){
+							//vector<TypedAttribute> typedAttrs = TypedAttributeList();
+							if(sToks[sI]==")"){
+								sI++;
+								string tempP = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //TODO: IDEA: should we combine 'primary' and 'key' as they should never be apart?
+								if(tempP=="PRIMARY"){
+									sI++;
+									string tempK = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+									if(tempK=="KEY"){
+										sI++;
+										if(sToks[sI]=="("){
+											sI++;
+											if(isAttributeList()){
+												if(sToks[sI]==")"){
+													sI++;
+													isCmd=true;
+													cout<<"xxx Well-formed 'CREATE' command on: "<<relName<<endl;;
+												}else{errOut(" Expected closing-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (<attribute-list>\"");}							
+											}else{ errOut(" Error in attribute list after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (\"");}		
+										}else{ errOut(" Expected open-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY\"");}
+									}else{errOut(" Expected \"KEY\" After \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY \""); }
+								}else{errOut(" Expected \"PRIMARY\" After \"CREATE TABLE "+relName+" ( <typed-attribute-list> )\""); }
+							}else{errOut("After \"CREATE TABLE "+relName+" ( <typed-attribute-list> \" , Expected closing-paren."); }
+						}else{errOut("After \"CREATE TABLE "+relName+"(\". Error in typed-attribute-list, or did not find typed-attribute-list"); }
+					}else{errOut("After \"CREATE TABLE "+relName+"\", Expected open-paren then typed-attribute-list. Did not find open-paren");}
+				}else{ errOut("Expected 'relation-name' after \"CREATE TABLE\" command."); }
+			}else{errOut("Expected \"TABLE\" to follow \"CREATE\"");}
+			leave("CREATE");
+		}
+		
+		//UPDATE dots SET x1 = 0 WHERE x1 < 0;
+		//update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
+		else if(fWord=="UPDATE"){
+			enter("UPDATE");
+			sI++;
+			if(isRelationName()){
+				string relName=sToks[sI];
+				sI++;
+				if(sToks[sI]=="SET"){
+					sI++;
+					//loop look here
+					if(isAttributeName()){
+						string attrName=sToks[sI];
+						sI++;
+						if(sToks[sI]== "="){
+							sI++;
+							if(isLiteral()){
+								//some looping needed 
+								while(sToks[sI]==","){ cout<<"\n\n\nERROR, NO SUPPORT FOR MULTIPLE ATTRIBUTE-NAME ASSIGNMENTS YET\n\n\n"; return false; sI++;}
+								sI++;
+								if(sToks[sI]=="WHERE"){
+									sI++;
+									if(isCondition()){
+										sI++;
+										isCmd=true;
+										cout<<"xxx Well-formed 'Update' command on: "<<relName<<endl;;
+									}else{errOut("error in condition");}
+								}else{errOut("expected \"WHERE\"");}
+							}else{errOut("Error in literal");}						
+						}else{errOut("Expected \"=\" after \"UPDATE "+relName+" SET "+attrName+"\"");}
+					}else{errOut("Expected <attribute-name> after \"UPDATE "+relName+" SET \"");}
+				}else{errOut("Expected \"SET\" after \"UPDATE "+relName+"\"");}
+			}else{errOut("Expected relation-name after UPDATE");}
+		}
+		
+		else if(fWord=="INSERT"){
+		
+		}
+		
+		else if(fWord=="DELETE" ){
+		
+		}
+		
+		else{isCmd=false;}
+		if(!isCmd){sI=cmdSi;}
+		return isCmd;
+	}
+
+	
 	/*Non-terminal Functions:
 	void query(); void relationName(); void identifier(); void alpha(); void digit(); void expr(); void atomicExpr(); void selection();
 	void condition(); void conjunction(); void comparison(); void op(); void operand(); void attributeName(); void literal(); 
@@ -232,21 +793,24 @@ private:
 	*/
 
 	//Helper Funcs
+	void errOut(string s) {
+		cout<<"\n\n*** ERROR: "<<s<<endl<<endl;
+	}
 	void errorS(string s) {
-	   cout<<"\n*** ERROR: "<<s<<endl;;
+	   cout<<"\n*** ERROR: "<<s<<endl;
 	   exit(1);
 	}
 	void enter(string name) {
 		spaces(level++);
 		cout<<"+-"<<name<<": Enter, \t";
-		cout<<"Tok == "<<sTok<<endl;
+		cout<<"Tok == "<<sToks[sI]<<endl;
 		//printf("+-%c: Enter, \t", name);
 		//printf("Sym == %s\n", sym);
 	}
 	void leave(string name) {
 		spaces(--level);
 		cout<<"+-"<<name<<": Leave, \t";
-		cout<<"Tok == "<<sTok<<endl;
+		cout<<"Tok == "<<sToks[sI]<<endl;
 		//printf("+-%c: Leave, \t", name);
 		//printf("Sym == %c\n", sym);
 	}
@@ -258,9 +822,10 @@ private:
 		getSTok();
 	}
 
-	void ParseQuery(){
-		query();
+	bool ParseQuery(){
+		return query();
 	}
+	
 	
 	//query ::= relation-name <- expr ;
 	bool query(){
@@ -299,6 +864,13 @@ private:
 		leave("RelationName");
 		return isRel;
 	}
+/*	bool isRelationName(){
+		enter("RelationName");
+		bool isRel = identifier();
+		leave("RelationName");
+		return isRel;
+	}*/
+	
 
 	//identifier ::= alpha { ( alpha | digit ) }
 	bool identifier(){
@@ -318,6 +890,7 @@ private:
 		leave("Idenfitier");
 		return isIdentifier;
 	}
+	
 
 	/*Old digit/alpha stuff
 	//alpha ::= a | … | z | A | … | Z | _
@@ -635,13 +1208,14 @@ private:
 		return isProd;
 	}
 	
-};
+	};
 
-int main() {
+int main(){
 	cout<<"-Starting Parser Main\n";
 	Parser* myP = new Parser("parser_milestone_good_inputs.txt");
 	cout<<"-Exiting Parser Main\n";
-	
+	cout << "Press ENTER to quit";
+	cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	return 0;
 }
 

@@ -1,4 +1,16 @@
 CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
+UPDATE dots SET x1 = 0 WHERE x1 < 0;
+
+OPEN animals;
+WRITE tes2tttt123;
+CLOSE other_animal;
+EXIT;
+SHOW tools;
+
+Exit;
+
+
+CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
 INSERT INTO animals VALUES FROM ("Joe Bob", "cat", 4);
 INSERT INTO animals VALUES FROM ("Spot", "dog", 10);
 INSERT INTO animals VALUES FROM ("Snoopy", "dog", 3);
