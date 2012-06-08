@@ -1,9 +1,6 @@
 /* parser.cpp:
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -13,18 +10,6 @@
 
 using namespace std;
 
-
-class DType{ //TODO: change to struct
-public:
-	bool isVARCHAR; //false means dType is INTEGER
-	int charCnt; //meaningless if !isVARCHAR
-};
-
-class TypedAttribute{ //TODO: change to struct
-public:
-	string attrName;
-	DType dType;
-};
 
 /* token consumption information
 "primitive" functions which consume all of their input:
@@ -168,44 +153,19 @@ vector<string> dbTokens(string commandLine){
 }
 
 
-/* http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf */
-std::istream& safeGetline(std::istream& is, std::string& t)
-{
-    t.clear();
 
-    // The characters in the stream are read one-by-one using a std::streambuf.
-    // That is faster than reading them one-by-one using the std::istream.
-    // Code that uses streambuf this way must be guarded by a sentry object.
-    // The sentry object performs various tasks,
-    // such as thread synchronization and updating the stream state.
-
-    std::istream::sentry se(is, true);
-    std::streambuf* sb = is.rdbuf();
-
-    for(;;) {
-        int c = sb->sbumpc();
-        switch (c) {
-			case '\r':
-				c = sb->sgetc();
-				if(c == '\n')
-					sb->sbumpc();
-				return is;
-				break;
-			case '\n':
-				break;
-			case EOF:
-				return is;
-				break;
-			default:
-				t += (char)c;
-				break;
-        }
-    }
+string retUpper(string inStr){
+		string upp = inStr;
+		for(string::iterator it = upp.begin(); it!=upp.end(); ++it){
+			*it = std::toupper((unsigned char)(*it));
+		}
+		return upp;
 }
 
 
 class Parser{
 public:
+	int debug; //debug(0 , 1 ,2-show syntax error messages, 3-show enter/leave print statements ,)
 	bool allowNonCaps;
 	vector<string> sToks;
 	int sI;
@@ -224,42 +184,36 @@ public:
 	}
 	Parser(string fileName){
 		level=0;
+		debug=4;
 		allowNonCaps = true;
 		ifstream inFile( fileName.c_str() );
 		while(inFile.good() ){ //assuming infile will be newLine seperated and WILL NOT have <cr><lf> line endings
-			
+			//clear out line variables
 			sToks.clear();
 			sI=0;
-			
-			
 			level=0;
 			string line;
 			
-			getline(inFile, line);	//function in/of <string> lib
+			//get next line and print, skip if blank line
+			getline(inFile, line);
 			if(line=="" || line=="\r\n" || line=="\n"){continue;} //Skip blank Lines
-			
 			cout<<"\n\n\n******************************\n**Handling Line: "<<line<<endl;
-			
-			/*Get Tokens
-			sTokens = dbTokens(line);
-			sTok= sTokens[0];
-			*/
+
+			//get and print tokens
 			sToks=dbTokens(line);
-			
-			
-			
-			//Print Tokens
 			printSTok(); cout<<endl;
 			
-			//Parse
+			//Parse line tokens
 			bool passedParse = ParseTokens();
 			
+			//Print results
 			cout<<"\n\n"<< (passedParse?"PASSED":"FAILED") << " on input line:\n"<<line<<endl;
 			cout<<"**Done handling line\n****************************\n";
 			
+			//only pause if parse fails
 			if(!passedParse){
-			cout << "Press ENTER to continue";
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				cout << "Press ENTER to continue";
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			}
 		}
 	}
@@ -301,13 +255,14 @@ public:
 		return true;
 	}
 
-	//atomic-expr ::= relation-name | ( expr )
+	
+	//BEGIN GRAMMAR FUNCTIONS
 	bool isAtomicExpr(){
-		//int aeSi = sI;
+	//atomic-expr ::= relation-name | ( expr )
 		enter("isAtomicExpr");
 		bool isAE=false;
 		if(sToks[sI]=="("){
-			//atomic-expr ::= ( expr ) case
+			//"atomic-expr ::= ( expr )" case
 			sI++;
 			if(isExpr()){
 				if(sToks[sI]==")"){
@@ -316,14 +271,15 @@ public:
 				}else{errOut("Expected closing-paren for expression in atomic-expression");}
 			}else{errOut("Expected expression to follow open-paren in atomic-expression");}
 		}else if(isRelationName()){
+			//"atomic-expr ::= relation-name" case
 			isAE=true;
 		}
 		leave("isAtomicExpr");
 		return isAE;
 	}
 	
-	//query ::= relation-name <- expr ;
 	bool isQuery(){
+	//query ::= relation-name <- expr ;
 		enter("isQuery");
 		bool isQ=false;
 		if(isRelationName()){
@@ -338,8 +294,8 @@ public:
 		return isQ;
 	}
 	
-	//selection ::= select ( condition ) atomic-expr
 	bool isSelection(){
+	//selection ::= select ( condition ) atomic-expr
 		enter("isSelection");
 		bool isSel=false;
 		if(sToks[sI]=="select"){
@@ -360,8 +316,8 @@ public:
 		return isSel;
 	}
 	
-	// projection ::= project ( attribute-list ) atomic-expr
 	bool isProjection(){
+	// projection ::= project ( attribute-list ) atomic-expr
 		enter("Projection");
 		bool isProj=false;
 		if(sToks[sI]=="project"){
@@ -382,8 +338,8 @@ public:
 		return isProj;
 	}
 	
-	// renaming ::= rename ( attribute-list ) atomic-expr
 	bool isRenaming(){
+	// renaming ::= rename ( attribute-list ) atomic-expr
 		enter("isRenaming");
 		bool isRen=false;
 		if(sToks[sI]=="rename"){
@@ -404,8 +360,8 @@ public:
 		return isRen;
 	}
 	
-	// union ::= atomic-expr + atomic-expr
 	bool isUnion(){
+	// union ::= atomic-expr + atomic-expr
 		enter("isUnion");
 		bool isUn=false;
 		if(isAtomicExpr()){
@@ -414,14 +370,14 @@ public:
 				if(isAtomicExpr()){
 					isUn=true;
 				}else{errOut("Expected <atomic-expr> to follow \"<atomic-expr> + \"");}
-			}else{errOut("Expected + to follow \"<atomic-expr> \" in Union");}
+			}
 		}		
 		leave("isUnion");
 		return isUn;
 	}
 	
-	//product ::= atomic-expr * atomic-expr 
 	bool isProduct(){
+	//product ::= atomic-expr * atomic-expr 
 		enter("isProduct");
 		bool isProd=false;
 		if(isAtomicExpr()){
@@ -430,14 +386,14 @@ public:
 				if(isAtomicExpr()){
 					isProd=true;
 				}else{errOut("Expected <atomic-expr> to follow \"<atomic-expr> * \"");}
-			}else{errOut("Expected * to follow \"<atomic-expr> \" in Product");}
+			}
 		}		
 		leave("isProduct");
 		return isProd;
 	}
 	
-	// difference ::= atomic-expr - atomic-expr
 	bool isDifference(){
+	// difference ::= atomic-expr - atomic-expr
 		enter("isDifference");
 		bool isDif=false;
 		if(isAtomicExpr()){
@@ -446,15 +402,14 @@ public:
 				if(isAtomicExpr()){
 					isDif=true;
 				}else{errOut("Expected <atomic-expr> to follow \"<atomic-expr> - \"");}
-			}else{errOut("Expected - to follow \"<atomic-expr> \" in Difference");}
+			}
 		}		
 		leave("isDifference");
 		return isDif;
 	}
 	
-	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
 	bool isExpr() {
-	//evaluate in order select, project, rename, |||| union, difference, product, ||| atomic
+	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
 		enter("isExpr");
 		int exprI = sI;
 		bool isExp = isSelection();
@@ -487,16 +442,16 @@ public:
 		return isExp;
 	}
 
-	//relation-name ::= identifier
 	bool isRelationName(){
+	//relation-name ::= identifier
 		enter("isRelationName");
 		bool isRel = isIdentifier();
 		leave("isRelationName");
 		return isRel;
 	}
 	
-	//identifier ::= alpha { ( alpha | digit ) }
 	bool isIdentifier(){
+	//identifier ::= alpha { ( alpha | digit ) }
 		bool isIdent=false;
 		enter("isIdenfitier");
 		string identif = sToks[sI];
@@ -517,19 +472,17 @@ public:
 		return isIdent;
 	}
 	
-	//attribute-list ::= attribute-name { , attribute-name } 
 	bool isAttributeList(){
+	//attribute-list ::= attribute-name { , attribute-name } 
 		enter("isAttributeList");
 		bool isAL = false;
 		if(isAttributeName()){
 			isAL =true;
 			int atNameSI = sI; //TODO: NOTE: this will be the first attribute name
-			//sI++;
 			while(sToks[sI]==","){
 				sI++;
 				if(isAttributeName()){
 					int atNamesSI = sI; //TODO: NOTE: these will be indexes to any following attribute names
-					//sI++;
 				}else{isAL=false; errOut("Error within attribute-list, expected attribute name after comma");}
 			}
 		}else{errOut("Expected at least 1 attribute name in attribute-list");}
@@ -538,8 +491,8 @@ public:
 		return isAL;
 	}
 	
-	//attribute-name ::= identifier
 	bool isAttributeName(){
+	//attribute-name ::= identifier
 		enter("isAttributeName");
 		bool isAttrib = false;
 		isAttrib = isIdentifier();
@@ -547,8 +500,8 @@ public:
 		return isAttrib;
 	}
 	
-	//type ::= VARCHAR ( integer ) | INTEGER
 	bool isType(){
+	//type ::= VARCHAR ( integer ) | INTEGER
 		enter("isType");
 		bool isType = false;
 		int tSi = sI;
@@ -579,8 +532,8 @@ public:
 		return isType;
 	}
 	
-	//integer ::= digit { digit }
 	bool isInteger(){
+	//integer ::= digit { digit }
 		enter("isInteger");
 		bool isInt=true;
 		string intS = sToks[sI];
@@ -594,7 +547,7 @@ public:
 		return isInt;	
 	}
 
-	bool isLiteral(){//TODO: enhance, currently only supports single word literals with no quotes. i.e.  UPDATE dots SET x1 = 0 WHERE x1 < 0;  // 0 is literal
+	bool isLiteral(){
 		enter("isLiteral");
 		int literalStartIndex = sI; 
 		int literalEndIndex = sI;
@@ -625,12 +578,11 @@ public:
 		return isLit;
 	}
 	
-	//typed-attribute-list ::= attribute-name type { , attribute-name type }
 	bool isTypedAttributeList(){
+	//typed-attribute-list ::= attribute-name type { , attribute-name type }
 		enter("isTypedAttributeList");
 		int taSi = sI;
 		bool isTA=false;
-		//TODO: change to do-while
 		if(isAttributeName()){
 			if(isType()){
 				isTA=true;
@@ -652,8 +604,8 @@ public:
 		return isTA;
 	}
 	
-	//condition ::= conjunction { || conjunction }
 	bool isCondition(){
+	//condition ::= conjunction { || conjunction }
 		enter("isCondition");
 		bool isCond = false;
 		if(isConjunction()){
@@ -669,8 +621,8 @@ public:
 		return isCond;
 	}
 
-	//conjunction ::= comparison { && comparison }
 	bool isConjunction(){
+	//conjunction ::= comparison { && comparison }
 		enter("isConjunction");
 		bool isConj = false;
 		if(isComparison()){
@@ -686,8 +638,8 @@ public:
 		return isConj;
 	}
 
-	//comparison ::= operand op operand | ( condition )
 	bool isComparison(){
+	//comparison ::= operand op operand | ( condition )
 		enter("isComparison");
 		bool isComp = false;
 		
@@ -701,13 +653,10 @@ public:
 			}else{errOut("Expected condition after open-paren of comparison");}
 		}else if(isOperand()){
 			string operand1=sToks[sI-1];
-			cout<<"FOUND Operand1: "<<operand1<<endl;
 			if(isOp()){
 				string op=sToks[sI-1];
-				cout<<"FOUND OP: "<<op<<endl;
 				if(isOperand()){
 					string operand2 = sToks[sI-1];
-					cout<<"FOUND Operand2: "<<operand2<<endl;
 					isComp=true;
 				}
 			}
@@ -716,8 +665,8 @@ public:
 		return isComp;
 	}
 
-	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
 	bool isOp(){
+	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
 		enter("isOp");
 		bool isop = true;
 		if(sToks[sI] == "=="){
@@ -744,45 +693,36 @@ public:
 		return isop;
 	}
 
-	//operand ::= attribute-name | literal
 	bool isOperand(){
+	//operand ::= attribute-name | literal
 		enter("isOpand");
 		bool isOpand = false;
 		if(isAttributeName()){
-			//sI++;
 			isOpand=true;
 		}else if(isLiteral()){
-			//sI++;
 			isOpand=true;
 		}
 		leave("isOperand");
 		return isOpand;
 	}
 
-	
-	//TODO: test functionality
-	string retUpper(string inStr){
-		string upp = inStr;
-		for(string::iterator it = upp.begin(); it!=upp.end(); ++it){
-			*it = std::toupper((unsigned char)(*it));
-		}
-		return upp;
+	bool isFCommand(){ //Determines if first token matches a Command
+		string f = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		return ( (f=="OPEN") || (f=="CLOSE") || (f=="WRITE") || (f=="EXIT") || (f=="SHOW") || (f=="CREATE") || (f=="UPDATE") || (f=="INSERT") || (f=="DELETE") );
 	}
 	
-	
-// create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
-// update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
-// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } )
-		   // | INSERT INTO relation-name VALUES FROM RELATION expr
-// delete-cmd ::= DELETE FROM relation-name WHERE condition
-
-
 	//command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
 	bool isCommand(){
-		bool isCmd=false;
-		int cmdSi = sI;		
-		string fWord = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-	
+		bool isCmd = false;
+		if(isFCommand()){
+			if(isOpen() || isClose() || isWrite() || isExit() || isShow() || isCreate() || isUpdate() || isInsert() || isDelete()){
+				if(sToks[sI]==";"){
+					isCmd=true;
+				}else{errOut("Expected ; after command!");}
+			}
+		}
+		return isCmd;
+			
 		// open-cmd ::== OPEN relation-name
 		if(fWord=="OPEN"){
 			enter("OPEN");
@@ -914,15 +854,12 @@ public:
 						if(sToks[sI]== "="){
 							sI++;
 							if(isLiteral()){
-								//some looping needed 
+								//TODO: FIX: some looping needed 
 								while(sToks[sI]==","){ cout<<"\n\n\nERROR, NO SUPPORT FOR MULTIPLE ATTRIBUTE-NAME ASSIGNMENTS YET\n\n\n"; return false; sI++;}
-								//sI++;
 								if(sToks[sI]=="WHERE"){
 									sI++;
 									if(isCondition()){
-										//sI++;
 										isCmd=true;
-										cout<<"xxx Well-formed 'Update' command on: "<<relName<<endl;;
 									}else{errOut("error in condition");}
 								}else{errOut("expected \"WHERE\"");}
 							}else{errOut("Error in literal");}						
@@ -953,7 +890,6 @@ public:
 								sI++; //consume 'RELATION'
 								if(isExpr()){
 									isCmd=true;
-									cout<<"xxx Well-formed 'INSERT INTO relation-name VALUES FROM RELATION expr' command"<<endl;
 								}else{errOut("Expected expression to follow \"INSERT INTO relation-name VALUES FROM RELATION\"");}
 							}else if(sToks[sI]=="("){
 								//This is the < VALUES FROM (literal{,literal}) > case of 'INSERT'
@@ -1004,40 +940,180 @@ public:
 		return isCmd;
 	}
 
-	//Helper Funcs
-	void errOut(string s) {
-		cout<<"\n\n*** ERROR: "<<s<<endl<<endl;
+	bool isOpen(){
+	//open-cmd ::== OPEN relation-name
+		enter("OPEN");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
+			sI++;
+			if(isRelationName()){
+				string relName=sToks[sI-1];
+				isOpn=true;
+			}else{ errOut("Expected 'relation-name' after \"OPEN\" command."); }
+		}
+		leave("OPEN");
+		return isOpn;
 	}
-
+	
+	bool isClose(){
+	// close-cmd ::== CLOSE relation-name
+		enter("CLOSE");
+		bool isCls=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="CLOSE"){
+			sI++;
+			if(isRelationName()){
+				string relName=sToks[sI-1];
+					isCls=true;
+					//TODO: DBENG: this is where we can call dbEng.CLOSE(relName);
+			}else{ errOut("Expected 'relation-name' after \"CLOSE\" command."); }
+		}
+		leave("CLOSE");
+		return isCls;
+	}
+	
+	bool isWrite(){
+		enter("WRITE");
+		bool isWrt=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		
+		if(sToks[sI]=="WRITE"){
+			sI++;
+			if(isRelationName()){
+				string relName=sToks[sI-1];
+					isWrt=true;
+					//TODO: DBENG: this is where we can call dbEng.WRITE(relName);
+			}else{ errOut("Expected 'relation-name' after \"WRITE\" command."); }
+			leave("WRITE");
+		}
+		leave("WRITE");
+		return isWrt;
+	}
+	
+	bool isExit(){
+		enter("OPEN");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
+			sI++;
+			
+			
+			
+			
+		}
+		leave("OPEN");
+		return isOpn;
+	}
+	
+	bool isShow(){
+		enter("OPEN");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
+			sI++;
+			
+			
+			
+			
+		}
+		leave("OPEN");
+		return isOpn;
+	}
+	
+	bool isCreate(){
+		enter("OPEN");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
+			sI++;
+			
+			
+			
+			
+		}
+		leave("OPEN");
+		return isOpn;
+	}
+	
+	bool isUpdate(){
+		enter("OPEN");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
+			sI++;
+			
+			
+			
+			
+		}
+		leave("OPEN");
+		return isOpn;
+	}
+	
+	bool isInsert(){
+		enter("OPEN");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
+			sI++;
+			
+			
+			
+			
+		}
+		leave("OPEN");
+		return isOpn;	
+	}
+	
+	bool isDelete(){
+		enter("OPEN");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
+			sI++;
+			
+			
+			
+			
+		}
+		leave("OPEN");
+		return isOpn;
+	}
+	
+	
+	//Debug Functions
+	void errOut(string s) {
+		if(debug>1){
+			cout<<"\n*** ERROR: "<<s<<endl;
+		}	
+	}
 	void enter(string name) {
 		spaces(level++);
-		cout<<"+-"<<name<<": Enter, \t";
-		cout<<"Tok == "<<sToks[sI]<<endl;
-		//printf("+-%c: Enter, \t", name);
-		//printf("Sym == %s\n", sym);
+		if(debug>2){
+			cout<<"+-"<<name<<": Enter, \t";
+			cout<<"Tok == "<<sToks[sI]<<endl;
+		}
 	}
-
 	void leave(string name) {
 		spaces(--level);
-		cout<<"+-"<<name<<": Leave, \t";
-		cout<<"Tok == "<<sToks[sI]<<endl;
-		//printf("+-%c: Leave, \t", name);
-		//printf("Sym == %c\n", sym);
+		if(debug>2){
+			cout<<"+-"<<name<<": Leave, \t";
+			cout<<"Tok == "<<sToks[sI]<<endl;
+		}
 	}
-
 	void spaces(int local_level) {
 		while (local_level-- > 0)
 			cout<<"| ";
 	}
-
-};//end of parser class
+};
 
 int main(){
 	cout<<"-Starting Parser Main\n";
 	Parser* myP = new Parser("parser_milestone_good_inputs.txt");
 	cout<<"-Exiting Parser Main\n";
 	cout << "Press ENTER to quit";
-	cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	cin.ignore((numeric_limits<streamsize>::max)(), '\n');
 	return 0;
 }
 
