@@ -152,9 +152,93 @@ vector<string> dbTokens(string commandLine){
    return tokens;			//A vector full of the tokens ready for translation by the database engine.
 }
 
+class Parser{
+public:
+	bool allowNonCaps; //True = allow mixed-case Command keywords (i.e. SELECT vs sElecT)
+	bool haltBetween; //True = halt execution after each Query/Command is parsed 
+	int debug; 	/*Debug Levels
+	0-No Output
+	1-Minimal pass/fail output
+	2-More pass/fail info
+	3-Show syntax error messages,
+	4-Show enter/leave print statements */
 
+	//Constructor
+	Parser(int Debug=1, bool HaltBetweenExec=false, bool AllowNonCapitalCMDs=false) :
+		debug(Debug),
+		haltBetween(HaltBetweenExec),
+		allowNonCaps(AllowNonCapitalCMDs)
+	{ ; }
+	
+	//Runs Parser On Single or Multiple Command/Queries
+	//Returns number of failed statements or -1 for system error
+	int ParseProgramBlock(string Program){
+		int failCount=0;
+		string Sub="";
+		size_t sPos=0;
+		size_t ePos = Program.find(';');
+		if(ePos==string::npos) failCount++;
+		while(ePos!=string::npos){
+			ePos++;
+			Sub = Program.substr(sPos,ePos-sPos);
+			if(!ParseSingleLine(Sub)){
+				failCount++;
+			}
+			sPos=ePos;		
+			ePos = Program.find(';',int(sPos));
+			if(haltBetween){
+				cout << "Press ENTER to continue";
+				cin.ignore((numeric_limits<streamsize>::max)(), '\n');
+				cout<<endl<<endl;
+			}
+		}
+		return failCount;
 
-string retUpper(string inStr){
+	}
+	
+	//Runs Parser on all Command/Queries in a text file (useful for testing)
+	//Assumes (textfile will be newLine seperated) AND (file will NOT have <cr><lf> line endings)
+	//Returns number of failed statements or -1 for input-file error
+	int ParseTxtFile(string fileName){
+		int failCount=0;
+		ifstream inFile( fileName.c_str() );
+		if(!inFile){
+			return -1;
+		}
+		while(inFile.good() ){ 
+			string line;
+			//get next line and print, skip if blank line
+			getline(inFile, line);
+			if(line=="" || line=="\r\n" || line=="\n"){continue;} //Skip blank Lines
+			if(!ParseSingleLine(line)){
+				failCount++;
+			}
+			if(haltBetween){
+				cout << "Press ENTER to continue";
+				cin.ignore((numeric_limits<streamsize>::max)(), '\n');
+				cout<<endl<<endl;
+			}
+		}
+		return failCount;
+	}
+			
+private:
+	vector<string> sToks;
+	int sI;
+	int level;
+
+	void resetParserVals(){
+		sToks.clear();
+		sI=0;
+		level=0;
+	}
+	void printSTok(){
+		//cout<<"*******Scanner Tokens:\n";
+		for(vector<string>::iterator it=sToks.begin(); it!=sToks.end(); ++it){
+			cout<<"["<<(*it)<<"] ";
+		}cout<<endl;
+	}
+	string retUpper(string inStr){
 		string upp = inStr;
 		for(string::iterator it = upp.begin(); it!=upp.end(); ++it){
 			*it = std::toupper((unsigned char)(*it));
@@ -162,101 +246,35 @@ string retUpper(string inStr){
 		return upp;
 }
 
-
-class Parser{
-public:
-	int debug; //debug(0 , 1 ,2-show syntax error messages, 3-show enter/leave print statements ,)
-	bool allowNonCaps;
-	vector<string> sToks;
-	int sI;
-	int level;
-	
-	void printSTok(){
-		cout<<"**Scanner Tokens: ";
-		for(vector<string>::iterator it=sToks.begin(); it!=sToks.end(); ++it){
-			cout<<"["<<(*it)<<"] ";
-		}cout<<endl;
-	}
-	
-
-	Parser(){
-		level=0;
-	}
-	Parser(string fileName){
-		level=0;
-		debug=4;
-		allowNonCaps = true;
-		ifstream inFile( fileName.c_str() );
-		while(inFile.good() ){ //assuming infile will be newLine seperated and WILL NOT have <cr><lf> line endings
-			//clear out line variables
-			sToks.clear();
-			sI=0;
-			level=0;
-			string line;
-			
-			//get next line and print, skip if blank line
-			getline(inFile, line);
-			if(line=="" || line=="\r\n" || line=="\n"){continue;} //Skip blank Lines
-			cout<<"\n\n\n******************************\n**Handling Line: "<<line<<endl;
-
-			//get and print tokens
-			sToks=dbTokens(line);
-			printSTok(); cout<<endl;
-			
-			//Parse line tokens
-			bool passedParse = ParseTokens();
-			
-			//Print results
-			cout<<"\n\n"<< (passedParse?"PASSED":"FAILED") << " on input line:\n"<<line<<endl;
-			cout<<"**Done handling line\n****************************\n";
-			
-			//only pause if parse fails
-			if(!passedParse){
-				cout << "Press ENTER to continue";
-				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	bool ParseSingleLine(string line){
+		resetParserVals();
+		sToks=dbTokens(line);	
+			if(debug==1){
+				cout<<endl<<line<<endl;
+			}else if(debug > 1){
+				cout<<"\n\n***************Input Line***************\n***";
+				cout<<line<<endl<<"***"<<endl;
+				cout<<"***";
+				printSTok();
+				cout<<"****************************************\n";
 			}
-		}
+			bool passedParse = ParseTokens();
+			//Print results
+			if(debug>3){ cout<<"****************************************\n"; }
+			if(debug>1){ cout<<"***              "<<(passedParse?"PASSED":"FAILED")<<"              ***\n****************************************\n"; }
+			return passedParse;
 	}
-	
 	bool ParseTokens(){
 		bool passedParse;
-		if(isFWordCommand(sToks[sI])){
+		if(isFCommand()){
 			passedParse = isCommand();
 		}else{
 			passedParse = isQuery();
 		}
 		return passedParse;
 	}
-
-	bool isFWordCommand(string fWord){
-		fWord = (allowNonCaps?retUpper(fWord):fWord);
-		
-		if(fWord=="OPEN"){
-		
-		}else if(fWord=="CLOSE"){
-		
-		}else if(fWord=="WRITE"){
-		
-		}else if(fWord=="EXIT"){
-		
-		}else if(fWord=="SHOW"){
-
-		}else if(fWord=="CREATE"){
-
-		}else if(fWord=="UPDATE"){
-		
-		}else if(fWord=="INSERT"){
-		
-		}else if(fWord=="DELETE" ){
-		
-		}else{
-			return false;
-		}
-		return true;
-	}
-
 	
-	//BEGIN GRAMMAR FUNCTIONS
+	//Grammar Functions:
 	bool isAtomicExpr(){
 	//atomic-expr ::= relation-name | ( expr )
 		enter("isAtomicExpr");
@@ -277,7 +295,6 @@ public:
 		leave("isAtomicExpr");
 		return isAE;
 	}
-	
 	bool isQuery(){
 	//query ::= relation-name <- expr ;
 		enter("isQuery");
@@ -293,7 +310,6 @@ public:
 		leave("isQuery");
 		return isQ;
 	}
-	
 	bool isSelection(){
 	//selection ::= select ( condition ) atomic-expr
 		enter("isSelection");
@@ -315,7 +331,6 @@ public:
 		leave("isSelection");
 		return isSel;
 	}
-	
 	bool isProjection(){
 	// projection ::= project ( attribute-list ) atomic-expr
 		enter("Projection");
@@ -337,7 +352,6 @@ public:
 		leave("Projection");
 		return isProj;
 	}
-	
 	bool isRenaming(){
 	// renaming ::= rename ( attribute-list ) atomic-expr
 		enter("isRenaming");
@@ -359,7 +373,6 @@ public:
 		leave("isRenaming");
 		return isRen;
 	}
-	
 	bool isUnion(){
 	// union ::= atomic-expr + atomic-expr
 		enter("isUnion");
@@ -375,7 +388,6 @@ public:
 		leave("isUnion");
 		return isUn;
 	}
-	
 	bool isProduct(){
 	//product ::= atomic-expr * atomic-expr 
 		enter("isProduct");
@@ -391,7 +403,6 @@ public:
 		leave("isProduct");
 		return isProd;
 	}
-	
 	bool isDifference(){
 	// difference ::= atomic-expr - atomic-expr
 		enter("isDifference");
@@ -407,7 +418,6 @@ public:
 		leave("isDifference");
 		return isDif;
 	}
-	
 	bool isExpr() {
 	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
 		enter("isExpr");
@@ -441,7 +451,6 @@ public:
 		leave("isExpr");
 		return isExp;
 	}
-
 	bool isRelationName(){
 	//relation-name ::= identifier
 		enter("isRelationName");
@@ -449,7 +458,6 @@ public:
 		leave("isRelationName");
 		return isRel;
 	}
-	
 	bool isIdentifier(){
 	//identifier ::= alpha { ( alpha | digit ) }
 		bool isIdent=false;
@@ -471,7 +479,6 @@ public:
 		leave("isIdenfitier");
 		return isIdent;
 	}
-	
 	bool isAttributeList(){
 	//attribute-list ::= attribute-name { , attribute-name } 
 		enter("isAttributeList");
@@ -490,7 +497,6 @@ public:
 		leave("isAttributeList");
 		return isAL;
 	}
-	
 	bool isAttributeName(){
 	//attribute-name ::= identifier
 		enter("isAttributeName");
@@ -499,7 +505,6 @@ public:
 		leave("isAttributeName");
 		return isAttrib;
 	}
-	
 	bool isType(){
 	//type ::= VARCHAR ( integer ) | INTEGER
 		enter("isType");
@@ -531,7 +536,6 @@ public:
 		leave("isType");
 		return isType;
 	}
-	
 	bool isInteger(){
 	//integer ::= digit { digit }
 		enter("isInteger");
@@ -546,12 +550,10 @@ public:
 		leave("isInteger");
 		return isInt;	
 	}
-
 	bool isLiteral(){
 		enter("isLiteral");
 		int literalStartIndex = sI; 
 		int literalEndIndex = sI;
-		
 		bool isLit=false;
 		if(sToks[sI]=="\""){ //Quoted literal
 			sI++; //consume open "
@@ -572,12 +574,9 @@ public:
 			sI++; //consume unquoted literal 
 			isLit=true;
 		}
-		
-		cout<<"LiteralStartIndex:"<<literalStartIndex<<"~~~~LiteralEndIndex:"<<literalEndIndex<<endl;
 		leave("isLiteral");
 		return isLit;
 	}
-	
 	bool isTypedAttributeList(){
 	//typed-attribute-list ::= attribute-name type { , attribute-name type }
 		enter("isTypedAttributeList");
@@ -603,7 +602,6 @@ public:
 		leave("isTypedAttributeList");
 		return isTA;
 	}
-	
 	bool isCondition(){
 	//condition ::= conjunction { || conjunction }
 		enter("isCondition");
@@ -620,7 +618,6 @@ public:
 		leave("isCondition");
 		return isCond;
 	}
-
 	bool isConjunction(){
 	//conjunction ::= comparison { && comparison }
 		enter("isConjunction");
@@ -637,7 +634,6 @@ public:
 		leave("isConjunction");
 		return isConj;
 	}
-
 	bool isComparison(){
 	//comparison ::= operand op operand | ( condition )
 		enter("isComparison");
@@ -664,7 +660,6 @@ public:
 		leave("isComparison");
 		return isComp;
 	}
-
 	bool isOp(){
 	//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
 		enter("isOp");
@@ -692,7 +687,6 @@ public:
 		leave("isOp");
 		return isop;
 	}
-
 	bool isOperand(){
 	//operand ::= attribute-name | literal
 		enter("isOpand");
@@ -705,12 +699,11 @@ public:
 		leave("isOperand");
 		return isOpand;
 	}
-
-	bool isFCommand(){ //Determines if first token matches a Command
+	bool isFCommand(){ 
+	//Determines if first token matches a Command
 		string f = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
 		return ( (f=="OPEN") || (f=="CLOSE") || (f=="WRITE") || (f=="EXIT") || (f=="SHOW") || (f=="CREATE") || (f=="UPDATE") || (f=="INSERT") || (f=="DELETE") );
 	}
-	
 	bool isCommand(){
 	//command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
 		enter("isCommand");
@@ -725,7 +718,6 @@ public:
 		leave("isCommand");
 		return isCmd;
 	}
-
 	bool isOpen(){
 	//open-cmd ::== OPEN relation-name
 		enter("isOpen");
@@ -741,7 +733,6 @@ public:
 		leave("isOpen");
 		return isOpn;
 	}
-	
 	bool isClose(){
 	//close-cmd ::== CLOSE relation-name
 		enter("isClose");
@@ -758,7 +749,6 @@ public:
 		leave("isClose");
 		return isCls;
 	}
-	
 	bool isWrite(){
 	//write-cmd ::== WRITE relation-name
 		enter("isWrite");
@@ -776,7 +766,6 @@ public:
 		leave("isWrite");
 		return isWrt;
 	}
-	
 	bool isExit(){
 	//exit-cmd ::== EXIT
 		enter("isExit");
@@ -789,7 +778,6 @@ public:
 		leave("isExit");
 		return isExt;
 	}
-	
 	bool isShow(){
 	//show-cmd ::== SHOW atomic-expr
 		enter("isShow");
@@ -807,7 +795,6 @@ public:
 		leave("isShow");
 		return isShw;
 	}
-	
 	bool isCreate(){
 	//create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
 		enter("isCreate");
@@ -840,7 +827,6 @@ public:
 												if(sToks[sI]==")"){
 													sI++;
 													isCrt=true;
-													cout<<"xxx Well-formed 'CREATE' command on: "<<relName<<"  ...TypedAttributeListSI("<<typedAttrLstSI<<") TypedAttributeListEI("<<typedAttrLstEI<<")\n";
 												}else{errOut(" Expected closing-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (<attribute-list>\"");}							
 											}else{ errOut(" Error in attribute list after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (\"");}		
 										}else{ errOut(" Expected open-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY\"");}
@@ -855,7 +841,6 @@ public:
 		leave("isCreate");
 		return isCrt;
 	}
-	
 	bool isUpdate(){
 	//update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
 		enter("isUpdate");
@@ -890,7 +875,6 @@ public:
 		leave("isUpdate");
 		return isUpd;
 	}
-	
 	bool isInsert(){
 	// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } ) 
 				//  | INSERT INTO relation-name VALUES FROM RELATION expr
@@ -931,19 +915,16 @@ public:
 								if(sToks[sI]==")"){
 										sI++;
 										isIns=true;
-										cout<<"xxx Well-formed 'INSERT INTO relation-name VALUES FROM ( literal { , literal } )' command"<<endl;
 								}else{errOut("Expected ')' to follow 'INSERT INTO relation-name VALUES FROM ( literal { , literal } '");}
 							}else{errOut("Expected 'RELATION' or '( literal { , literal } )' after \"INSERT INTO <relation-name> VALUES FROM\"");}
 						}else{errOut("Expected 'FROM' after \"INSERT INTO <relation-name> VALUES\"");}
 					}else{errOut("Expected 'VALUES' after \"INSERT INTO <relation-name>\"");}
 				}else{errOut("expected <relation-name> after 'INSERT INTO'");}
 			}else{errOut("expected 'INTO' after 'INSERT'");}		
-			
 		}
 		leave("isInsert");
 		return isIns;	
 	}
-	
 	bool isDelete(){
 	//delete-cmd ::= DELETE FROM relation-name WHERE condition
 		enter("isDelete");
@@ -969,39 +950,81 @@ public:
 		return isDel;
 	}
 	
-	
-	//Debug Functions
+	//Debug Functions:
 	void errOut(string s) {
-		if(debug>1){
+		if(debug>2){
 			cout<<"\n*** ERROR: "<<s<<endl;
 		}	
 	}
 	void enter(string name) {
-		spaces(level++);
-		if(debug>2){
+		if(debug>3){
+			spaces(level++);
 			cout<<"+-"<<name<<": Enter, \t";
 			cout<<"Tok == "<<sToks[sI]<<endl;
 		}
 	}
 	void leave(string name) {
-		spaces(--level);
-		if(debug>2){
+		if(debug>3){
+			spaces(--level);
 			cout<<"+-"<<name<<": Leave, \t";
 			cout<<"Tok == "<<sToks[sI]<<endl;
 		}
 	}
 	void spaces(int local_level) {
-		while (local_level-- > 0)
-			cout<<"| ";
+		if(debug>3){
+			while (local_level-- > 0) {cout<<"| ";}
+		}
 	}
 };
 
 int main(){
-	cout<<"-Starting Parser Main\n";
-	Parser* myP = new Parser("parser_milestone_good_inputs.txt");
-	cout<<"-Exiting Parser Main\n";
-	cout << "Press ENTER to quit";
-	cin.ignore((numeric_limits<streamsize>::max)(), '\n');
+	Parser myP(2,true,true);
+	string sampleProg="SHOW set_diff_test; rename_test <- rename (v_fname, v_lname, v_personality, v_bounty) enemies  ; INSERT INTO lifeforms VALUES FROM (\"Martian\", \"Mars\"); UPDATE dots SET x1 = 0 WHERE x1 < 0; INSERT INTO dots VALUES FROM (-1, 0, 20);";
+	string sampleSingle="advanced_query <-       project  (x   )  (select (   y == y2) ( points   * dots_to_points));";
+	string txtFileName = "parser_milestone_good_inputs.txt";
+	
+	
+	cout<<"Parser can be called with a with a single Query/Command, a Program Block, or even be passed a text file to read from.\n";
+	cout<<"Additionally, the parser allows for some level of customization.\n";
+	cout<<"*The caller can choose to enforce all uppercase commands (such as SELECT) or allow for mix-case.\n";
+	cout<<"*The caller can enable the parser to pause (wait for enter key) between parses, so the caller may examine the results.\n";
+	cout<<"*The caller may also specify different levels of verbosity (debug argument) from silent(0) to extra-verbose(4).\n";
+	cout<<"***Note: If caller is interfacing code with parser, be sure to set Debug=0; and HaltBetweenExec=false;\n\n";
+	cout<<"So let's pass a single Command to be parsed!\nPress ENTER to continue\n"; cin.ignore((numeric_limits<streamsize>::max)(), '\n');
+	int result = myP.ParseProgramBlock(sampleSingle);
+	cout<<(result==0?"Nice Job, Single Query Parsed!":"Boo, sample single line failed")<<endl<<endl;
+	
+	
+	cout<<"Now lets parse a block of Commands from a single string...\nPress ENTER to continue\n"; cin.ignore((numeric_limits<streamsize>::max)(), '\n');
+	result = myP.ParseProgramBlock(sampleProg);
+	if(result==-1){
+		cout<<"Unknown Error"<<endl;
+	}else{
+		cout<<"Number of Failed Statements: "<<result<<endl;
+	}
+	
+	cout<<"You can also pass parser a textfile to read Commands from. Check out the parser main to see how!\n\n\n";
+	//result = myP.ParseTxtFile(txtFileName);
+	//if(result==-1){
+	//	cout<<"Error Opening input file"<<endl;
+	//}else{
+	//	cout<<"\n\nNumber of Failed Statements: "<<result<<endl;
+	//}
+	
+	Parser par(0,false,true);
+	string usrCmd="";
+	cout<<"Neat! Wanna try some commands? When you get bored, just enter 'leave' to exit.\n\n";
+	while(1){
+		cout<<"::";
+		cin>>usrCmd;
+		cout<<"~"<<usrCmd<<endl;
+		if(usrCmd=="leave"){break;}
+		int fail = par.ParseProgramBlock(usrCmd);
+		cout<<"~"<<(fail==0?"PASSED":"FAILED")<<endl;
+	}
+		
+	cout<<"\n\nThanks and gigem!"<<endl<<endl;
+	cout<<"Exiting...\n";
 	return 0;
 }
 
