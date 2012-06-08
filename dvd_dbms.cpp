@@ -4,7 +4,7 @@
 #include <string>
 #include <limits>
 #include <time.h>
-#include <dbparser.h>
+//#include <dbparser.h>
 
 using namespace std;
 void centerstring(char* s)
@@ -28,6 +28,7 @@ void title(char* currentTitle){
 
 string primaryMenu(char* primaryTitle){
 	int selection=NULL;
+	cin.clear();
 	title(primaryTitle);
 	cout<<"*(1)Customers"<<endl;
 	cout<<"*\tAdd new customer"<<endl;
@@ -83,7 +84,7 @@ string customerMenu(){
 	else if(selection==5)return "searchCustomer";
 	else if(selection==6)return "dvdMenu";
 	else if(selection==7)return "rentalMenu";
-	else if(selection==0)return "exit";
+	else if(selection==0)return "close application";
 	else return "primaryMenu";
 }
 string dvdMenu(){
@@ -147,7 +148,7 @@ string rentalMenu(){
 	else if(selection==4)return "checkOutDvd";
 	else if(selection==5)return "checkInDvd";
 	else if(selection==6)return "listRentalsByCustomer";
-	else if(selection==0)return "exit";
+	else if(selection==0)return "close application";
 	else return "primaryMenu";
 }
 string addNewCustomerMenu(){
@@ -162,15 +163,19 @@ string addNewCustomerMenu(){
 	userId=firstName+lastName+itoa(seconds,id,10);
 	cout<<"*Customer's user ID will be:"<<userId<<endl;
 	cout<<"*1 to accept above information, 5 to change, any key to go back:";
-//	do{
+	do{
 		cin>>choice;
-//	}while(choice!='1'||choice!='5');
-	if(choice=='1')
-		Parser("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
-	else if(choice=='1')
-		addNewCustomerMenu();
+	}while(choice!='1'&&choice!='5');
+	if(choice=='1'){
+		cout<<"INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");"<<endl;
+		//Parser("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
+		system("pause");
+	}
+	else if(choice=='5')
+		return "addNewCustomerMenu";
 	else
 		return "customerMenu";
+	return "primaryMenu";
 }
 string removeCustomerMenu(){
 	return NULL;
@@ -255,10 +260,10 @@ void selectionProcessor(){
 		else if(choice=="listRentalsByCustomer")
 			choice=primaryMenu("not yet implemented");
 		else{
-			choice="";
-			primaryMenu("DVD Database Management System");
+			choice=primaryMenu("DVD Database Management System");
 		}
 	}
+	system("exit");
 }
 
 int main(){
