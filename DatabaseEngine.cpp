@@ -12,6 +12,8 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include "Parser.h"
+#include <queue>
 
 using namespace std;
 
@@ -46,6 +48,13 @@ string intToString(int number) {
 	stringstream ss;
 	ss << number;
 	return ss.str();
+}
+
+int stringToInt(string str){
+	int i;
+	stringstream ss(str);
+	ss>>i;
+	return i;
 }
 
 class dataType {
@@ -183,6 +192,9 @@ public:
 class Relation {
 
 public:
+
+	vector<string> primaryKeys; //attribute names
+
 
 	string name;
 	map<string, Attribute> columns;
@@ -551,3 +563,137 @@ int main() {
 
 	return 0;
 }
+
+
+
+
+map<string,Relation*> relsInMem;	//need to release memory on exit
+
+
+
+string ExecuteCommand(string Command){
+	//Create Parser Instance with Debug=0; (no output, silent)
+	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
+	int fails = parserInst.ParseProgramBlock(Command);
+	if(fails!=0){
+		return "Input is not syntactically correct, returning"; 
+	}
+	
+	int tI=0;
+	
+	vector<string> toks = parserInst.getTokens(Command);
+	if(toks[tI] == "CREATE"){
+		string relName = toks[2];
+		queue<string> attrNames;
+		queue<int> attrTypes;
+		//typed-attribute-list will always start at index=4 (but open paren @ 3) and end when a close-paren follows a data type (instead of a comma)
+		int alI=3; //attribute-list-Index (alI)
+		do{
+			alI++;
+			attrNames.push(toks[alI]);
+			alI++;
+			string typeName = toks[alI];
+			if(typeName=="VARCHAR"){
+				//cout<<"VC"<<endl;
+				alI+=2;
+				int len = stringToInt(toks[alI]);
+				//cout<<len<<endl;
+				attrTypes.push(len);
+				alI+=2;			
+			}else if(typeName=="INTEGER"){
+				attrTypes.push(0);
+				alI++;
+			}else{
+				cerr<<"Something terrible happened in ExecuteCommand-Create-TypedAttributeList\n";
+			}
+		}while(toks[alI]==",");
+		alI+=3; //move index to open-paren of 'primary key' attribute-list
+		queue<string> pkNames;
+		do{
+			alI++;
+			pkNames.push(toks[alI]);
+			alI++;
+			
+		}while(toks[alI]==",");
+		
+
+		Relation* newRel = new Relation(relName);
+		
+		while(!attrNames.empty()){
+			dataType dt((attrTypes.front()==0?true:false),attrTypes.front());
+			
+			newRel->addAttribute(attrNames.front(),dt);
+			attrNames.pop();
+			attrTypes.pop();
+			
+		}
+		while(!pkNames.empty()){
+			newRel->primaryKeys.push_back(pkNames.front());
+			pkNames.pop();
+		}
+		
+		relsInMem.insert( pair<string,Relation*>(relName,newRel) );
+		
+		string crRel = relsInMem[relName]->stringify();
+		return crRel;
+	}
+	else if(toks[tI] == "INSERT"){
+		string relName = toks[2];
+		vector<string> vals;
+		int intInd=5;
+		do{
+			intInd++;
+			if(toks[intInd]=="\""){
+				intInd++;
+				vals.push_back(toks[intInd]);
+				intInd+=2;
+			}else if(toks[intInd]=="-"){
+				intInd++;
+				vals.push_back("-"+toks[intInd]);
+				intInd++;
+			}else{
+				vals.push_back(toks[intInd]);
+				intInd++;
+			}
+		}while(toks[intInd]==",");
+		relsInMem[relName]->addTuple(vals);
+		return relsInMem[relName]->stringify();
+	}
+	
+	
+	
+	return "NULLL";
+}
+
+
+
+int main()2{
+	
+	cout<<"trying create:"<<endl;
+	string res = ExecuteCommand("CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);");
+	relsInMem["animals"]->print();
+	cout<<"trying insert:"<<endl;
+	res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Joe\", \"cat\", 4);");
+	relsInMem["animals"]->print();
+	
+	
+	
+	cout<<"Freeing Memory:\n";
+	cout<<"--Relations:\n";
+	for( map<string,Relation*>::iterator relIt= relsInMem.begin(); relIt != relsInMem.end(); ++relIt){
+		cout<<(*relIt).first<<" @ "<<relIt->second<<endl;
+		delete relIt->second;
+	}
+	//cout<<"--Relations:";
+	
+	cout << "Press ENTER to continue";
+	cin.ignore((numeric_limits<streamsize>::max)(), '\n');
+	
+
+	return 0;
+}
+
+
+
+
+
