@@ -1,0 +1,30 @@
+﻿Build started 6/8/2012 5:29:03 PM.
+     1>Project "H:\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\dbapp.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\dvd_dbms.cpp
+         dvd_dbms.cpp
+     1>h:\csce315project\dvd_dbms.cpp(159): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
+     1>h:\csce315project\dvd_dbms.cpp(159): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
+     1>h:\csce315project\dvd_dbms.cpp(273): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>h:\csce315project\dvd_dbms.cpp(322): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
+     1>h:\csce315project\dvd_dbms.cpp(322): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
+     1>h:\csce315project\dvd_dbms.cpp(427): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>h:\csce315project\dvd_dbms.cpp(487): warning C4390: ';' : empty controlled statement found; is this the intent?
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\CSCE315Project\dbapp\Debug\dbapp.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\dbapp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"H:\CSCE315Project\dbapp\Debug\dbapp.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\CSCE315Project\dbapp\Debug\dbapp.lib" /MACHINE:X86 Debug\dvd_dbms.obj
+         LINK : H:\CSCE315Project\dbapp\Debug\dbapp.exe not found or not built by the last incremental link; performing full link
+         dbapp.vcxproj -> H:\CSCE315Project\dbapp\Debug\dbapp.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"H:\CSCE315Project\dbapp\Debug\dbapp.exe;#1" /manifest Debug\dbapp.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "Debug\dbapp.unsuccessfulbuild".
+         Touching "Debug\dbapp.lastbuildstate".
+     1>Done Building Project "H:\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.86
