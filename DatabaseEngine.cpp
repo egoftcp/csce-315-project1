@@ -20,6 +20,19 @@ void wait() {
 	cin >> a;
 }
 
+bool isNum(char input) {
+	if(input == '-' || input == '0' ||
+	   input == '1' || input == '2' ||
+	   input == '3' || input == '4' ||
+	   input == '5' || input == '6' ||
+	   input == '7' || input == '8' ||
+	   input == '9' ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 string intToString(int number) {
 	stringstream ss;
 	ss << number;
@@ -76,6 +89,8 @@ public:
 	string name;
 	vector<string> cells;
 
+	Attribute() {}
+	
 	Attribute(string input_name) {
 		name = input_name;
 	}
@@ -186,16 +201,40 @@ public:
 		return true;  //wip
 	}
 	
-	
+	/*
 	void addAttribute(string name) {
 		Attribute attr(name);
 		columns.insert( pair<string,Attribute>(name, attr) );
-	}
+	}*/
 	
 	void addAttribute(string name, dataType type) {
+		//cout << name << '\t' << type.getType() << '\n';
+		
 		Attribute attr(name, type);
-		columns.insert( pair<string,Attribute>(name, attr) );
+		//columns[name]= &attr;
+		//Attribute* attr = new Attribute(name, type);
+		//columns[name]= &attr;
+		
+		pair< map<string,Attribute>::iterator, bool > ret;
+		
+		ret = columns.insert( pair<string,Attribute>(name, attr) );
+		
+		/*
+		if(ret.second==false){
+			cout<<">>>>>>> Element already existed\n";
+		}else{
+			cout<<">>>>>>>> New element Inserted\n";
+		}
+		
+		cout<<">><><><>< map[name]:"<<columns[name].name<<":"<<columns[name].getType()<<endl;	
+		*/
+		
 	}
+	
+	/*
+	void addAttribute(Attribute attr) {
+		//columns.insert(attr);
+	}*/
 	
 	void deleteAttribute(string name) {
 		columns.erase(name);
@@ -275,8 +314,6 @@ public:
 		table = table + "\n";
 		
 		return table;
-		//Idea behind this is to convert the relation into a string
-		//The string can then be written to a file
 	}
 	
 	
@@ -301,6 +338,95 @@ public:
 		}
 		cout << '\n';
 	}
+	
+	void parseHeader(string line) {
+		//dataType type;
+		string temp = "";
+		string name = "";
+		string varCharLength = "";
+	
+		for(int i = 0; i < line.size(); i++) {
+			if( isalpha(line[i]) ) {
+				while( isalpha(line[i]) ) {
+					name = name + line[i];
+					i++;
+				}
+				//
+			
+				i++;
+				while( isalpha(line[i]) ) {
+					temp = temp + line[i];
+					i++;
+				}
+			
+				if( strcmp(temp.c_str(), "INTEGER") == 0) {
+					dataType type(true);
+					//Attribute attr(name, type);
+					addAttribute(name, type);
+					//attr.print();
+				} else {
+					if( strcmp (temp.c_str(), "VARCHAR") == 0 ) {
+						i++;
+						while( isNum(line[i]) ) {
+							varCharLength = varCharLength + line[i];
+							i++;
+						}
+						//
+						dataType type(atoi(varCharLength.c_str()));
+						//Attribute attr(name, type);
+						addAttribute(name, type);
+						//attr.print();
+					} else { cout << '[' + i + "] " "ERROR IN PARSING\n"; }
+				}
+			
+				//Attribute attr(name, type);
+				//attr.print();
+				temp = "";
+			}
+			i = i++;
+			name = "";
+			varCharLength = "";
+		}
+	}
+	
+	void parseTuples(string line) {
+		vector<string> cells;
+		string temp = "";
+		for(int i = 0; i < line.size(); i++) {
+			if( line[i] == '\"' ) {
+				i++;
+				while(line[i] != '\"' ) {
+					temp = temp + line[i];
+					i++;
+				}
+				//cout << "VARCHAR -> " << temp << '\n';
+				cells.push_back(temp);
+				temp = "";
+			} else {
+				if( isNum(line[i]) ) {
+					while(isNum(line[i])) {
+						temp = temp + line[i];
+						i++;
+					}
+					//cout << "INTEGER -> " << temp << '\n';
+					cells.push_back(temp);				
+					temp = "";
+				}
+			}
+			if(line[i] == ')') {
+				break;
+			}
+		}
+		/*
+		for(int i = 0; i < cells.size(); i++) {
+			cout << i << '\t' << cells[i] << '\n';
+		}*/
+		
+		//wait();
+		
+		addTuple(cells);
+	}
+	
 };
 
 class Domain {
@@ -323,22 +449,9 @@ void writeToFile(DB_type writeFrom) {
 	
 }
 
-bool isNum(char input) {
-	if(input == '-' || input == '0' ||
-	   input == '1' || input == '2' ||
-	   input == '3' || input == '4' ||
-	   input == '5' || input == '6' ||
-	   input == '7' || input == '8' ||
-	   input == '9' ) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-
+/*
 void parseHeader(string line, Relation table) {
-	//dataType type;	
+	//dataType type;
 	string temp = "";
 	string name = "";
 	string varCharLength = "";
@@ -374,12 +487,13 @@ void parseHeader(string line, Relation table) {
 					//Attribute attr(name, type);
 					table.addAttribute(name, type);
 					//attr.print();
-				} else { cout << "ERROR IN PARSING\n"; }
+				} else { cout << '[' + i + "] " "ERROR IN PARSING\n"; }
 			}
 			
 			//Attribute attr(name, type);
 			//attr.print();
 			temp = "";
+			cout << "Size: " << table.columns.size() << '\n';
 		}
 		i = i++;
 		name = "";
@@ -414,7 +528,7 @@ void parseTuples(string line, Relation table) {
 			break;
 		}
 	}
-}
+}*/
 
 Relation readFromFile(string input) {
 
@@ -429,11 +543,11 @@ Relation readFromFile(string input) {
 	string line;
 
 	getline(inputFile, line);
-	parseHeader(line, importedRelation);
+	importedRelation.parseHeader(line);
 	
-	while(inputFile.good()) {
+	while(!inputFile.eof()) {
 		getline(inputFile, line);
-		parseTuples(line, importedRelation);
+		importedRelation.parseTuples(line);
 	}
 	
 	inputFile.close();
@@ -447,11 +561,10 @@ int main() {
 
 	Relation table = readFromFile("test.db");
 
+	//Relation table("test");
+	
 	dataType charType(false, 20);
 	dataType intType(true);
-
-	//cout << table.columns.size(); 
-	
 	
 	//table.addAttribute("First", charType);
 	//table.addAttribute("Second", intType);
@@ -477,14 +590,9 @@ int main() {
 	
 	//cout << table.stringify();
 	
-	writeToFile<Relation>(table);
-	
-	string testTuples = "(\"hello\", \"there\", 324)"; 
-	string testHeader = "First VARCHAR(20), Second INTEGER, Third VARCHAR(20))";
-	
-	//parseTuples(testTuples, table);
-	
-	parseHeader(testHeader, table);
+	//writeToFile<Relation>(table);
+		
+	//cout << ">>>> " << table.columns.size() << '\n';
 	
 	//table.deleteAttribute("Second");
 	
