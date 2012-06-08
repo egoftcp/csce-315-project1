@@ -153,14 +153,15 @@ string rentalMenu(){
 }
 string addNewCustomerMenu(){
 	time_t seconds = time(NULL);
-	int selection=NULL,idNum=seconds;
+	int selection=NULL;
 	string userId,firstName,lastName,phoneNumber;
 	char id[21],choice;
+	itoa(seconds,id,10);
 	title("Add New Customer");
 	cout<<"*Enter Customer's First Name:";cin>>firstName;
 	cout<<"*Enter Customer's Last Name:";cin>>lastName;
 	cout<<"*Enter Customer's Phone Number:";cin>>phoneNumber;
-	userId=firstName+lastName+itoa(seconds,id,10);
+	userId=firstName.substr(0,3)+lastName.substr(0,3)+id[5]+id[7]+id[8];
 	cout<<"*Customer's user ID will be:"<<userId<<endl;
 	cout<<"*1 to accept above information, 5 to change, any key to go back:";
 	do{
@@ -190,7 +191,30 @@ string searchCustomerMenu(){
 	return NULL;
 }
 string addNewDvdMenu(){
-	return NULL;
+	time_t seconds = time(NULL);
+	int selection=NULL;
+	string inventoryNumber,dvdId,dvdTitle;
+	char id[21],choice;
+	itoa(seconds,id,10);
+	title("Add New DVD");
+	cout<<"*Enter DVD ID:";cin>>dvdId;
+	cout<<"*Enter DVD Title:";cin.clear();cin.sync();getline(cin,dvdTitle);
+	inventoryNumber=id;
+	cout<<"*Inventory Number will be:"<<inventoryNumber<<endl;
+	cout<<"*1 to accept above information, 5 to change, any key to go back:";
+	do{
+		cin>>choice;
+	}while(choice!='1'&&choice!='5');
+	if(choice=='1'){
+		cout<<"INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");"<<endl;
+		//Parser("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+title+"\");");
+		system("pause");
+	}
+	else if(choice=='5')
+		return "addNewDvdMenu";
+	else
+		return "dvdMenu";
+	return "primaryMenu";
 }
 string removeNewDvdMenu(){
 	return NULL;
@@ -240,7 +264,7 @@ void selectionProcessor(){
 		else if(choice=="searchCustomer")
 			choice=primaryMenu("not yet implemented");
 		else if(choice=="addNewDvd")
-			choice=primaryMenu("not yet implemented");
+			choice=addNewDvdMenu();
 		else if(choice=="removeDvd")
 			choice=primaryMenu("not yet implemented");
 		else if(choice=="updateDvd")
