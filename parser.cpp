@@ -777,9 +777,8 @@ public:
 			}else{errOut("Expected relation-name after UPDATE");}
 		}
 
-		// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } )
-			// | INSERT INTO relation-name VALUES FROM RELATION expr
-
+		// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } ) 
+					//  | INSERT INTO relation-name VALUES FROM RELATION expr
 		else if(fWord=="INSERT"){
 			sI++;
 			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'INTO'
@@ -826,8 +825,23 @@ public:
 			}else{errOut("expected 'INTO' after 'INSERT'");}		
 		}
 		
+		//delete-cmd ::= DELETE FROM relation-name WHERE condition
 		else if(fWord=="DELETE" ){
-		
+			sI++;
+			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'FROM'
+			if(sToks[sI]=="FROM"){
+				sI++;
+				if(isRelationName()){
+					sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'WHERE'
+					if(sToks[sI]=="WHERE"){
+						sI++;
+						if(isCondition()){
+							isCmd=true;
+							cout<<"xxx Well-formed 'DELETE' command"<<endl;;
+						}else{errOut("Expected <condition> to follow \"DELETE FROM relation-name WHERE\"");}
+					}else{errOut("Expected \"WHERE\" to follow \"DELETE FROM <relation-name>\"");	}
+				}else{errOut("Expected <relation-name> to follow \"DELETE FROM\"");	}
+			}else{errOut("Expected \"FROM\" to follow \"DELETE\"");}
 		}
 		
 		//if(sToks[sI]!=";"){ isCmd=false;} 
