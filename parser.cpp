@@ -711,8 +711,9 @@ public:
 		return ( (f=="OPEN") || (f=="CLOSE") || (f=="WRITE") || (f=="EXIT") || (f=="SHOW") || (f=="CREATE") || (f=="UPDATE") || (f=="INSERT") || (f=="DELETE") );
 	}
 	
-	//command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
 	bool isCommand(){
+	//command ::= ( open-cmd | close-cmd | write-cmd | exit-cmd | show-cmd | create-cmd | update-cmd | insert-cmd | delete-cmd ) ;
+		enter("isCommand");
 		bool isCmd = false;
 		if(isFCommand()){
 			if(isOpen() || isClose() || isWrite() || isExit() || isShow() || isCreate() || isUpdate() || isInsert() || isDelete()){
@@ -721,87 +722,101 @@ public:
 				}else{errOut("Expected ; after command!");}
 			}
 		}
+		leave("isCommand");
 		return isCmd;
-			
-		// open-cmd ::== OPEN relation-name
-		if(fWord=="OPEN"){
-			enter("OPEN");
+	}
+
+	bool isOpen(){
+	//open-cmd ::== OPEN relation-name
+		enter("isOpen");
+		bool isOpn=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="OPEN"){
 			sI++;
 			if(isRelationName()){
 				string relName=sToks[sI-1];
-				if(sToks[sI]==";"){
-					isCmd=true;
-					cout<<"xxx Well-formed Command to 'OPEN' relation with name '"<<relName<<"'\n";
-					//TODO: DBENG: this is where we can call dbEng.Open(relName);
-				}else{ errOut("Expected semi-colon (';') at end of \"OPEN\" command."); }
+				isOpn=true;
 			}else{ errOut("Expected 'relation-name' after \"OPEN\" command."); }
-			leave("OPEN");
 		}
-		
-		// close-cmd ::== CLOSE relation-name
-		else if(fWord=="CLOSE"){
-			enter("CLOSE");
+		leave("isOpen");
+		return isOpn;
+	}
+	
+	bool isClose(){
+	//close-cmd ::== CLOSE relation-name
+		enter("isClose");
+		bool isCls=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="CLOSE"){
 			sI++;
 			if(isRelationName()){
 				string relName=sToks[sI-1];
-				if(sToks[sI]==";"){
-					isCmd=true;
-					cout<<"xxx Well-formed Command to 'CLOSE' relation with name '"<<relName<<"'\n";
+					isCls=true;
 					//TODO: DBENG: this is where we can call dbEng.CLOSE(relName);
-				}else{ errOut("Expected semi-colon (';') at end of \"CLOSE\" command."); }
 			}else{ errOut("Expected 'relation-name' after \"CLOSE\" command."); }
-			leave("CLOSE");
 		}
-		
-		//write-cmd ::== WRITE relation-name
-		else if(fWord=="WRITE"){
-			enter("WRITE");
+		leave("isClose");
+		return isCls;
+	}
+	
+	bool isWrite(){
+	//write-cmd ::== WRITE relation-name
+		enter("isWrite");
+		bool isWrt=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);	
+		if(sToks[sI]=="WRITE"){
 			sI++;
 			if(isRelationName()){
 				string relName=sToks[sI-1];
-				if(sToks[sI]==";"){
-					isCmd=true;
-					cout<<"xxx Well-formed Command to 'WRITE' relation with name '"<<relName<<"'\n";
+					isWrt=true;
 					//TODO: DBENG: this is where we can call dbEng.WRITE(relName);
-				}else{ errOut("Expected semi-colon (';') at end of \"WRITE\" command."); }
 			}else{ errOut("Expected 'relation-name' after \"WRITE\" command."); }
 			leave("WRITE");
 		}
-		
-		// exit-cmd ::== EXIT
-		else if(fWord=="EXIT"){
-			enter("EXIT");
+		leave("isWrite");
+		return isWrt;
+	}
+	
+	bool isExit(){
+	//exit-cmd ::== EXIT
+		enter("isExit");
+		bool isExt=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="EXIT"){
 			sI++;
-			if(sToks[sI]==";"){
-				isCmd=true;
-				cout<<"xxx Well-formed Command to 'EXIT'\n";
-				//TODO: DBENG: this is where we can call dbEng.EXIT();
-			}else{ errOut("Expected semi-colon (';') at end of \"EXIT\" command."); }
-			leave("EXIT");
+			isExt=true;
 		}
-
-		// show-cmd ::== SHOW atomic-expr		
-		else if(fWord=="SHOW"){ //TODO: Need to implement isExpr() from isAtomicExpr()
-			enter("SHOW");
+		leave("isExit");
+		return isExt;
+	}
+	
+	bool isShow(){
+	//show-cmd ::== SHOW atomic-expr
+		enter("isShow");
+		bool isShw=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="SHOW"){
 			sI++;
 			int atomicExprSI=sI;
 			if(isAtomicExpr()){
 				int atomicExprEI=sI-1;
-				if(sToks[sI]==";"){
-					isCmd=true;
-					cout<<"xxx Well-formed Command to 'SHOW' atomic-expression. atomicExpStartI("<<atomicExprSI<<") aExpEndI("<<atomicExprEI<<")\n"; //<<atomicExpr<<"'\n";
+					isShw=true;
 					//TODO: DBENG: this is where we can call dbEng.atomicExp(atomicExpr);  sToks[cmdSi] sToks[sI-1]
-				}else{ errOut("Expected semi-colon (';') at end of \"SHOW\" command."); }
 			}else{ errOut("Expected 'atomic-expression' after \"SHOW\" command."); }
-			leave("SHOW");
 		}
-		
-		// create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
-		else if(fWord=="CREATE"){
-			enter("CREATE");
+		leave("isShow");
+		return isShw;
+	}
+	
+	bool isCreate(){
+	//create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
+		enter("isCreate");
+		bool isCrt=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="CREATE"){
 			sI++;
-			string sWord = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-			if(sWord == "TABLE"){
+			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+			if(sToks[sI] == "TABLE"){
 				sI++;
 				if(isRelationName()){
 					string relName=sToks[sI-1];
@@ -824,7 +839,7 @@ public:
 											if(isAttributeList()){
 												if(sToks[sI]==")"){
 													sI++;
-													isCmd=true;
+													isCrt=true;
 													cout<<"xxx Well-formed 'CREATE' command on: "<<relName<<"  ...TypedAttributeListSI("<<typedAttrLstSI<<") TypedAttributeListEI("<<typedAttrLstEI<<")\n";
 												}else{errOut(" Expected closing-paren after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (<attribute-list>\"");}							
 											}else{ errOut(" Error in attribute list after \"CREATE TABLE "+relName+" ( <typed-attribute-list> ) PRIMARY KEY (\"");}		
@@ -836,13 +851,17 @@ public:
 					}else{errOut("After \"CREATE TABLE "+relName+"\", Expected open-paren then typed-attribute-list. Did not find open-paren");}
 				}else{ errOut("Expected 'relation-name' after \"CREATE TABLE\" command."); }
 			}else{errOut("Expected \"TABLE\" to follow \"CREATE\"");}
-			leave("CREATE");
 		}
-		
-		//UPDATE dots SET x1 = 0 WHERE x1 < 0;
-		//update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
-		else if(fWord=="UPDATE"){
-			enter("UPDATE");
+		leave("isCreate");
+		return isCrt;
+	}
+	
+	bool isUpdate(){
+	//update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
+		enter("isUpdate");
+		bool isUpd=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="UPDATE"){
 			sI++;
 			if(isRelationName()){
 				string relName=sToks[sI-1];
@@ -859,7 +878,7 @@ public:
 								if(sToks[sI]=="WHERE"){
 									sI++;
 									if(isCondition()){
-										isCmd=true;
+										isUpd=true;
 									}else{errOut("error in condition");}
 								}else{errOut("expected \"WHERE\"");}
 							}else{errOut("Error in literal");}						
@@ -868,10 +887,17 @@ public:
 				}else{errOut("Expected \"SET\" after \"UPDATE "+relName+"\"");}
 			}else{errOut("Expected relation-name after UPDATE");}
 		}
-
-		// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } ) 
-					//  | INSERT INTO relation-name VALUES FROM RELATION expr
-		else if(fWord=="INSERT"){
+		leave("isUpdate");
+		return isUpd;
+	}
+	
+	bool isInsert(){
+	// insert-cmd ::= INSERT INTO relation-name VALUES FROM ( literal { , literal } ) 
+				//  | INSERT INTO relation-name VALUES FROM RELATION expr
+		enter("isInsert");
+		bool isIns=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="INSERT"){
 			sI++;
 			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'INTO'
 			if(sToks[sI]=="INTO"){
@@ -889,7 +915,7 @@ public:
 								sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'RELATION' token
 								sI++; //consume 'RELATION'
 								if(isExpr()){
-									isCmd=true;
+									isIns=true;
 								}else{errOut("Expected expression to follow \"INSERT INTO relation-name VALUES FROM RELATION\"");}
 							}else if(sToks[sI]=="("){
 								//This is the < VALUES FROM (literal{,literal}) > case of 'INSERT'
@@ -899,12 +925,12 @@ public:
 										sI++;
 										if(isLiteral()){
 											; //TODO: POSSIBILITY: can handle individuals literals here.
-										}else{isCmd=false; errOut("Expected Literal to follow ',' in \"INSERT INTO relation-name VALUES FROM ( literal { , literal } )\"");}
+										}else{isIns=false; errOut("Expected Literal to follow ',' in \"INSERT INTO relation-name VALUES FROM ( literal { , literal } )\"");}
 									}
 								}
 								if(sToks[sI]==")"){
 										sI++;
-										isCmd=true;
+										isIns=true;
 										cout<<"xxx Well-formed 'INSERT INTO relation-name VALUES FROM ( literal { , literal } )' command"<<endl;
 								}else{errOut("Expected ')' to follow 'INSERT INTO relation-name VALUES FROM ( literal { , literal } '");}
 							}else{errOut("Expected 'RELATION' or '( literal { , literal } )' after \"INSERT INTO <relation-name> VALUES FROM\"");}
@@ -912,10 +938,18 @@ public:
 					}else{errOut("Expected 'VALUES' after \"INSERT INTO <relation-name>\"");}
 				}else{errOut("expected <relation-name> after 'INSERT INTO'");}
 			}else{errOut("expected 'INTO' after 'INSERT'");}		
+			
 		}
-		
-		//delete-cmd ::= DELETE FROM relation-name WHERE condition
-		else if(fWord=="DELETE" ){
+		leave("isInsert");
+		return isIns;	
+	}
+	
+	bool isDelete(){
+	//delete-cmd ::= DELETE FROM relation-name WHERE condition
+		enter("isDelete");
+		bool isDel=false;
+		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		if(sToks[sI]=="DELETE"){
 			sI++;
 			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'FROM'
 			if(sToks[sI]=="FROM"){
@@ -925,160 +959,14 @@ public:
 					if(sToks[sI]=="WHERE"){
 						sI++;
 						if(isCondition()){
-							isCmd=true;
-							cout<<"xxx Well-formed 'DELETE' command"<<endl;;
+							isDel=true;
 						}else{errOut("Expected <condition> to follow \"DELETE FROM relation-name WHERE\"");}
 					}else{errOut("Expected \"WHERE\" to follow \"DELETE FROM <relation-name>\"");	}
 				}else{errOut("Expected <relation-name> to follow \"DELETE FROM\"");	}
 			}else{errOut("Expected \"FROM\" to follow \"DELETE\"");}
 		}
-		
-		//if(sToks[sI]!=";"){ isCmd=false;} 
-		
-		else{isCmd=false;}
-		if(!isCmd){sI=cmdSi;}
-		return isCmd;
-	}
-
-	bool isOpen(){
-	//open-cmd ::== OPEN relation-name
-		enter("OPEN");
-		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="OPEN"){
-			sI++;
-			if(isRelationName()){
-				string relName=sToks[sI-1];
-				isOpn=true;
-			}else{ errOut("Expected 'relation-name' after \"OPEN\" command."); }
-		}
-		leave("OPEN");
-		return isOpn;
-	}
-	
-	bool isClose(){
-	// close-cmd ::== CLOSE relation-name
-		enter("CLOSE");
-		bool isCls=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="CLOSE"){
-			sI++;
-			if(isRelationName()){
-				string relName=sToks[sI-1];
-					isCls=true;
-					//TODO: DBENG: this is where we can call dbEng.CLOSE(relName);
-			}else{ errOut("Expected 'relation-name' after \"CLOSE\" command."); }
-		}
-		leave("CLOSE");
-		return isCls;
-	}
-	
-	bool isWrite(){
-		enter("WRITE");
-		bool isWrt=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		
-		if(sToks[sI]=="WRITE"){
-			sI++;
-			if(isRelationName()){
-				string relName=sToks[sI-1];
-					isWrt=true;
-					//TODO: DBENG: this is where we can call dbEng.WRITE(relName);
-			}else{ errOut("Expected 'relation-name' after \"WRITE\" command."); }
-			leave("WRITE");
-		}
-		leave("WRITE");
-		return isWrt;
-	}
-	
-	bool isExit(){
-		enter("OPEN");
-		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="OPEN"){
-			sI++;
-			
-			
-			
-			
-		}
-		leave("OPEN");
-		return isOpn;
-	}
-	
-	bool isShow(){
-		enter("OPEN");
-		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="OPEN"){
-			sI++;
-			
-			
-			
-			
-		}
-		leave("OPEN");
-		return isOpn;
-	}
-	
-	bool isCreate(){
-		enter("OPEN");
-		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="OPEN"){
-			sI++;
-			
-			
-			
-			
-		}
-		leave("OPEN");
-		return isOpn;
-	}
-	
-	bool isUpdate(){
-		enter("OPEN");
-		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="OPEN"){
-			sI++;
-			
-			
-			
-			
-		}
-		leave("OPEN");
-		return isOpn;
-	}
-	
-	bool isInsert(){
-		enter("OPEN");
-		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="OPEN"){
-			sI++;
-			
-			
-			
-			
-		}
-		leave("OPEN");
-		return isOpn;	
-	}
-	
-	bool isDelete(){
-		enter("OPEN");
-		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
-		if(sToks[sI]=="OPEN"){
-			sI++;
-			
-			
-			
-			
-		}
-		leave("OPEN");
-		return isOpn;
+		leave("isDelete");
+		return isDel;
 	}
 	
 	
