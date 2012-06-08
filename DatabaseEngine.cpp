@@ -15,6 +15,10 @@
 
 using namespace std;
 
+void close() {
+	exit(0);
+}
+
 void wait() {
 	char a;
 	cin >> a;
@@ -31,6 +35,11 @@ bool isNum(char input) {
 	} else {
 		return false;
 	}
+}
+
+void parseArguments(string input) {
+	
+
 }
 
 string intToString(int number) {
@@ -238,6 +247,18 @@ public:
 		return name;
 	}
 	
+	Relation selection(string input) {
+		Relation result("a");
+		
+		return result;
+	}
+	
+	Relation projection(string input) {
+		Relation result("b");
+		
+		return result;
+	}
+	
 	string stringify() {
 		string table = "(";
 		int j = 0;	
@@ -370,6 +391,77 @@ public:
 			addTuple(cells);
 		}
 	}
+	
+	int getHeight() {
+		map<string, Attribute>::iterator iter4size = columns.begin();
+		return ((*iter4size).second.getSize());
+	}
+	
+	Relation Relation::operator+(const Relation& right) {
+		Relation result = *this;
+		bool equal; 
+		map<string, Attribute>::iterator iter1 = result.columns.begin();
+			
+	//} else {	
+	}
+	
+	void selection(Relation table, string input) {
+		
+		
+	}
+	
+	void projection(Relation table, string input) {
+	
+		
+	
+	}
+	
+	void crossProduct(Relation table1, Relation table2) {
+		for(map<string, Attribute>::iterator iter = table1.columns.begin(); iter != table1.columns.end(); iter++) {
+			addAttribute((*iter).second.getName(), (*iter).second.type);
+		}
+		for(map<string, Attribute>::iterator iter = table2.columns.begin(); iter != table2.columns.end(); iter++) {
+			addAttribute((*iter).second.getName(), (*iter).second.type);
+		}
+		
+		vector<string> first;
+		vector<string> second;
+		vector<string> data;
+	
+			for(int i = 0; i < table1.getHeight(); i++) {
+				
+				for(map<string, Attribute>::iterator iter = table1.columns.begin(); iter != table1.columns.end(); iter++) {
+					first.push_back(((*iter).second.cells[i]));
+					cout << ((*iter).second.cells[i]) << '\t';	
+					for(int j = 0; j < table2.getHeight(); j++) {
+						for(map<string, Attribute>::iterator iter2 = table2.columns.begin(); iter2 != table2.columns.end(); iter2++) {
+							second.push_back(((*iter2).second.cells[j]));
+							cout << ((*iter).second.cells[i]) << '\t';
+						}
+						
+						/*
+						for(int k = 0; k < first.size(); k++) {
+							data.push_back(first[k]);
+						}
+						for(int k = 0; k < second.size(); k++) {
+							data.push_back(second[k]);
+						}*/
+						
+						second.clear();
+					}
+					cout << '\n';
+					first.clear();
+				}
+				
+				for(int j = 0; j < data.size(); j++) {
+					cout << data[j] << '\t';
+				}
+				cout << '\n';
+				
+				data.clear();
+			}
+			//addTuple(data);			
+	}
 };
 
 class Domain {
@@ -398,7 +490,7 @@ Relation readFromFile(string input) {
 	inputFile.open(input.c_str());
 	
 	string name = input.substr(0, input.size()-3);
-	cout << "Name\t" << name << '\n';
+	
 	Relation importedRelation(name);
 	
 	char currentChar;
@@ -418,37 +510,38 @@ Relation readFromFile(string input) {
 	return importedRelation;
 }
 
-
-
 int main() {
 
 	Relation importedTable = readFromFile("test.db");
 	Relation table("foo");
 	
+	Relation crossTable("cross");
+	
 	dataType charType(false, 20);
 	dataType intType(true);
 	
-	table.addAttribute("First", charType);
-	table.addAttribute("Second", intType);
-	table.addAttribute("Third", charType);
+	table.addAttribute("FOO", charType);
+	table.addAttribute("REDDIT", charType);
+	table.addAttribute("BAR", charType);
 	
 	vector<string> input(3);
-	input[0] = "hello";
-	input[1] = "343";
-	input[2] = "dog";
+	input[0] = "MINE";
+	input[1] = "SPLIN";
+	input[2] = "HALO";
 	
 	vector<string> input2(3);
-	input2[0] = "bye";
-	input2[1] = "404";
-	input2[2] = "cat";
+	input2[0] = "DIABLO";
+	input2[1] = "SC2";
+	input2[2] = "HL1";
 
 	table.addTuple(input);
-	
 	table.addTuple(input2);
 	
-	table.setElement(0, 1, "NEW");
+	crossTable.crossProduct(table, importedTable);
 	
-	importedTable.print();
+	//crossTable.print();
+	
+	//importedTable.print();
 	
 	//writeToFile<Relation>(table);
 	
