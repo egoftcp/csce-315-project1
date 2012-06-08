@@ -1,9 +1,0 @@
-CREATE TABLE tools (kind VARCHAR(8), weight INTEGER, cost INTEGER) PRIMARY KEY (kind);
-INSERT INTO tools VALUES FROM ("hammer", 3, 10);
-INSERT INTO tools VALUES FROM ("screw driver", 1, 2);
-INSERT INTO tools VALUES FROM ("plane", 2, 10);
-INSERT INTO tools VALUES FROM ("hand saw", 2, 22);
-INSERT INTO tools VALUES FROM ("blow torch", 3, 25);
-INSERT INTO tools VALUES FROM ("jack hammer", 55, 300);
-INSERT INTO tools VALUES FROM ("plow", 300, 500);
-SHOW tools;

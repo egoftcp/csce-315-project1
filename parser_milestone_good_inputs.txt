@@ -1,17 +1,5 @@
-OPEN animals;
 CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
-UPDATE dots SET x1 = 0 WHERE x1 < 0;
-OPEN animals;
-WRITE tes2tttt123;
-CLOSE other_animal;
-EXIT;
-SHOW tools;
-
-Exit;
-
-
-CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
-INSERT INTO animals VALUES FROM ("Joe Bob", "cat", 4);
+INSERT INTO animals VALUES FROM ("Joe", "cat", 4);
 INSERT INTO animals VALUES FROM ("Spot", "dog", 10);
 INSERT INTO animals VALUES FROM ("Snoopy", "dog", 3);
 INSERT INTO animals VALUES FROM ("Tweety", "bird", 1);
@@ -94,21 +82,6 @@ INSERT INTO shape_color VALUES FROM ("sphere", "orange");
 set_diff_test <- product_test - shape_color;
 SHOW set_diff_test;
 
-CREATE TABLE lifeforms (name VARCHAR(30), planet VARCHAR(20)) PRIMARY KEY (name);
-INSERT INTO lifeforms VALUES FROM ("Dog", "Earth");
-INSERT INTO lifeforms VALUES FROM ("Human", "Earth");
-INSERT INTO lifeforms VALUES FROM ("Martian", "Mars");
-INSERT INTO lifeforms VALUES FROM ("Kryptonian", "Krypton");
-INSERT INTO lifeforms VALUES FROM ("Dolphin", "Earth");
-
-CREATE TABLE planets (planet VARCHAR(20), solar_system VARCHAR(20)) PRIMARY KEY (planet);
-INSERT INTO planets VALUES FROM ("Earth", "Sun");
-INSERT INTO planets VALUES FROM ("Mars", "Sun");
-INSERT INTO planets VALUES FROM ("Krypton", "Rao");
-
-join_test <- lifeforms JOIN planets;
-SHOW join_test;
-
 CREATE TABLE points (x INTEGER, y INTEGER, z INTEGER) PRIMARY KEY (x, y, z);
 INSERT INTO points VALUES FROM (0, 0, 0);
 INSERT INTO points VALUES FROM (1, 1, 1);
@@ -138,5 +111,3 @@ SHOW dots;
 advanced_query <- project (x) (select (y == y2) (points * dots_to_points));
 SHOW advanced_query;
 
-DELETE TABLE dots;
-SHOW dots;
