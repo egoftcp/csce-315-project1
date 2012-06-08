@@ -424,7 +424,9 @@ public:
 		
 		//wait();
 		
-		addTuple(cells);
+		if(cells.size() != 0) {
+			addTuple(cells);
+		}
 	}
 	
 };
