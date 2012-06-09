@@ -569,15 +569,23 @@ int main() {
 
 map<string,Relation*> relsInMem;	//need to release memory on exit
 
+bool closeRelation(string relationName){
+    if(relsInMem.count(relationName)!=0){
+        //relation does not exist in memory
+         
+    }
+}
 
 
-string ExecuteCommand(string Command){
+bool ExecuteCommand(string Command){
 	//Create Parser Instance with Debug=0; (no output, silent)
 	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
 	int fails = parserInst.ParseProgramBlock(Command);
 	if(fails!=0){
-		return "Input is not syntactically correct, returning"; 
+		cout<<"Input is not syntactically correct, returning\n";
+		return false;
 	}
+	bool ret=false;
 	
 	int tI=0;
 	
@@ -594,10 +602,8 @@ string ExecuteCommand(string Command){
 			alI++;
 			string typeName = toks[alI];
 			if(typeName=="VARCHAR"){
-				//cout<<"VC"<<endl;
 				alI+=2;
 				int len = stringToInt(toks[alI]);
-				//cout<<len<<endl;
 				attrTypes.push(len);
 				alI+=2;			
 			}else if(typeName=="INTEGER"){
@@ -616,7 +622,6 @@ string ExecuteCommand(string Command){
 			
 		}while(toks[alI]==",");
 		
-
 		Relation* newRel = new Relation(relName);
 		
 		while(!attrNames.empty()){
@@ -634,8 +639,8 @@ string ExecuteCommand(string Command){
 		
 		relsInMem.insert( pair<string,Relation*>(relName,newRel) );
 		
-		string crRel = relsInMem[relName]->stringify();
-		return crRel;
+		ret = true;
+		return ret;
 	}
 	else if(toks[tI] == "INSERT"){
 		string relName = toks[2];
@@ -657,9 +662,25 @@ string ExecuteCommand(string Command){
 			}
 		}while(toks[intInd]==",");
 		relsInMem[relName]->addTuple(vals);
-		return relsInMem[relName]->stringify();
+		ret=true;
+		return ret;
+	}else if(toks[tI]=="SHOW"){
+	    string relName=toks[tI+1];
+	    relsInMem[relName]->print();
+	    ret=true;
+	    return ret;
+	}else if(toks[tI]=="WRITE"){
+	    string relName=toks[tI+1];
+	    //TODO: CHECK TO SEE IF TABLE EXISTS
+	    //IF SO, RETURN false;
+	    //ELSE...
+	    writeToFile<Relation>((*relsInMem[relName]));
+	    ret = true;
+	    return ret;
 	}
 	
+	
+	writeToFile<Relation>(table);
 	
 	
 	return "NULLL";
@@ -670,11 +691,16 @@ string ExecuteCommand(string Command){
 int main()2{
 	
 	cout<<"trying create:"<<endl;
-	string res = ExecuteCommand("CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);");
-	relsInMem["animals"]->print();
-	cout<<"trying insert:"<<endl;
+	bool res = ExecuteCommand("CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);");
 	res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Joe\", \"cat\", 4);");
-	relsInMem["animals"]->print();
+	res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Spot\", \"dog\", 10);");
+    res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Snoopy\", \"dog\", 3);");
+    res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Tweety\", \"bird\", 1);");
+    res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Joe\", \"bird\", 2);");
+    res = ExecuteCommand("SHOW animals;");
+    res = ExecuteCommand("WRITE animals;");
+	res = ExecuteCommand("OPEN animals;");
+	res = ExecuteCommand("EXIT;");
 	
 	
 	
