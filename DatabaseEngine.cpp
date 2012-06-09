@@ -193,11 +193,11 @@ class Relation {
 
 public:
 
-	vector<string> primaryKeys; //attribute names
-
-
 	string name;
-	map<string, Attribute> columns;
+	vector<string> primaryKeys; //attribute names
+	vector<string> values;
+	vector<Attribute> columns;
+	map<string, int> indices;
 	map<string, Attribute>::iterator start;
 	int primaryKey;
 
@@ -227,26 +227,26 @@ public:
 
 	void addTuple(vector<string> input) {
 		int i = 0;
-		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-			(*iter).second.cells.push_back(input[i]);			
+		for(int j = 0; j < columns.size(); j++) {
+			columns[j].cells.push_back(input[i]);			
 			i++;
 		}
 	}
 	
 	Attribute findAttribute(string input_name) {
-		map<string, Attribute>::iterator iter = columns.begin();
-		while( strcmp( (*iter).second.name.c_str(), input_name.c_str()) != 0 && iter != columns.end()) {
-			iter++;
+		int i = 0;
+		while( strcmp( columns.name.c_str(), input_name.c_str()) != 0 && i != columns.size()) {
+			i++;
 		}
-		return (*iter).second;
+		return columns[i];
 	}
 	
 	void setElement(int x, int y, string value) {
-		map<string, Attribute>::iterator iter = columns.begin();
+		int j = 0;
 		for(int i = 0; i < x; i++) {
-			iter++;
+			j++;
 		}
-		(*iter).second.setElement(y, value);
+		columns.second.setElement(y, value);
 	}
 	
 	string getElement(int x, int y) {
@@ -276,31 +276,31 @@ public:
 	string stringify() {
 		string table = "(";
 		int j = 0;	
-		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
+		for(int i = 0; i < columns.size(); i++) {
 			j++;
 			if( j == columns.size() ) {
-				table = table + (*iter).second.getName() + " " + (*iter).second.getType() + ")\n";
+				table = table + columns[i].getName() + " " + columns[i].getType() + ")\n";
 			} else {
-				table = table + (*iter).second.getName() + " " + (*iter).second.getType() + ", ";
+				table = table + columns[i].getName() + " " + columns[i].getType() + ", ";
 			}
 		}
 	
-		start = columns.begin();
-		for(int i = 0; i < (*start).second.getSize(); i++) {
+		//start = columns.begin();
+		for(int i = 0; i < columns[0].getSize(); i++) {
 			table = table + "(";	
 			j = 0;
-			for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-				if(j == (*start).second.getSize()) {
-					if( (*iter).second.isInt() ) {
-						table = table + (*iter).second.getElement(i) + ")\n";
+			for(int k = 0; k < columns.size(); k++) {
+				if(j == columns[0].getSize()) {
+					if( columns[k].isInt() ) {
+						table = table + columns[k].getElement(i) + ")\n";
 					} else {
-						table = table + "\"" + (*iter).second.getElement(i) + "\")\n";
+						table = table + "\"" + columns[k].getElement(i) + "\")\n";
 					}
 				} else {
-					if( (*iter).second.isInt() ) {
-						table = table + (*iter).second.getElement(i) + ", ";
+					if( columns[k].isInt() ) {
+						table = table + columns[k].getElement(i) + ", ";
 					} else {
-						table = table + "\"" + (*iter).second.getElement(i) + "\", ";
+						table = table + "\"" + columns[k].getElement(i) + "\", ";
 					}
 				}	
 				j++;
@@ -317,8 +317,8 @@ public:
 		
 		//Prints the header (name of attributes)
 		cout << '\t';
-		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-				cout << (*iter).second.getName() << '\t';
+		for(int i = 0; i < columns.size(); i++) {
+				cout << columns.getName() << '\t';
 		}
 		cout << '\n';
 		
@@ -326,8 +326,8 @@ public:
 		start = columns.begin();
 		for(int i = 0; i < (*start).second.getSize(); i++) {
 			cout << i << '\t';
-			for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-				cout << (*iter).second.getElement(i) << '\t';
+			for(int j = 0; j < columns.size(); j++) {
+				cout << columns[j].getElement(i) << '\t';
 			}
 			cout << '\n';
 		}
@@ -407,14 +407,13 @@ public:
 	}
 	
 	int getHeight() {
-		map<string, Attribute>::iterator iter4size = columns.begin();
-		return ((*iter4size).second.getSize());
+		return (columns[0].getSize());
 	}
 	
 	Relation Relation::operator+(const Relation& right) {
 		Relation result = *this;
 		bool equal; 
-		map<string, Attribute>::iterator iter1 = result.columns.begin();
+		//map<string, Attribute>::iterator iter1 = result.columns.begin();
 			
 	//} else {	
 	}
@@ -434,16 +433,16 @@ public:
 		vector<string> name;
 		vector<dataType> types;
 		
-		for(map<string, Attribute>::iterator iter = table1.columns.begin(); iter != table1.columns.end(); ++iter) {
-			//addAttribute((*iter).second.getName(), (*iter).second.type);
-			name.push_back((*iter).second.getName());
-			types.push_back((*iter).second.type);
+		for(int i = 0; i < table1.size(); i++) {
+			addAttribute(columns[i].getName(), columns[i].type);
+			//name.push_back((*iter).second.getName());
+			//types.push_back((*iter).second.type);
 		}
 		
-		for(map<string, Attribute>::iterator iter = table2.columns.begin(); iter != table2.columns.end(); ++iter) {
-			//addAttribute((*iter).second.getName(), (*iter).second.type);
-			name.push_back((*iter).second.getName());
-			types.push_back((*iter).second.type);	
+		for(int i = 0; i < table2.size(); i++) {
+			addAttribute(columns[i].getName(), columns[i].type);
+			//name.push_back((*iter).second.getName());
+			//types.push_back((*iter).second.type);	
 		}
 		cout<<"---\n";
 		for(int i = 0; i < name.size(); i++) {
@@ -453,25 +452,19 @@ public:
 			//this.addAttribute(name[i],types[i]);
 			//cout << name[i] << '\t';
 		}
-		cout<<"---\n";
-		this->print();
-		cout << ">>> ";
-		for(map<string, Attribute>::iterator a = columns.begin(); a != columns.end(); a++) {
-			cout << (*a).second.getName() << '\t';
-		}
 		
 		vector<string> first;
 		vector<string> second;
 		vector<string> data;
 	
 			for(int i = 0; i < table1.getHeight(); i++) {
-				for(map<string, Attribute>::iterator iter = table1.columns.begin(); iter != table1.columns.end(); iter++) {
-					first.push_back(((*iter).second.cells[i]));
+				for(int l = 0; l < table1.size(); l++) {
+					first.push_back(table1[l].cells[i]);
 					//cout << ((*iter).second.cells[i]) << '\t';	
 				}
 					for(int j = 0; j < table2.getHeight(); j++) {
-						for(map<string, Attribute>::iterator iter2 = table2.columns.begin(); iter2 != table2.columns.end(); iter2++) {
-							second.push_back(((*iter2).second.cells[j]));
+						for(int m = 0; m < table2.size(); m++) {
+							second.push_back(table2[m].cells[j]));
 							//cout << ((*iter2).second.cells[j]) << '\t';
 						}
 						
