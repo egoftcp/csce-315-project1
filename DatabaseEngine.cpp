@@ -572,7 +572,7 @@ Relation* readFromFilePtr(string input) {
 }
 
 
-int main(){
+int main1(){
 
 	Relation importedTable = readFromFile("test.db");
 	Relation table("foo");
@@ -762,6 +762,7 @@ bool ExecuteCommand(string Command){
 				intInd++;
 			}
 		}while(toks[intInd]==",");
+		cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
 		relsInMem[relName]->addTuple(vals);
 		ret=true;
 		return ret;
@@ -792,25 +793,19 @@ bool ExecuteCommand(string Command){
 
 
 
-int main2(){
+int main(){
 	
-	cout<<"trying create:"<<endl;
+
 	bool res = ExecuteCommand("CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);");
 	res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Joe\", \"cat\", 4);");
-	cout<<"RES::"<<res<<endl;
 	res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Spot\", \"dog\", 10);");
     res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Snoopy\", \"dog\", 3);");
     res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Tweety\", \"bird\", 1);");
     res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Joe\", \"bird\", 2);");
     res = ExecuteCommand("SHOW animals;");
-	cout<<"RES6::"<<res<<endl;
     res = ExecuteCommand("WRITE animals;");
-	cout<<"RES7::"<<res<<endl;
 	res = ExecuteCommand("OPEN animals;");
-	cout<<"RES8::"<<res<<endl;
-	res = ExecuteCommand("EXIT;");
-	cout<<"RES9::"<<res<<endl;
-	
+	res = ExecuteCommand("EXIT;");	
 	
 	
 	
