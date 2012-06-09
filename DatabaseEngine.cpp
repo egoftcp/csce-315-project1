@@ -215,8 +215,10 @@ public:
 	
 	void addAttribute(string name, dataType type) {
 		Attribute attr(name, type);
+		columns[name]=attr;
+		/*
 		pair< map<string,Attribute>::iterator, bool > ret;
-		ret = columns.insert( pair<string,Attribute>(name, attr) );
+		ret = columns.insert( pair<string,Attribute>(name, attr) );*/
 	}
 	
 	void deleteAttribute(string name) {
@@ -226,7 +228,7 @@ public:
 	void addTuple(vector<string> input) {
 		int i = 0;
 		for(map<string, Attribute>::iterator iter = columns.begin(); iter != columns.end(); iter++) {
-			(*iter).second.cells.push_back(input[i]);
+			(*iter).second.cells.push_back(input[i]);			
 			i++;
 		}
 	}
@@ -429,11 +431,33 @@ public:
 	}
 	
 	void crossProduct(Relation table1, Relation table2) {
-		for(map<string, Attribute>::iterator iter = table1.columns.begin(); iter != table1.columns.end(); iter++) {
-			addAttribute((*iter).second.getName(), (*iter).second.type);
+		vector<string> name;
+		vector<dataType> types;
+		
+		for(map<string, Attribute>::iterator iter = table1.columns.begin(); iter != table1.columns.end(); ++iter) {
+			//addAttribute((*iter).second.getName(), (*iter).second.type);
+			name.push_back((*iter).second.getName());
+			types.push_back((*iter).second.type);
 		}
-		for(map<string, Attribute>::iterator iter = table2.columns.begin(); iter != table2.columns.end(); iter++) {
-			addAttribute((*iter).second.getName(), (*iter).second.type);
+		
+		for(map<string, Attribute>::iterator iter = table2.columns.begin(); iter != table2.columns.end(); ++iter) {
+			//addAttribute((*iter).second.getName(), (*iter).second.type);
+			name.push_back((*iter).second.getName());
+			types.push_back((*iter).second.type);	
+		}
+		cout<<"---\n";
+		for(int i = 0; i < name.size(); i++) {
+			Attribute ar(name[i],types[i]);
+			cout<<name[i]<<endl;
+			columns[name[i]]=ar;
+			//this.addAttribute(name[i],types[i]);
+			//cout << name[i] << '\t';
+		}
+		cout<<"---\n";
+		this->print();
+		cout << ">>> ";
+		for(map<string, Attribute>::iterator a = columns.begin(); a != columns.end(); a++) {
+			cout << (*a).second.getName() << '\t';
 		}
 		
 		vector<string> first;
@@ -441,38 +465,37 @@ public:
 		vector<string> data;
 	
 			for(int i = 0; i < table1.getHeight(); i++) {
-				
 				for(map<string, Attribute>::iterator iter = table1.columns.begin(); iter != table1.columns.end(); iter++) {
 					first.push_back(((*iter).second.cells[i]));
-					cout << ((*iter).second.cells[i]) << '\t';	
+					//cout << ((*iter).second.cells[i]) << '\t';	
+				}
 					for(int j = 0; j < table2.getHeight(); j++) {
 						for(map<string, Attribute>::iterator iter2 = table2.columns.begin(); iter2 != table2.columns.end(); iter2++) {
 							second.push_back(((*iter2).second.cells[j]));
-							cout << ((*iter).second.cells[i]) << '\t';
+							//cout << ((*iter2).second.cells[j]) << '\t';
 						}
 						
-						/*
 						for(int k = 0; k < first.size(); k++) {
 							data.push_back(first[k]);
 						}
 						for(int k = 0; k < second.size(); k++) {
 							data.push_back(second[k]);
-						}*/
+						}
+						
+						for(int m = 0; m < data.size(); m++) {
+							//cout << data[m] << '\t';
+						}
 						
 						second.clear();
 					}
 					cout << '\n';
 					first.clear();
-				}
+				//}
 				
-				for(int j = 0; j < data.size(); j++) {
-					cout << data[j] << '\t';
-				}
-				cout << '\n';
-				
+				//cout << '\n';
+				addTuple(data);
 				data.clear();
-			}
-			//addTuple(data);			
+			}			
 	}
 };
 
@@ -578,7 +601,7 @@ int main(){
 	
 	crossTable.crossProduct(table, importedTable);
 	
-	//crossTable.print();
+	crossTable.print();
 	
 	//importedTable.print();
 	
