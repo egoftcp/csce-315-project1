@@ -522,7 +522,34 @@ Relation readFromFile(string input) {
 	return importedRelation;
 }
 
-int main() {
+
+Relation* readFromFilePtr(string input) {
+	ifstream inputFile;
+	inputFile.open(input.c_str());
+	
+	string name = input.substr(0, input.size()-3);
+	
+	Relation* importedRelation= new Relation(name);
+	
+	char currentChar;
+	vector<string> parsedInfo;
+	string line;
+
+	getline(inputFile, line);
+	importedRelation->parseHeader(line);
+	
+	while(!inputFile.eof()) {
+		getline(inputFile, line);
+		importedRelation->parseTuples(line);
+	}
+	
+	inputFile.close();
+	
+	return importedRelation;
+}
+
+
+int main(){
 
 	Relation importedTable = readFromFile("test.db");
 	Relation table("foo");
@@ -569,12 +596,63 @@ int main() {
 
 map<string,Relation*> relsInMem;	//need to release memory on exit
 
-bool closeRelation(string relationName){
-    if(relsInMem.count(relationName)!=0){
-        //relation does not exist in memory
-         
-    }
+
+bool freeMemory(){
+	cout<<"Freeing Memory:\n";
+	cout<<"--Relations:\n";
+	for( map<string,Relation*>::iterator relIt= relsInMem.begin(); relIt != relsInMem.end(); ++relIt){
+		cout<<(*relIt).first<<" @ "<<relIt->second<<endl;
+		delete relIt->second;
+	}
+	return true;
 }
+
+//CLOSE relation-name; //Writes Existing  Table to DB
+bool closeRelation(string relationName){
+    if(relsInMem.count(relationName)==0){
+        //relation does not exist in memory
+        return false;
+    }
+	//TODO: ELSE IF relationName.db does not exist, break? only pre existing tables can be called from CLOSE
+	else{
+		writeToFile<Relation>((*relsInMem[relationName]));
+		delete relsInMem[relationName];
+		relsInMem.erase(relationName);
+		return true;
+	}
+	return false;
+}
+
+//WRITE relation-name; //Writes NEW Table to DB
+bool writeRelation(string relationName){
+	if(relsInMem.count(relationName)==0){
+        //relation does not exist in memory
+        return false;
+    }
+	//TODO: ELSE IF relationName.db DOES exist, break? only NEW tables can be called from WRITE?
+	else{
+		writeToFile<Relation>((*relsInMem[relationName]));
+		delete relsInMem[relationName];
+		relsInMem.erase(relationName);
+		return true;
+	}
+	return false;
+}
+
+bool openRelation(string relationName){
+	if(relsInMem.count(relationName)!=0){
+		//relation already exists in memory!
+		return false;
+	}
+	//TODO: ELSE IF relationName.db does NOT exist, break (return false)
+	else{
+		Relation* readRel = readFromFilePtr(relationName+".db");
+		relsInMem.insert( pair<string,Relation*>(relationName,readRel) );
+		return true;
+	}
+	return false;
+}
+
 
 
 bool ExecuteCommand(string Command){
@@ -671,46 +749,47 @@ bool ExecuteCommand(string Command){
 	    return ret;
 	}else if(toks[tI]=="WRITE"){
 	    string relName=toks[tI+1];
-	    //TODO: CHECK TO SEE IF TABLE EXISTS
-	    //IF SO, RETURN false;
-	    //ELSE...
-	    writeToFile<Relation>((*relsInMem[relName]));
-	    ret = true;
-	    return ret;
+	    bool suc = writeRelation(relName);
+	    return suc;
+	}else if(toks[tI]=="OPEN"){
+		string relName = toks[tI+1];
+		bool suc = openRelation(relName);
+		return suc;
+	}else if(toks[tI]=="EXIT"){
+		bool suc = freeMemory();
+		exit(1);
+		return suc;
 	}
 	
+
 	
-	writeToFile<Relation>(table);
 	
-	
-	return "NULLL";
+	return false;
 }
 
 
 
-int main()2{
+int main2(){
 	
 	cout<<"trying create:"<<endl;
 	bool res = ExecuteCommand("CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);");
 	res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Joe\", \"cat\", 4);");
+	cout<<"RES::"<<res<<endl;
 	res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Spot\", \"dog\", 10);");
     res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Snoopy\", \"dog\", 3);");
     res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Tweety\", \"bird\", 1);");
     res = ExecuteCommand("INSERT INTO animals VALUES FROM (\"Joe\", \"bird\", 2);");
     res = ExecuteCommand("SHOW animals;");
+	cout<<"RES6::"<<res<<endl;
     res = ExecuteCommand("WRITE animals;");
+	cout<<"RES7::"<<res<<endl;
 	res = ExecuteCommand("OPEN animals;");
+	cout<<"RES8::"<<res<<endl;
 	res = ExecuteCommand("EXIT;");
+	cout<<"RES9::"<<res<<endl;
 	
 	
 	
-	cout<<"Freeing Memory:\n";
-	cout<<"--Relations:\n";
-	for( map<string,Relation*>::iterator relIt= relsInMem.begin(); relIt != relsInMem.end(); ++relIt){
-		cout<<(*relIt).first<<" @ "<<relIt->second<<endl;
-		delete relIt->second;
-	}
-	//cout<<"--Relations:";
 	
 	cout << "Press ENTER to continue";
 	cin.ignore((numeric_limits<streamsize>::max)(), '\n');
