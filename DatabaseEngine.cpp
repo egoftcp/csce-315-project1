@@ -216,10 +216,9 @@ public:
 	
 	void deleteAttribute(string name) {
 		vector<Attribute>::iterator iter = columns.begin();
-		map<string, int>::iterator spot = indices.find(name);
 
-		columns.erase((iter + indices[name])); 
-		indices.erase(spot);
+		columns.erase((iter + indices[name]));
+		indices.erase(name);
 	}
 
 	void addTuple(vector<string> input) {
@@ -274,7 +273,6 @@ public:
 			}
 		}
 	
-		//start = columns.begin();
 		for(int i = 0; i < columns[0].getSize(); i++) {
 			table = table + "(";	
 			j = 0;
@@ -296,7 +294,6 @@ public:
 			}
 		}
 		table = table + "\n";
-		
 		return table;
 	}
 	
@@ -549,16 +546,15 @@ int main(){
 	
 	//wait();
 
-	importedTable.print();
-	
-	wait();
+	//importedTable.print();
 
 	//writeToFile<Relation>(table);
-	cout << '\n';
-
-	//table.deleteAttribute("Second");
 	
-	//table.print();
+	table.deleteAttribute("REDDIT");
+	
+	table.print();
+
+	wait();
 
 	return 0;
 }
