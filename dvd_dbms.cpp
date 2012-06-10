@@ -315,15 +315,12 @@ string searchCustomerMenu(){
 	return "primaryMenu";
 }
 string addNewDvdMenu(){
-	time_t seconds = time(NULL);
 	int selection=NULL;
 	string inventoryNumber,dvdId,dvdTitle;
-	char id[21],choice;
-	itoa(seconds,id,10);
+	char choice;
 	title("Add New DVD");
 	cout<<"*Enter DVD ID:";cin>>dvdId;
-	cout<<"*Enter DVD Title:";
-	inventoryNumber=id;
+	cout<<"*Enter DVD Title:";cin.clear();cin.sync();getline(cin,dvdTitle);
 	cout<<"*Inventory Number will be:"<<inventoryNumber<<endl;
 	cout<<"*1 to accept above information, 5 to change, any key to go back:";
 	do{
@@ -521,13 +518,82 @@ string searchAvailableDvdMenu(){
 	return "primaryMenu";
 }
 string checkOutDvdMenu(){
-	return NULL;
+	time_t seconds = time(NULL);
+	int selection=NULL;
+	char checkOutDate[21],dueDate[21],choice;
+	strftime(checkOutDate,20,"%Y-%m-%d %H:%M:%S",localtime(&seconds));
+	seconds=seconds+259200;
+	strftime(dueDate,20,"%Y-%m-%d %H:%M:%S",localtime(&seconds));
+	string inventoryNumber,dvdId,dvdTitle;
+	string userId,firstName,lastName,phoneNumber;
+	title("Check Out DVD");
+	cout<<"*Enter DVD ID:";cin>>dvdId;
+	cout<<"*Enter Customer ID:";cin>>userId;
+	cout<<"*Check out date will be:"<<checkOutDate<<endl;
+	cout<<"*Due date will be:"<<dueDate<<endl;
+	cout<<"*1 to accept above information, 5 to change, any key to go back:";
+	do{
+		cin>>choice;
+	}while(choice!='1'&&choice!='5');
+	if(choice=='1'){
+		cout<<"INSERT INTO rentals VALUES FROM ("+userId+","+dvdId+",\""+checkOutDate+"\", \"out\");"<<endl;
+		//Parser("INSERT INTO rentals VALUES FROM ("+userId+","+dvdId+",\""+checkOutDate+"\", \"out\");");
+		system("pause");
+	}
+	else if(choice=='5')
+		return "checkOutDvdMenu";
+	else
+		return "dvdMenu";
+	return "primaryMenu";
 }
 string checkInDvdMenu(){
-	return NULL;
+	time_t seconds = time(NULL);
+	int selection=NULL;
+	char checkInDate[21],choice;
+	strftime(checkInDate,20,"%Y-%m-%d %H:%M:%S",localtime(&seconds));
+	string userId,dvdId;
+	title("Check In DVD");
+	cout<<"*Enter DVD ID:";cin>>dvdId;
+	cout<<"*Enter Customer ID:";cin>>userId;
+	cout<<"*Check in date will be:"<<checkInDate<<endl;
+	cout<<"*1 to accept above information, 5 to change, any key to go back:";
+	do{
+		cin>>choice;
+	}while(choice!='1'&&choice!='5');
+	if(choice=='1'){
+		cout<<"UPDATE rentals SET checkInDate = \""<<checkInDate<<"\" WHERE dvdId = "+dvdId+";"<<endl;
+		//Parser("UPDATE rentals SET checkInDate = \""+checkInDate+"\" WHERE dvdId = "+dvdId+";");
+		system("pause");
+	}
+	else if(choice=='5')
+		return "checkOutDvdMenu";
+	else
+		return "dvdMenu";
+	return "primaryMenu";
 }
 string listRentalsByCustomerMenu(){
-	return NULL;
+	int selection=NULL;
+	string userId="userId";
+	string dvdId="dvdIdNotImplemented",checkOutDate="checkOutNotImplemented",checkInDate="checkInNotImplemented";
+	char choice;
+	title("List Rentals by Customer");
+	cout<<"*(1)List rentals by Customer ID"<<endl;
+	cout<<"*"<<endl;
+	cout<<"*(5)Back to main menu"<<endl;
+	do{
+		cin>>choice;
+	}while(choice!='1'&&choice!='5');
+	if(choice=='1'){
+		cout<<"*Enter Customer ID to search for:";cin>>userId;
+		cout<<"*rentalsByCustomer <- select (userId = "+userId+") rentals;"<<endl;
+		//Parser("rentalsByCustomer <- select (userId = "+userId+") rentals;");
+		//Parser("SHOW rentalsByCustomer;");
+		for(int i=0;i<10;i++)
+			cout<<"*"<<userId<<", "+dvdId+", "+checkOutDate+", "+checkInDate<<endl;
+		system("pause");
+	}else if(choice=='5');
+		return "dvdMenu";
+	return "primaryMenu";
 }
 void selectionProcessor(){
 	string choice="";
@@ -564,11 +630,11 @@ void selectionProcessor(){
 		else if(choice=="searchAvailableDvd")
 			choice=searchAvailableDvdMenu();
 		else if(choice=="checkOutDvd")
-			choice=primaryMenu("not yet implemented");
+			choice=checkOutDvdMenu();
 		else if(choice=="checkInDvd")
-			choice=primaryMenu("not yet implemented");
+			choice=checkInDvdMenu();
 		else if(choice=="listRentalsByCustomer")
-			choice=primaryMenu("not yet implemented");
+			choice=listRentalsByCustomerMenu();
 		else{
 			choice=primaryMenu("DVD Database Management System");
 		}
@@ -578,7 +644,5 @@ void selectionProcessor(){
 int main(){
 	string choice;
 	selectionProcessor();
-	cout<<"* Press ENTER to quit";
-	getline(cin, choice);
 	return 0;
 }
