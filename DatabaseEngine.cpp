@@ -12,7 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
-//#include "Parser.h"
+#include "Parser.h"
 #include <queue>
 
 using namespace std;
@@ -398,12 +398,10 @@ public:
 	
 	void selection(Relation table, string input) {
 		
-		
 	}
 	
 	void projection(Relation table, string input) {
-	
-	
+		
 	}
 	
 	void crossProduct(Relation table1, Relation table2) {
@@ -513,7 +511,7 @@ Relation* readFromFilePtr(string input) {
 }
 
 
-int main(){
+int main2(){
 
 	Relation importedTable = readFromFile("test.db");
 	Relation table("foo");
@@ -621,7 +619,6 @@ bool openRelation(string relationName){
 }
 
 
-/*
 bool ExecuteCommand(string Command){
 	//Create Parser Instance with Debug=0; (no output, silent)
 	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
@@ -749,7 +746,7 @@ int main(){
     res = ExecuteCommand("SHOW animals;");
     res = ExecuteCommand("WRITE animals;");
 	res = ExecuteCommand("OPEN animals;");
-	res = ExecuteCommand("EXIT;");	
+	//res = ExecuteCommand("EXIT;");	
 	
 	
 	
@@ -759,8 +756,3 @@ int main(){
 
 	return 0;
 }
-*/
-
-
-
-
