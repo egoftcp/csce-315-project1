@@ -12,7 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
-#include "Parser.h"
+//#include "Parser.h"
 #include <queue>
 
 using namespace std;
@@ -53,7 +53,7 @@ string intToString(int number) {
 int stringToInt(string str){
 	int i;
 	stringstream ss(str);
-	ss>>i;
+	ss >> i;
 	return i;
 }
 
@@ -103,10 +103,6 @@ public:
 
 	Attribute() {}
 	
-	Attribute(string input_name) {
-		name = input_name;
-	}
-	
 	Attribute(string input_name, dataType inputType) {
 		name = input_name;
 		type = inputType;
@@ -133,18 +129,10 @@ public:
 	
 	int findCellIndex(string value) {
 		int i = 0;
-		while( strcmp(cells[i].c_str(), value.c_str()) != 0)  {
+		for(vector<string>::iterator iter = cells.begin(); iter != find(cells.begin(), cells.end(), value); iter++) {
 			i++;
 		}
-		
-		if(i < cells.size()) {
-			return i;
-		} else {
-			cout << "Error in findCellIndex, i is " << i << ", exiting program\n";
-			exit(1);
-			return -1;
-			//error value, watch out for vector[-1] results
-		}
+		return i;
 	}
 	
 	string getElement(int index) {
@@ -165,6 +153,7 @@ public:
 			for(int j = 0; j < cells.size(); j++) {
 				if(i != j && strcmp(cells[i].c_str(), cells[j].c_str()) == 0) {
 					repeat = true;
+					return repeat;
 				}				
 			}
 		}
@@ -195,10 +184,10 @@ public:
 
 	string name;
 	vector<string> primaryKeys; //attribute names
-	vector<string> values;
+	//vector<string> values;
 	vector<Attribute> columns;
 	map<string, int> indices;
-	map<string, Attribute>::iterator start;
+	//map<string, Attribute>::iterator start;
 	int primaryKey;
 
 	Relation(string input_name) {
@@ -215,48 +204,48 @@ public:
 	
 	void addAttribute(string name, dataType type) {
 		Attribute attr(name, type);
-		columns[name]=attr;
-		/*
-		pair< map<string,Attribute>::iterator, bool > ret;
-		ret = columns.insert( pair<string,Attribute>(name, attr) );*/
+		columns.push_back(attr);
+		indices[name] = (columns.size() - 1);
+	}
+
+	void addSeveralAttributes(vector<string> name, vector<dataType> type) {
+		for(int i = 0; i < name.size(); i++) {
+			addAttribute(name[i], type[i]);
+		}
 	}
 	
 	void deleteAttribute(string name) {
-		columns.erase(name);
+		vector<Attribute>::iterator iter = columns.begin();
+		map<string, int>::iterator spot = indices.find(name);
+
+		columns.erase((iter + indices[name])); 
+		indices.erase(spot);
 	}
 
 	void addTuple(vector<string> input) {
-		int i = 0;
-		for(int j = 0; j < columns.size(); j++) {
-			columns[j].cells.push_back(input[i]);			
-			i++;
+		int j = 0;
+		for(int i = 0; i < columns.size(); i++) {
+			columns[i].cells.push_back(input[j]);
+			j++;
 		}
+	}
+
+	vector<string> getTuple(int index) {
+		vector<string> output;
+		for(int i = 0; i < columns.size(); i++) {
+			output.push_back(columns[i].cells[index]);
+		}
+		return output;
 	}
 	
 	Attribute findAttribute(string input_name) {
-		int i = 0;
-		while( strcmp( columns.name.c_str(), input_name.c_str()) != 0 && i != columns.size()) {
-			i++;
-		}
-		return columns[i];
+		return columns[indices[input_name]];
 	}
 	
 	void setElement(int x, int y, string value) {
-		int j = 0;
-		for(int i = 0; i < x; i++) {
-			j++;
-		}
-		columns.second.setElement(y, value);
+		columns[x].cells[y] = value;
 	}
-	
-	string getElement(int x, int y) {
-		map<string, Attribute>::iterator iter = columns.begin();
-		for(int i = 0; i < x; i++) {
-			iter++;
-		}
-		return (*iter).second.cells[y];	
-	}
-	
+
 	string getName() {
 		return name;
 	}
@@ -316,22 +305,17 @@ public:
 	void print() {
 		
 		//Prints the header (name of attributes)
-		cout << '\t';
 		for(int i = 0; i < columns.size(); i++) {
-				cout << columns.getName() << '\t';
+			cout << columns[i].getName() << '\t';
 		}
 		cout << '\n';
-		
-		//Prints values of elements
-		start = columns.begin();
-		for(int i = 0; i < (*start).second.getSize(); i++) {
-			cout << i << '\t';
+
+		for(int i = 0; i < columns[0].cells.size(); i++) {
 			for(int j = 0; j < columns.size(); j++) {
-				cout << columns[j].getElement(i) << '\t';
+				cout << columns[j].cells[i] << '\t';
 			}
 			cout << '\n';
 		}
-		cout << '\n';
 	}
 	
 	void parseHeader(string line) {
@@ -368,7 +352,7 @@ public:
 				}
 				temp = "";
 			}
-			i = i++;
+			//i = i++;
 			name = "";
 			varCharLength = "";
 		}
@@ -412,10 +396,7 @@ public:
 	
 	Relation Relation::operator+(const Relation& right) {
 		Relation result = *this;
-		bool equal; 
-		//map<string, Attribute>::iterator iter1 = result.columns.begin();
-			
-	//} else {	
+		bool equal; 	
 	}
 	
 	void selection(Relation table, string input) {
@@ -425,79 +406,49 @@ public:
 	
 	void projection(Relation table, string input) {
 	
-		
 	
 	}
 	
 	void crossProduct(Relation table1, Relation table2) {
-		vector<string> name;
+		vector<string> names;
 		vector<dataType> types;
 		
-		for(int i = 0; i < table1.size(); i++) {
-			addAttribute(columns[i].getName(), columns[i].type);
-			//name.push_back((*iter).second.getName());
-			//types.push_back((*iter).second.type);
+		for(int i = 0; i < table1.columns.size(); i++) {
+			names.push_back( table1.columns[i].getName() );
+			types.push_back( table1.columns[i].type );
 		}
-		
-		for(int i = 0; i < table2.size(); i++) {
-			addAttribute(columns[i].getName(), columns[i].type);
-			//name.push_back((*iter).second.getName());
-			//types.push_back((*iter).second.type);	
+		for(int i = 0; i < table2.columns.size(); i++) {
+			names.push_back( table2.columns[i].getName() );
+			types.push_back( table2.columns[i].type );
 		}
-		cout<<"---\n";
-		for(int i = 0; i < name.size(); i++) {
-			Attribute ar(name[i],types[i]);
-			cout<<name[i]<<endl;
-			columns[name[i]]=ar;
-			//this.addAttribute(name[i],types[i]);
-			//cout << name[i] << '\t';
-		}
-		
+		addSeveralAttributes(names, types);
+
 		vector<string> first;
 		vector<string> second;
 		vector<string> data;
-	
-			for(int i = 0; i < table1.getHeight(); i++) {
-				for(int l = 0; l < table1.size(); l++) {
-					first.push_back(table1[l].cells[i]);
-					//cout << ((*iter).second.cells[i]) << '\t';	
+
+		for(int i = 0; i < table1.getHeight(); i++) {
+
+			for(int j = 0; j < table2.getHeight(); j++) {
+				first = table1.getTuple(i);
+				second = table2.getTuple(j);
+
+				for(int m = 0; m < first.size(); m++) {
+					data.push_back(first[m]);
 				}
-					for(int j = 0; j < table2.getHeight(); j++) {
-						for(int m = 0; m < table2.size(); m++) {
-							second.push_back(table2[m].cells[j]));
-							//cout << ((*iter2).second.cells[j]) << '\t';
-						}
-						
-						for(int k = 0; k < first.size(); k++) {
-							data.push_back(first[k]);
-						}
-						for(int k = 0; k < second.size(); k++) {
-							data.push_back(second[k]);
-						}
-						
-						for(int m = 0; m < data.size(); m++) {
-							//cout << data[m] << '\t';
-						}
-						
-						second.clear();
-					}
-					cout << '\n';
-					first.clear();
-				//}
+
+				for(int k = 0; k < second.size(); k++) {
+					data.push_back(second[k]);
+				}
 				
-				//cout << '\n';
 				addTuple(data);
 				data.clear();
-			}			
+				first.clear();
+				second.clear();
+			}
+		}
 	}
-};
 
-class Domain {
-	//halp
-};
-
-class Value {
-	//halp
 };
 
 template <class DB_type>
@@ -565,7 +516,7 @@ Relation* readFromFilePtr(string input) {
 }
 
 
-int main1(){
+int main(){
 
 	Relation importedTable = readFromFile("test.db");
 	Relation table("foo");
@@ -594,12 +545,17 @@ int main1(){
 	
 	crossTable.crossProduct(table, importedTable);
 	
-	crossTable.print();
+	//crossTable.print();
 	
-	//importedTable.print();
+	//wait();
+
+	importedTable.print();
 	
+	wait();
+
 	//writeToFile<Relation>(table);
-	
+	cout << '\n';
+
 	//table.deleteAttribute("Second");
 	
 	//table.print();
@@ -611,7 +567,6 @@ int main1(){
 
 
 map<string,Relation*> relsInMem;	//need to release memory on exit
-
 
 bool freeMemory(){
 	cout<<"Freeing Memory:\n";
@@ -670,7 +625,7 @@ bool openRelation(string relationName){
 }
 
 
-
+/*
 bool ExecuteCommand(string Command){
 	//Create Parser Instance with Debug=0; (no output, silent)
 	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
@@ -808,7 +763,7 @@ int main(){
 
 	return 0;
 }
-
+*/
 
 
 
