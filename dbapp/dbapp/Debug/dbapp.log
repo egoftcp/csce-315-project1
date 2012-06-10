@@ -1,23 +1,23 @@
-﻿Build started 6/9/2012 10:58:40 PM.
+﻿Build started 6/10/2012 7:04:38 AM.
      1>Project "C:\Users\Dad\Desktop\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\dbapp.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\dvd_dbms.cpp
          dvd_dbms.cpp
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(159): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(159): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(173): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(173): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(273): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(424): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(484): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(524): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(289): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(442): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(502): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(542): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(526): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(544): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(553): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(572): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(595): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(615): warning C4390: ';' : empty controlled statement found; is this the intent?
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\dbapp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.lib" /MACHINE:X86 Debug\dvd_dbms.obj
          LINK : C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.exe not found or not built by the last incremental link; performing full link
@@ -31,4 +31,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.62
+Time Elapsed 00:00:02.82
