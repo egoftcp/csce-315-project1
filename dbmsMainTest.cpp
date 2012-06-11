@@ -21,7 +21,7 @@ int main(){
 	exeDBMS1.Excute(sampleCommand5);
 */
 	cout<<"ENTERING MAIN!!!\n\n\n";
-	DBMS* dbms1 = new DBMS();
+	DBMS* dbms1 = new DBMS(true);
 	delete dbms1;
 	cout<<"LEAVING MAIN!!!\n\n\n";	
 		

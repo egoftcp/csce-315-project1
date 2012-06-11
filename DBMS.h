@@ -32,11 +32,12 @@ public:
 	ParserEngine* Parser;
 	
 	string DBPath;
-	DBMS(bool CmdPrmptMode=true, int DebugMode=7, string DBPath="./"){
+	
+	DBMS(bool CmdPrmptMode=true, int DebugMode=1, string DBPath="./"){
 		debug = DebugMode;
 		consoleMode = CmdPrmptMode;
 		engine = new DBEngine(DBPath);
-		Parser = new ParserEngine(engine, &relsInMem);
+		Parser = new ParserEngine(engine, &relsInMem, DebugMode);
 		if(consoleMode){
 			startConsole();
 		}
@@ -49,17 +50,21 @@ public:
 		//--all commands will either succeded or fail.
 		//--all queries will result in a new relation created in memory.
 		//--only SHOW will have "output" (print relation to screen"
+		
 		int valid = Parser->Validate(line);
-		if(valid=0){errOut("Invalid Query or Command: "+line); return;}
-		else if(valid=1){
+		if(valid==0){errOut("Invalid Query or Command Syntax |**| "+line); return;}
+		else if(valid==1){
 			if(!(Parser->ExecuteCommand(line))){ errOut("Unexpected error Executing Command: "+line);}
-		}else if(valid=2){
+		}else if(valid==2){
 			Relation* newRel = Parser->ExecuteQuery(line);
 			//TODO: look here \/
 			//if newRel == 0, errOut
 			//if (relsInMem.count(newRel->getName())==1){not a new rel, already in mem. handle differntly or updatre relsInMem? errOut if addr is not same?}
-			relsInMem[newRel->getName()]=newRel;
+
 			
+			//NOTE: breaks if returned relation does not have a name
+			string newRelName = newRel->getName();
+			relsInMem[newRel->getName()]=newRel;
 		}
 	}
 
@@ -129,11 +134,14 @@ private:
 		cout<<"\nTry some commands...\n\n";
 		
 		string input;
-		do{
-			cout<<"dbms::";
-			cin>>input;
+		cout<<"dbms::";
+		getline(cin,input);
+		
+		while(input!="leave"){
 			Execute(input);
-		} while(input!="leave"); //QUESTION: include exit? or is that a command that requires processing (i.e. saving/closing)
+			cout<<"dbms::";
+			getline(cin,input);
+		} 
 		
 	}
 	bool freeMemory(){
@@ -143,6 +151,7 @@ private:
 			delete relIt->second;
 		}
 		delete engine;
+		delete Parser;
 		return true; // is there any way to tell if memory was freed or if failed?
 	}
 	void errOut(string error){
@@ -152,33 +161,4 @@ private:
 	}
 };
 
-
-
-
-
-
-//int main(){
-/* DVD_APP USAGE EXAMPLE (NOT TESTED) (SUBJECT TO CHANGE)
-	string sampleCommand1 = "CREATE TABLE baseball_players (fname VARCHAR(20), lname VARCHAR(30), team VARCHAR(20), homeruns INTEGER, salary INTEGER) PRIMARY KEY (fname, lname);";
-	string sampleCommand2 = "INSERT INTO baseball_players VALUES FROM (\"Joe\", \"Swatter\", \"Pirates\", 40, 1000000);";
-	string sampleCommand3 = "INSERT INTO baseball_players VALUES FROM (\"Sarah\", \"Batter\", \"Dinosaurs\", 100, 5000000);";
-	string sampleCommand4 = "INSERT INTO baseball_players VALUES FROM (\"Snoopy\", \"Slinger\", \"Pirates\", 3, 200000);";
-	string sampleQuery1 = "high_hitters <- select (homeruns >= 40) baseball_players;"
-	string sampleCommand5 = "SHOW high_hitters";
-	
-	DBMS exDBMS1(false, 0, "./DVDDataBase"); //use this constructor for DVD_APP
-	exeDBMS1.Execute(SampleCommand1);
-	string Program = sampleCommand2 + sampleCommand3 + sampleCommand4;
-	exeDBMS1.Excute(Program);
-	exeDBMS1.Excute(sampleQuery1);
-	exeDBMS1.Excute(sampleCommand5);
-*/
-//	cout<<"ENTERING MAIN!!!\n\n\n";
-
-//	DBMS dbms();
-
-//	cout<<"LEAVING MAIN!!!\n\n\n";	
-		
-//	return 0;
-//}
 

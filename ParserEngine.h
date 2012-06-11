@@ -41,26 +41,15 @@ public:
 	int sI;
 	int level;
 	
-	
-	
-	//Constructors
-	ParserEngine(int Debug=1, bool AllowNonCapitalCMDs=false) :
-		debug(Debug),
-		allowNonCaps(AllowNonCapitalCMDs)
-	{ ; }
-	
-	ParserEngine(DBEngine* EngineP, map<string, Relation* > * RelsInMemP){
+	//Constructor
+	ParserEngine(DBEngine* EngineP, map<string, Relation* > * RelsInMemP,int Debug=1, bool AllowNonCapitalCMDs=false):debug(Debug), allowNonCaps(AllowNonCapitalCMDs){
 		relsInMemP=RelsInMemP;
 		engineP = EngineP;
-		debug=1;
-		allowNonCaps=true;
+		resetParserVals();
+		cout<<"DEBUG:"<<debug<<endl;
 	}
 	
 	
-	//Runs Parser On Single or Multiple Command/Queries
-	//Returns number of failed statements or -1 for system error
-	
-
 	/*Old Code
 	//Runs Parser on all Command/Queries in a text file (useful for testing)
 	//Assumes (textfile will be newLine seperated) AND (file will NOT have <cr><lf> line endings)
@@ -115,25 +104,42 @@ public:
 
 	
 int Validate(const string& line){
-	/*if(isCommand(line){
-		return 1; //1 represents a valid command
+	resetParserVals();
+	sToks= dbTokens(line);
+	
+	if(sToks.back() != ";"){
+		return 0;
 	}
-	else if(isQuery(line)){
-		return 2; //2 represents a valid query
+	
+	if(isCommand()){
+			return 1; //1 represents a valid command
+	}else{
+		resetParserVals();
+		sToks= dbTokens(line);
+		cout<<"stoks.size()"<<sToks.size()<<endl;
+		if(isQuery()){
+			return 2; //2 represents a valid query
+		}else{
+			return 0; //Failed Syntatic Check
+		}
 	}
-	else{
-		return 0; //Failed Syntatic Check
-	}*/
-	return -1;
 }
 
 Relation* ExecuteQuery(const string& Query){
+	resetParserVals();
+	sToks = dbTokens(Query);
+	
+	
 	Relation* newRel;
 	//TODO: MOVE IN IMPLEMENTATION
 	return newRel;
 }
 
 bool ExecuteCommand(const string& Command){
+	bool exeResult=false;
+	return false;
+	
+	
 	/*
 	//Create Parser Instance with Debug=0; (no output, silent)
 	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
@@ -257,6 +263,12 @@ bool ExecuteCommand(const string& Command){
 	*/
 	return false;
 }
+
+
+
+
+
+
 
 
 int ParseProgramBlock(string Program){//TODO: kill off
@@ -486,107 +498,6 @@ Relation* doExpr() {
 }
 */
 
-/*CONDITIONS
-class condition{ //  a || b || c  ...
-	vector<conjunction> conjunctions;
-	
-	
-	bool passes(Relation* relation, int tupleIndex){ //only 1 conjuntion must pass for condition to be true
-		for(int i =0; i<conjunctions.size){
-				if(conjunctions[i]).passes(relation, tupleIndex)){
-					return true;
-				}
-		}
-		return false;
-	}
-	
-};
-
-class conjunction{ // x && y && z
-	vector<comparison> comparisons;
-	
-	bool passes(Relation* relation, int tupleIndex){ //only 1 comparison must fail for condition to be false
-		for(int i =0; i<comparisons.size){
-				if( !(comparisons[i].passes(relation, tupleIndex)) ){
-					return false;
-				}
-		}
-		return true;
-	}
-	
-};
-
-class comparison{ // <fname == "joe BOB"> , <lname==fname>
-	bool isCondition;
-	condition cond;
-	
-	operand operand1;
-	operation op;
-	operand operand2;
-		
-	bool passes(Relation* relation, int tupleIndex){
-		if(isCondition){
-			return cond.passes(relation, tupleIndex);
-		}
-		else{
-			string val1, val2;
-			if(operand1.isAttribute){
-				val1=relation->findAttribute(operand1.val).cells[tupleIndex];
-			}else{
-				val1=operand1.val;
-			}
-			if(operand2.isAttribute){
-				val2=relation->findAttribute(operand2.val).cells[tupleIndex];
-			}else{
-				val2=operand2.val;
-			}
-			switch op{
-				case "==":
-					return val1==val2;
-					break;
-				case "!=":
-					return val1!=val2;
-					break;
-				case "<=":
-					return val1<=val2;
-					break;
-				case ">=":
-					return val1>=val2;
-					break;
-				case "<":
-					return val1<val2;
-					break;
-				case ">":
-					return val1>val2;
-					break;
-			}
-		}
-	}
-};
-
-enum op { "==", "!=", "<", ">", "<=", ">=" };
-
-class operand{
-	bool isAttribute;
-	string val; //either attribute name or literal
-};
-*/
-
-/*Questionable Content
-#define token string
-
-class View{
-
-	vector<token> storedQuery;
-	
-	vector<Attribute*>  
-
-
-};
-*/
-
-
-
 /*bool isRelationName(){
 //relation-name ::= identifier
 	enter("isRelationName");
@@ -727,7 +638,12 @@ class View{
 					isQ=true;
 				}else{errOut("Expected <expr> after \"<relation-name> <-\" in Query");}
 			}else{errOut("Expected \"<-\" after \"<relation-name>\" in Query");}
-		}		
+		}
+		if( sI>=sToks.size() ){
+			isQ=false;
+		}else if(sToks[sI]!=";"){
+			isQ=false;
+		}
 		leave("isQuery");
 		return isQ;
 	}
@@ -1378,14 +1294,14 @@ class View{
 		}	
 	}
 	void enter(string name) {
-		if(debug>3){
+		if(debug>3&& sI<sToks.size() ){
 			spaces(level++);
 			cout<<"+-"<<name<<": Enter, \t";
 			cout<<"Tok == "<<sToks[sI]<<endl;
 		}
 	}
 	void leave(string name) {
-		if(debug>3){
+		if(debug>3 && sI<sToks.size() ){
 			spaces(--level);
 			cout<<"+-"<<name<<": Leave, \t";
 			cout<<"Tok == "<<sToks[sI]<<endl;
@@ -1399,62 +1315,5 @@ class View{
 	
 	
 };
-
-
-
-/*int main(){
-	Parser myP(2,true,true);
-	string sampleProg="SHOW set_diff_test; rename_test <- rename (v_fname, v_lname, v_personality, v_bounty) enemies  ; INSERT INTO lifeforms VALUES FROM (\"Martian\", \"Mars\"); UPDATE dots SET x1 = 0 WHERE x1 < 0; INSERT INTO dots VALUES FROM (-1, 0, 20);";
-	string sampleSingle="advanced_query <-       project  (x   )  (select (   y == y2) ( points   * dots_to_points));";
-	string txtFileName = "parser_milestone_good_inputs.txt";
-	
-	
-	cout<<"Parser can be called with a with a single Query/Command, a Program Block, or even be passed a text file to read from.\n";
-	cout<<"Additionally, the parser allows for some level of customization.\n";
-	cout<<"*The caller can choose to enforce all uppercase commands (such as SELECT) or allow for mix-case.\n";
-	cout<<"*The caller can enable the parser to pause (wait for enter key) between parses, so the caller may examine the results.\n";
-	cout<<"*The caller may also specify different levels of verbosity (debug argument) from silent(0) to extra-verbose(4).\n";
-	cout<<"***Note: If caller is interfacing code with parser, be sure to set Debug=0; and HaltBetweenExec=false;\n\n";
-	cout<<"So let's pass a single Command to be parsed!\nPress ENTER to continue\n"; cin.ignore((numeric_limits<streamsize>::max)(), '\n');
-	int result = myP.ParseProgramBlock(sampleSingle);
-	cout<<(result==0?"Nice Job, Single Query Parsed!":"Boo, sample single line failed")<<endl<<endl;
-	
-	
-	cout<<"Now lets parse a block of Commands from a single string...\nPress ENTER to continue\n"; cin.ignore((numeric_limits<streamsize>::max)(), '\n');
-	result = myP.ParseProgramBlock(sampleProg);
-	if(result==-1){
-		cout<<"Unknown Error"<<endl;
-	}else{
-		cout<<"Number of Failed Statements: "<<result<<endl;
-	}
-	
-	cout<<"You can also pass parser a textfile to read Commands from. Check out the parser main to see how!\n\n\n";
-	//result = myP.ParseTxtFile(txtFileName);
-	//if(result==-1){
-	//	cout<<"Error Opening input file"<<endl;
-	//}else{
-	//	cout<<"\n\nNumber of Failed Statements: "<<result<<endl;
-	//}
-	
-	Parser par(0,false,true);
-	string usrCmd="";
-	cout<<"Neat! Wanna try some commands? When you get bored, just enter 'leave' to exit.\n\n";
-	while(1){
-		cout<<"::";
-		cin>>usrCmd;
-		cout<<"~"<<usrCmd<<endl;
-		if(usrCmd=="leave"){break;}
-		int fail = par.ParseProgramBlock(usrCmd);
-		cout<<"~"<<(fail==0?"PASSED":"FAILED")<<endl;
-	}
-		
-	cout<<"\n\nThanks and gigem!"<<endl<<endl;
-	cout<<"Exiting...\n";
-	return 0;
-}
-*/
-
-
-
 
 
