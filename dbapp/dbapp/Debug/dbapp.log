@@ -1,4 +1,4 @@
-﻿Build started 6/10/2012 11:01:22 PM.
+﻿Build started 6/10/2012 11:06:18 PM.
      1>Project "C:\Users\Dad\Desktop\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\dbapp.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -31,4 +31,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.63
+Time Elapsed 00:00:02.65

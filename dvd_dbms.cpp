@@ -218,7 +218,7 @@ string updateCustomerMenu(){
 	string userId,firstName="fNamenotImplemented",lastName="lNamenotImplemented",phoneNumber="phone#notImplemented",idToUpdate;
 	char choice;
 	title("Update Customer");green("*Enter Customer's User ID:");white("");cin>>idToUpdate;
-	green("*customerToUpdate <- select (userId = "+idToUpdate+") customers;");cout<<endl;
+	white("*customerToUpdate <- select (userId = "+idToUpdate+") customers;");cout<<endl;
 	//Parser("customerToUpdate <- select (userId = "+idToUpdate+") customers;");
 	//Parser("SHOW customerToUpdate;");
 	cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -238,21 +238,21 @@ string updateCustomerMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='3');
 	if(choice=='1'){
 		green("*Enter Customer's First Name:");white("");cin>>firstName;
-		green("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
 		//Parser("UPDATE customers SET lastName = "+firstName+" WHERE userId = "+idToUpdate+";");
 		//Parser("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Customer's Last Name:");white("");cin>>lastName;
-		green("*UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("*UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");cout<<endl;
 		//Parser("UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");
 		//Parser("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='3'){
 		green("*Enter Customer's Phone Number:");white("");cin>>phoneNumber;
-		green("*UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("*UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");cout<<endl;
 		//Parser("UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");
 		//Parser("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -352,7 +352,7 @@ string removeDvdMenu(){
 	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented",idToDelete;	char choice;
 	title("Remove DVD");
 	green("*Enter DVD ID to remove:");white("");cin>>idToDelete;
-	green("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");cout<<endl;
+	white("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");cout<<endl;
 	//Parser("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");
 	//Parser("SHOW dvdToDelete;");
 	cout<<idToDelete<<", "+inventoryNumber+", "+dvdTitle<<endl;
@@ -465,7 +465,7 @@ string searchDvdMenu(){
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
 	else if(choice=='5')
-		return "customerMenu";
+		return "dvdMenu";
 	system("pause");
 	return "primaryMenu";
 }
