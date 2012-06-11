@@ -18,8 +18,10 @@
     <ClCompile Include="..\..\dvd_dbms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\DBMS.cpp">
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\DBMS.h">
       <Filter>Header Files</Filter>
-    </ClCompile>
+    </ClInclude>
   </ItemGroup>
 </Project>
