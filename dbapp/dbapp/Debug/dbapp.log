@@ -1,9 +1,9 @@
-﻿Build started 6/10/2012 11:30:09 PM.
+﻿Build started 6/11/2012 1:06:44 AM.
      1>Project "C:\Users\Dad\Desktop\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
-         Creating "Debug\dbapp.unsuccessfulbuild" because "AlwaysCreate" was specified.
+         Touching "Debug\dbapp.unsuccessfulbuild".
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\dvd_dbms.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\DBMS.cpp ..\..\dvd_dbms.cpp
          dvd_dbms.cpp
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(169): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(169): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
@@ -17,9 +17,32 @@
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(565): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(607): warning C4390: ';' : empty controlled statement found; is this the intent?
+         DBMS.cpp
+     1>c:\users\dad\desktop\csce315project\attribute.h(68): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\attribute.h(69): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(60): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(74): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(82): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(115): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(127): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(153): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(158): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(159): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(171): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(209): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(244): warning C4101: 'equal' : unreferenced local variable
+     1>c:\users\dad\desktop\csce315project\relation.h(259): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(263): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(279): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\relation.h(283): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\dbengine.h(131): warning C4101: 'currentChar' : unreferenced local variable
+     1>c:\users\dad\desktop\csce315project\dbengine.h(158): warning C4101: 'currentChar' : unreferenced local variable
+     1>c:\users\dad\desktop\csce315project\parserengine.h(833): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\dad\desktop\csce315project\parserengine.h(909): warning C4018: '<' : signed/unsigned mismatch
+         Generating Code...
        Link:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\dbapp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.lib" /MACHINE:X86 Debug\dvd_dbms.obj
-         LINK : C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.exe not found or not built by the last incremental link; performing full link
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\dbapp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.lib" /MACHINE:X86 Debug\DBMS.obj
+         Debug\dvd_dbms.obj
          dbapp.vcxproj -> C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.exe
        Manifest:
          C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\Dad\Desktop\CSCE315Project\dbapp\Debug\dbapp.exe;#1" /manifest Debug\dbapp.exe.intermediate.manifest
@@ -30,4 +53,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.58
+Time Elapsed 00:00:04.89

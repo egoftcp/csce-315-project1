@@ -157,7 +157,7 @@ private:
 
 
 
-int main(){
+//int main(){
 /* DVD_APP USAGE EXAMPLE (NOT TESTED) (SUBJECT TO CHANGE)
 	string sampleCommand1 = "CREATE TABLE baseball_players (fname VARCHAR(20), lname VARCHAR(30), team VARCHAR(20), homeruns INTEGER, salary INTEGER) PRIMARY KEY (fname, lname);";
 	string sampleCommand2 = "INSERT INTO baseball_players VALUES FROM (\"Joe\", \"Swatter\", \"Pirates\", 40, 1000000);";
@@ -173,12 +173,12 @@ int main(){
 	exeDBMS1.Excute(sampleQuery1);
 	exeDBMS1.Excute(sampleCommand5);
 */
-	cout<<"ENTERING MAIN!!!\n\n\n";
+//	cout<<"ENTERING MAIN!!!\n\n\n";
 
-	DBMS dbms();
+//	DBMS dbms();
 
-	cout<<"LEAVING MAIN!!!\n\n\n";	
+//	cout<<"LEAVING MAIN!!!\n\n\n";	
 		
-	return 0;
-}
+//	return 0;
+//}
 

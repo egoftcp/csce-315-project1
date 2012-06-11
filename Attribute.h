@@ -2,6 +2,7 @@
 #define ATTRIBUTE_H
   
 #include <string>
+#include <algorithm>
 #include "DataType.h"
 
 
