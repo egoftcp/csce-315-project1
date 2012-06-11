@@ -11,6 +11,7 @@
 //#include "Attribute.h"
 //#include "Relation.h"
 //#include "DBEngine.h"
+//#include "DBMS.cpp"
 
 using namespace std;
 vector<string> sToks;
@@ -42,7 +43,7 @@ void title(char* currentTitle){
 	for(int i=0;i<80;i++)
 		green("*");
 }
-	void printSTok(){
+/*	void printSTok(){
 		//cout<<"*******Scanner Tokens:\n";
 		for(vector<string>::iterator it=sToks.begin(); it!=sToks.end(); ++it){
 			cout<<"["<<(*it)<<"] ";
@@ -176,7 +177,7 @@ void title(char* currentTitle){
 		   }
 	   }
 	   return tokens;			//A vector full of the tokens ready for translation by the database engine.
-	}
+	}*/
 //Root Menus
 string primaryMenu(){
 	int selection=NULL;
@@ -321,7 +322,7 @@ string addNewCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		sToks=dbTokens("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+",\""+phoneNumber+"\");");white("");printSTok();
+		green("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+",\""+phoneNumber+"\");");white("");//printSTok();
 		//exeDBMS1.Execute("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
 		system("pause");
 	}
@@ -337,7 +338,7 @@ string removeCustomerMenu(){
 	char choice;
 	title("Remove Customer");
 	green("*Enter Customer's User ID:");white("");cin>>idToDelete;
-	white("");sToks=dbTokens("customerToDelete <- select (userId = "+idToDelete+") customers;");white("");printSTok();
+	white("");green("customerToDelete <- select (userId = "+idToDelete+") customers;");white("");//printSTok();
 	//exeDBMS1.Execute("customerToDelete <- select (userId = "+idToDelete+") customers;");
 	//exeDBMS1.Execute("SHOW customerToDelete;");
 	cout<<idToDelete<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -346,7 +347,7 @@ string removeCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		white("");sToks=dbTokens("DELETE FROM customers WHERE (userId = "+idToDelete+");");white("");printSTok();
+		white("");green("DELETE FROM customers WHERE (userId = "+idToDelete+");");white("");//printSTok();
 		//exeDBMS1.Execute("DELETE FROM customers WHERE (userId = "+idToDelete+");");
 		system("pause");
 	}
@@ -361,8 +362,8 @@ string updateCustomerMenu(){
 	string userId,firstName="fNamenotImplemented",lastName="lNamenotImplemented",phoneNumber="phone#notImplemented",idToUpdate;
 	char choice;
 	title("Update Customer");green("*Enter Customer's User ID:");white("");cin>>idToUpdate;
-	white("");sToks=dbTokens("customerToUpdate <- select (userId = "+idToUpdate+") customers;");white("");printSTok();
-	white("");sToks=dbTokens("SHOW customerToUpdate;");white("");printSTok();
+	white("");green("customerToUpdate <- select (userId = "+idToUpdate+") customers;");white("");//printSTok();
+	white("");green("SHOW customerToUpdate;");white("");//printSTok();
 	//exeDBMS1.Execute("customerToUpdate <- select (userId = "+idToUpdate+") customers;");
 	//exeDBMS1.Execute("SHOW customerToUpdate;");
 	cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -382,7 +383,7 @@ string updateCustomerMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='3');
 	if(choice=='1'){
 		green("*Enter Customer's First Name:");white("");cin>>firstName;
-		sToks=dbTokens("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		green("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
 		//exeDBMS1.Execute("UPDATE customers SET lastName = "+firstName+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;

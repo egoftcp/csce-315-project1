@@ -62,10 +62,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\DBMS.cpp" />
     <ClCompile Include="..\..\dvd_dbms.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\ParserEngine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
