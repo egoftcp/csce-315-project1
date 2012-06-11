@@ -4,11 +4,19 @@
 #include <string>
 #include <limits>
 #include <time.h>
-//#include <DBMS.cpp>
+#include <vector>
+#include <boost/tokenizer.hpp>
+//#include "ParserEngine.h"
+//#include "DataType.h"
+//#include "Attribute.h"
+//#include "Relation.h"
+//#include "DBEngine.h"
 
 using namespace std;
-//DBMS exDBMS1(true, 0, "./"); 
+vector<string> sToks;
+//DBMS exDBMS1(false, 0, "./"); 
 
+//Formating functions
 void white(string print){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 	cout<<print;
@@ -34,8 +42,142 @@ void title(char* currentTitle){
 	for(int i=0;i<80;i++)
 		green("*");
 }
+	void printSTok(){
+		//cout<<"*******Scanner Tokens:\n";
+		for(vector<string>::iterator it=sToks.begin(); it!=sToks.end(); ++it){
+			cout<<"["<<(*it)<<"] ";
+		}cout<<endl;
+	}
+	vector<string> dbTokens(string commandLine){
+	//FUNCTION DECLARATIONS  
+		string first;
+		string temp="";			//the temp string is needed in order to store tokens produced by tokenizer when it may
+								//be necessary to concatenate them with adjoining tokens to keep appropriate values within
+								//the the command together.
+		bool openSymbol=false,closeSymbol=false,openQuote=false;	//these boolean variable are utilized to keep track of symbols
+																	//that may have multiple parts and to ensure that text within 
+																	//quotations is held together as one token, regardless of 
+																	//punctuation or spaces.
+		boost::char_separator<char> separator(" \n","\"()+<>=-;,!");	//the tokenizer function allows for the declaration of ignored and
+																		//returned symbols with the ignored before the comma
+		vector<string> tokens;	//a vector of type string to store the tokens so they may be returned to the calling program
+		boost::tokenizer< boost::char_separator<char> > possibleTokens(commandLine, separator);	//the boost library supplies this function
+		//END OF FUNCTION DECLARATIONS
+	   
+		for( boost::tokenizer< boost::char_separator<char> >::iterator position=possibleTokens.begin();
+			position!=possibleTokens.end();
+			++position){
+		   if(openQuote==true)							//With each pass through this for loop, the position is iterated
+		   {											//If statements are used to check each token against possible 
+				if(*position=="\"")						//conjunctive symbols such as <=, ==, >==, etc.
+				{										//The first priority of the conditional checking is for an open quotation.
+					tokens.push_back(temp);				//If the passed command has quotations around two otherwise separated words,
+					tokens.push_back(*position);		//such as "two words", the openQuote boolean flag will stay true until the
+					temp="";							//quote is finished and the strings within are concatenated into a token.
+					openSymbol=false;
+					closeSymbol=false;
+					openQuote=false;
+				}
+				else
+					if(temp=="")
+						temp=*position;
+					else
+					{
+						first=*position;
+						if(!isalpha(first[0]))
+							temp=temp+*position;		//if the current string is a symbol and still within the quotation then
+						else							//no space will be added.
+							temp=temp+" "+*position;	//the temp string is storing the concatenated strings within the quotes,
+					}									//using a space between if both strings are text.
+		   }
+		   else if(openSymbol==true)					//There are four types of data that this chain handles: openSybols, 
+		   {											//closeSymbols, quotations, and strings that would be data or commands.
+				if(*position=="\"")						//When the openSymbol was previously set to true, the current position
+				{										//is then checked for another openSymbol that may need to be joined with the
+					tokens.push_back(temp);				//previous or if the current position requires that a new flag be set to true.
+					tokens.push_back(*position);
+					temp="";
+					openSymbol=false;
+					closeSymbol=false;
+					openQuote=true;						//In this case a quotation is found and determined to be an opening quote.
+				}
+				else if(*position=="<"||*position=="="||*position=="-")
+				{
+					openSymbol=true;					//In this case an adjoining openSymbol is found and concatenated to the previous.
+					temp=temp+*position;				//This conditional check handles <=, ==, and <- symbols.
+				}
+				else
+				{
+					tokens.push_back(temp);
+					tokens.push_back(*position);
+					temp="";
+					openSymbol=false;
+					closeSymbol=false;					//when no symbols are found in this case, the previous open symbol is tokenized
+				}										//and the current string is tokenized as well.
+		   }
+		   else if(closeSymbol==true)
+		   {
+			   if(*position=="\"")
+				{
+					tokens.push_back(*position);
+					temp="";
+					openSymbol=false;
+					closeSymbol=false;		
+					openQuote=true;						//When the prior string was a closeSymbol and a quotation is found it can be
+				}										//assumed this is an open quotation.
+			   else if(*position==">"||*position=="=")
+				{
+					closeSymbol=true;					//Here an adjoining closeSymbol is found and concatenated to the previous symbol.
+					temp=temp+*position;				//This handles the >= symbol.
+				}
+			   else if(*position=="-")
+				{
+					closeSymbol=false;					//If the previous symbol was a closeSymbol then <- will be accounted for.
+					openSymbol=true;
+					tokens.push_back(temp);
+					temp=*position;
 
-
+				}
+			   else
+				{
+					tokens.push_back(temp);
+					tokens.push_back(*position);		//Lastely, when the previous string was a closeSymbol and the current string is not 
+					closeSymbol=false;					//a symbol, the previous symbol will be tokenized and the current string will be tokenized.
+					temp="";
+				}
+		   }
+		   else
+		   {
+			   if(*position=="\"")
+			   {
+					tokens.push_back(*position);
+					temp="";
+					openSymbol=false;
+					closeSymbol=false;
+					openQuote=true;						//If the previous string was not a symbol and there was no previous openQuote, this quote
+			   }										//will be treated as an opening quote.
+			   else if(*position=="<"||*position=="="||*position=="-"||*position=="!")		//As with the previous conditional checks, this check
+				{																			//accounts for all possible openSymbols.
+					openSymbol=true;
+					temp=temp+*position;
+				}
+			   else if(*position==">")
+				{
+					closeSymbol=true;
+					temp=*position;
+				}
+			   else
+			   {
+					closeSymbol=false;
+					openSymbol=false;
+					tokens.push_back(*position);		//All other strings are tokenized.
+					temp="";
+			   }
+		   }
+	   }
+	   return tokens;			//A vector full of the tokens ready for translation by the database engine.
+	}
+//Root Menus
 string primaryMenu(){
 	int selection=NULL;
 	cin.clear();
@@ -161,6 +303,7 @@ string rentalMenu(){
 	else if(selection==0)return "close application";
 	else return "primaryMenu";
 }
+//Database Command Menus
 string addNewCustomerMenu(){
 	time_t seconds = time(NULL);
 	int selection=NULL;
@@ -178,7 +321,7 @@ string addNewCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		white("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");cout<<endl;
+		sToks=dbTokens("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+",\""+phoneNumber+"\");");white("");printSTok();
 		//exeDBMS1.Execute("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
 		system("pause");
 	}
@@ -194,7 +337,7 @@ string removeCustomerMenu(){
 	char choice;
 	title("Remove Customer");
 	green("*Enter Customer's User ID:");white("");cin>>idToDelete;
-	green("customerToDelete <- select (userId = "+idToDelete+") customers;");cout<<endl;
+	white("");sToks=dbTokens("customerToDelete <- select (userId = "+idToDelete+") customers;");white("");printSTok();
 	//exeDBMS1.Execute("customerToDelete <- select (userId = "+idToDelete+") customers;");
 	//exeDBMS1.Execute("SHOW customerToDelete;");
 	cout<<idToDelete<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -203,7 +346,7 @@ string removeCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		white("DELETE FROM customers WHERE (userId = "+idToDelete+");");cout<<endl;
+		white("");sToks=dbTokens("DELETE FROM customers WHERE (userId = "+idToDelete+");");white("");printSTok();
 		//exeDBMS1.Execute("DELETE FROM customers WHERE (userId = "+idToDelete+");");
 		system("pause");
 	}
@@ -218,7 +361,8 @@ string updateCustomerMenu(){
 	string userId,firstName="fNamenotImplemented",lastName="lNamenotImplemented",phoneNumber="phone#notImplemented",idToUpdate;
 	char choice;
 	title("Update Customer");green("*Enter Customer's User ID:");white("");cin>>idToUpdate;
-	white("*customerToUpdate <- select (userId = "+idToUpdate+") customers;");cout<<endl;
+	white("");sToks=dbTokens("customerToUpdate <- select (userId = "+idToUpdate+") customers;");white("");printSTok();
+	white("");sToks=dbTokens("SHOW customerToUpdate;");white("");printSTok();
 	//exeDBMS1.Execute("customerToUpdate <- select (userId = "+idToUpdate+") customers;");
 	//exeDBMS1.Execute("SHOW customerToUpdate;");
 	cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -238,7 +382,7 @@ string updateCustomerMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='3');
 	if(choice=='1'){
 		green("*Enter Customer's First Name:");white("");cin>>firstName;
-		white("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		sToks=dbTokens("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
 		//exeDBMS1.Execute("UPDATE customers SET lastName = "+firstName+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;

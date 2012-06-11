@@ -18,12 +18,9 @@
     <ClCompile Include="..\..\dvd_dbms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\DBMS.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Attribute.h">
+    <ClInclude Include="..\..\ParserEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
