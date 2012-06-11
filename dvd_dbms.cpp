@@ -19,19 +19,19 @@ vector<string> sToks;
 //Formating functions
 void white(string print){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-	cout<<print;
-}
+	cout<<print;//simply takes a string to print and ensures it is white font
+}  
 void green(string print){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-	cout<<print;
+	cout<<print;//simply takes a string to print and ensures it is green font
 }
 void centerstring(char* s)
 {
    int l=strlen(s);
    int pos=(int)((80-l)/2);
    for(int i=0;i<pos;i++)
-    white(" ");
-   cout<<s;
+    white(" ");	//adds an appropriate amount of spaces before the passed string so that it 
+   cout<<s;		//centers on a normal 80 character wide console
 }
 void title(char* currentTitle){
 	system("cls");
@@ -751,6 +751,7 @@ string listRentalsByCustomerMenu(){
 		return "dvdMenu";
 	return "primaryMenu";
 }
+//User choice handler
 void selectionProcessor(){
 	string choice="";
 	choice=primaryMenu();
@@ -797,6 +798,7 @@ void selectionProcessor(){
 	}
 	system("exit");
 }
+//db_application main function
 int main(){
 	string choice;
 	selectionProcessor();
