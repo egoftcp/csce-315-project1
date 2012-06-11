@@ -4,8 +4,8 @@
  * Database Engine (WIP)					*
  ********************************************/
 
- //TODO: IFNDEF ..... 
- #ifndef DBENGINE_H
+ 
+#ifndef DBENGINE_H
 #define DBENGINE_H
  
 #include "stdlib.h" 

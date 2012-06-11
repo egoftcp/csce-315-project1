@@ -10,19 +10,7 @@ using namespace std;
 //note: in notepadpp, press alt+3 , unfold: alt+shift+0
 
 //TODO: move to utility class, looow priority 
-bool isNum(char input) {
-	if(input == '-' || input == '0' ||
-	   input == '1' || input == '2' ||
-	   input == '3' || input == '4' ||
-	   input == '5' || input == '6' ||
-	   input == '7' || input == '8' ||
-	   input == '9' ) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
+
 
 
 
@@ -187,7 +175,7 @@ public:
 				} else {
 					if( strcmp (temp.c_str(), "VARCHAR") == 0 ) {
 						i++;
-						while( isNum(line[i]) ) {
+						while( Helpers::isNum(line[i]) ) {
 							varCharLength = varCharLength + line[i];
 							i++;
 						}
@@ -216,8 +204,8 @@ public:
 				cells.push_back(temp);
 				temp = "";
 			} else {
-				if( isNum(line[i]) ) {
-					while(isNum(line[i])) {
+				if( Helpers::isNum(line[i]) ) {
+					while(Helpers::isNum(line[i])) {
 						temp = temp + line[i];
 						i++;
 					}

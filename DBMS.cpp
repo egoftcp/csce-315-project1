@@ -32,11 +32,19 @@ public:
 	ParserEngine* Parser;
 	
 	string DBPath;
+	
+	/*
+	DBMS(){
+		cout<<"HERE"<<endl;
+	}*/
+	
 	DBMS(bool CmdPrmptMode=true, int DebugMode=7, string DBPath="./"){
+		cout<<"???"<<endl;
 		debug = DebugMode;
 		consoleMode = CmdPrmptMode;
 		engine = new DBEngine(DBPath);
 		Parser = new ParserEngine(engine, &relsInMem);
+		cout<<"consoleMode:"<<consoleMode<<endl;
 		if(consoleMode){
 			startConsole();
 		}
@@ -61,6 +69,21 @@ public:
 			relsInMem[newRel->getName()]=newRel;
 			
 		}
+	}
+	
+	void startConsole(){
+		cout<<"\n\n\n**************************************************************\n";
+		cout<<"*****Welcome to the Relational Database Management System*****\n";
+		cout<<"\n\n\n**************************************************************\n";
+		cout<<"\nTry some commands...\n\n";
+		
+		string input;
+		do{
+			cout<<"dbms::";
+			cin>>input;
+			Execute(input);
+		} while(input!="leave"); //QUESTION: include exit? or is that a command that requires processing (i.e. saving/closing)
+		
 	}
 
 	/*
@@ -122,20 +145,6 @@ private:
 	bool consoleMode; //if true, DBMS will take over (output to) command prompt and wait for input from stdin. Otherwise, it can be used as normal class
 
 	//Methods:
-	void startConsole(){
-		cout<<"\n\n\n**************************************************************\n";
-		cout<<"*****Welcome to the Relational Database Management System*****\n";
-		cout<<"\n\n\n**************************************************************\n";
-		cout<<"\nTry some commands...\n\n";
-		
-		string input;
-		do{
-			cout<<"dbms::";
-			cin>>input;
-			Execute(input);
-		} while(input!="leave"); //QUESTION: include exit? or is that a command that requires processing (i.e. saving/closing)
-		
-	}
 	bool freeMemory(){
 		if(debug>=3){cout<<"Freeing Memory:\n-Relations:\n";}
 		for( map<string,Relation*>::iterator relIt= relsInMem.begin(); relIt != relsInMem.end(); ++relIt){
@@ -174,9 +183,10 @@ private:
 	exeDBMS1.Excute(sampleCommand5);
 */
 //	cout<<"ENTERING MAIN!!!\n\n\n";
-
-//	DBMS dbms();
-
+//	DBMS* dbms1 = new DBMS();
+	
+	
+//	delete dbms1;
 //	cout<<"LEAVING MAIN!!!\n\n\n";	
 		
 //	return 0;

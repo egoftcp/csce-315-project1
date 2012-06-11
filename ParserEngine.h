@@ -1,43 +1,53 @@
 /* parser.cpp:
  */
 
-#ifndef PARSERENGINE_H
-#define PARSERENGINE_H
+
  
 #include <string>
 #include <sstream>
+#include <queue>
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include<boost/tokenizer.hpp>
+#include "Helpers.h"
 #include "Attribute.h" //
 #include "Relation.h"
 #include "DBEngine.h"
-#include<boost/tokenizer.hpp>
+#include "CondConjCompOp.h"
 
 using namespace std;
 
 
+
+//Relational operators in c++ stdlib with <utility> header file
+//http://en.wikipedia.org/wiki/Utility_%28C%2B%2B%29
+//http://www.cplusplus.com/reference/std/utility/
+
 class ParserEngine{
 public:
+
+	//Data Members
 	bool allowNonCaps; //True = allow mixed-case Command keywords (i.e. SELECT vs sElecT)
-	int debug; 	/*Debug Levels
-	0-No Output
-	1-Minimal pass/fail output
-	2-More pass/fail info
-	3-Show syntax error messages,
-	4-Show enter/leave print statements */
-	
+	int debug; 		/*Debug Levels
+					0-No Output
+					1-Minimal pass/fail output
+					2-More pass/fail info
+					3-Show syntax error messages,
+					4-Show enter/leave print statements */
 	map<string,Relation* > * relsInMemP;
 	DBEngine* engineP;
+	vector<string> sToks;
+	int sI;
+	int level;
 	
 	
-	//Constructor
+	
+	//Constructors
 	ParserEngine(int Debug=1, bool AllowNonCapitalCMDs=false) :
 		debug(Debug),
 		allowNonCaps(AllowNonCapitalCMDs)
 	{ ; }
-	
-	
 	
 	ParserEngine(DBEngine* EngineP, map<string, Relation* > * RelsInMemP){
 		relsInMemP=RelsInMemP;
@@ -49,30 +59,9 @@ public:
 	
 	//Runs Parser On Single or Multiple Command/Queries
 	//Returns number of failed statements or -1 for system error
-	int ParseProgramBlock(string Program){
-		int failCount=0;
-		string Sub="";
-		size_t sPos=0;
-		size_t ePos = Program.find(';');
-		if(ePos==string::npos) failCount++;
-		while(ePos!=string::npos){
-			ePos++;
-			Sub = Program.substr(sPos,ePos-sPos);
-			if(!ParseSingleLine(Sub)){
-				failCount++;
-			}
-			sPos=ePos;		
-			ePos = Program.find(';',int(sPos));
-			//if(haltBetween){
-			//	cout << "Press ENTER to continue";
-			//	cin.ignore((numeric_limits<streamsize>::max)(), '\n');
-			//	cout<<endl<<endl;
-			//}
-		}
-		return failCount;
+	
 
-	}
-public: //TODO: fix public vs private. poor practice
+	/*Old Code
 	//Runs Parser on all Command/Queries in a text file (useful for testing)
 	//Assumes (textfile will be newLine seperated) AND (file will NOT have <cr><lf> line endings)
 	//Returns number of failed statements or -1 for input-file error
@@ -97,12 +86,9 @@ public: //TODO: fix public vs private. poor practice
 			//}
 		}
 		return failCount;
-	}
-			
-
-	vector<string> sToks;
-	int sI;
-	int level;
+	}		
+	*/	
+	
 	/* token consumption information
 	"primitive" functions which consume all of their input:
 	isLiteral();
@@ -125,174 +111,336 @@ public: //TODO: fix public vs private. poor practice
 			cout<<"["<<(*it)<<"] ";
 		}cout<<endl;
 	}
-	string retUpper(string inStr){
-		string upp = inStr;
-		for(string::iterator it = upp.begin(); it!=upp.end(); ++it){
-			*it = std::toupper((unsigned char)(*it));
-		}
-		return upp;
+	
+
+	
+int Validate(const string& line){
+	/*if(isCommand(line){
+		return 1; //1 represents a valid command
+	}
+	else if(isQuery(line)){
+		return 2; //2 represents a valid query
+	}
+	else{
+		return 0; //Failed Syntatic Check
+	}*/
+	return -1;
 }
 
-	//Scanner
-	vector<string> dbTokens(string commandLine){
-	//FUNCTION DECLARATIONS  
-		string first;
-		string temp="";			//the temp string is needed in order to store tokens produced by tokenizer when it may
-								//be necessary to concatenate them with adjoining tokens to keep appropriate values within
-								//the the command together.
-		bool openSymbol=false,closeSymbol=false,openQuote=false;	//these boolean variable are utilized to keep track of symbols
-																	//that may have multiple parts and to ensure that text within 
-																	//quotations is held together as one token, regardless of 
-																	//punctuation or spaces.
-		boost::char_separator<char> separator(" \n","\"()+<>=-;,!");	//the tokenizer function allows for the declaration of ignored and
-																		//returned symbols with the ignored before the comma
-		vector<string> tokens;	//a vector of type string to store the tokens so they may be returned to the calling program
-		boost::tokenizer< boost::char_separator<char> > possibleTokens(commandLine, separator);	//the boost library supplies this function
-		//END OF FUNCTION DECLARATIONS
-	   
-		for( boost::tokenizer< boost::char_separator<char> >::iterator position=possibleTokens.begin();
-			position!=possibleTokens.end();
-			++position){
-		   if(openQuote==true)							//With each pass through this for loop, the position is iterated
-		   {											//If statements are used to check each token against possible 
-				if(*position=="\"")						//conjunctive symbols such as <=, ==, >==, etc.
-				{										//The first priority of the conditional checking is for an open quotation.
-					tokens.push_back(temp);				//If the passed command has quotations around two otherwise separated words,
-					tokens.push_back(*position);		//such as "two words", the openQuote boolean flag will stay true until the
-					temp="";							//quote is finished and the strings within are concatenated into a token.
-					openSymbol=false;
-					closeSymbol=false;
-					openQuote=false;
-				}
-				else
-					if(temp=="")
-						temp=*position;
-					else
-					{
-						first=*position;
-						if(!isalpha(first[0]))
-							temp=temp+*position;		//if the current string is a symbol and still within the quotation then
-						else							//no space will be added.
-							temp=temp+" "+*position;	//the temp string is storing the concatenated strings within the quotes,
-					}									//using a space between if both strings are text.
-		   }
-		   else if(openSymbol==true)					//There are four types of data that this chain handles: openSybols, 
-		   {											//closeSymbols, quotations, and strings that would be data or commands.
-				if(*position=="\"")						//When the openSymbol was previously set to true, the current position
-				{										//is then checked for another openSymbol that may need to be joined with the
-					tokens.push_back(temp);				//previous or if the current position requires that a new flag be set to true.
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;
-					openQuote=true;						//In this case a quotation is found and determined to be an opening quote.
-				}
-				else if(*position=="<"||*position=="="||*position=="-")
-				{
-					openSymbol=true;					//In this case an adjoining openSymbol is found and concatenated to the previous.
-					temp=temp+*position;				//This conditional check handles <=, ==, and <- symbols.
-				}
-				else
-				{
-					tokens.push_back(temp);
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;					//when no symbols are found in this case, the previous open symbol is tokenized
-				}										//and the current string is tokenized as well.
-		   }
-		   else if(closeSymbol==true)
-		   {
-			   if(*position=="\"")
-				{
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;		
-					openQuote=true;						//When the prior string was a closeSymbol and a quotation is found it can be
-				}										//assumed this is an open quotation.
-			   else if(*position==">"||*position=="=")
-				{
-					closeSymbol=true;					//Here an adjoining closeSymbol is found and concatenated to the previous symbol.
-					temp=temp+*position;				//This handles the >= symbol.
-				}
-			   else if(*position=="-")
-				{
-					closeSymbol=false;					//If the previous symbol was a closeSymbol then <- will be accounted for.
-					openSymbol=true;
-					tokens.push_back(temp);
-					temp=*position;
+Relation* ExecuteQuery(const string& Query){
+	Relation* newRel;
+	//TODO: MOVE IN IMPLEMENTATION
+	return newRel;
+}
 
-				}
-			   else
+bool ExecuteCommand(const string& Command){
+	/*
+	//Create Parser Instance with Debug=0; (no output, silent)
+	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
+	int fails = parserInst.ParseProgramBlock(Command);
+	if(fails!=0){
+		cout<<"Input is not syntactically correct, returning\n";
+		return false;
+	}
+	bool ret=false;
+	
+	int tI=0;
+	
+	vector<string> toks = parserInst.getTokens(Command);
+	if(toks[tI] == "CREATE"){
+		string relName = toks[2];
+		queue<string> attrNames;
+		queue<int> attrTypes;
+		//typed-attribute-list will always start at index=4 (but open paren @ 3) and end when a close-paren follows a data type (instead of a comma)
+		int alI=3; //attribute-list-Index (alI)
+		do{
+			alI++;
+			attrNames.push(toks[alI]);
+			alI++;
+			string typeName = toks[alI];
+			if(typeName=="VARCHAR"){
+				alI+=2;
+				int len = stringToInt(toks[alI]);
+				attrTypes.push(len);
+				alI+=2;			
+			}else if(typeName=="INTEGER"){
+				attrTypes.push(0);
+				alI++;
+			}else{
+				cerr<<"Something terrible happened in ExecuteCommand-Create-TypedAttributeList\n";
+			}
+		}while(toks[alI]==",");
+		alI+=3; //move index to open-paren of 'primary key' attribute-list
+		queue<string> pkNames;
+		do{
+			alI++;
+			pkNames.push(toks[alI]);
+			alI++;
+			
+		}while(toks[alI]==",");
+		
+		Relation* newRel = new Relation(relName);
+		
+		while(!attrNames.empty()){
+			DataType dt((attrTypes.front()==0?true:false),attrTypes.front());
+			
+			newRel->addAttribute(attrNames.front(),dt);
+			attrNames.pop();
+			attrTypes.pop();
+			
+		}
+		while(!pkNames.empty()){
+			newRel->primaryKeys.push_back(pkNames.front());
+			pkNames.pop();
+		}
+		
+		relsInMem.insert( pair<string,Relation*>(relName,newRel) );
+		
+		ret = true;
+		return ret;
+	}
+	else if(toks[tI] == "INSERT"){
+		string relName = toks[2];
+		vector<string> vals;
+		int intInd=5;
+		do{
+			intInd++;
+			if(toks[intInd]=="\""){
+				intInd++;
+				vals.push_back(toks[intInd]);
+				intInd+=2;
+			}else if(toks[intInd]=="-"){
+				intInd++;
+				vals.push_back("-"+toks[intInd]);
+				intInd++;
+			}else{
+				vals.push_back(toks[intInd]);
+				intInd++;
+			}
+		}while(toks[intInd]==",");
+		cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
+		relsInMem[relName]->addTuple(vals);
+		ret=true;
+		return ret;
+	}
+	else if(toks[tI]=="SHOW"){
+	    string relName=toks[tI+1];
+	    relsInMem[relName]->print();
+	    ret=true;
+	    return ret;
+	}
+	else if(toks[tI]=="WRITE"){
+	    string relName=toks[tI+1];
+	    bool suc = writeRelation(relName);
+	    return suc;
+	}
+	else if(toks[tI]=="OPEN"){
+		string relName = toks[tI+1];
+		bool suc = openRelation(relName);
+		return suc;
+	}
+	else if(toks[tI]=="EXIT"){
+		bool suc = freeMemory();
+		exit(1);
+		return suc;
+	}
+	else if(toks[tI]=="CLOSE"){
+		//delete existing relName.db
+		//write in-memory version of relName to relName.db
+		//free memory of relsInMem[relName] 
+		//remove relName from relsInMem   //int erasedCount = relsInMem.erase(relName); if(erasedCount!=1){errOut("Error removing relName from memory map.");}
+	}
+	else if(toks[tI]=="DELETE"){
+	}
+	else if(toks[tI]=="UPDATE"){
+	}
+	*/
+	return false;
+}
+
+
+int ParseProgramBlock(string Program){//TODO: kill off
+	int failCount=0;
+	string Sub="";
+	size_t sPos=0;
+	size_t ePos = Program.find(';');
+	if(ePos==string::npos) failCount++;
+	while(ePos!=string::npos){
+		ePos++;
+		Sub = Program.substr(sPos,ePos-sPos);
+		if(!ParseSingleLine(Sub)){
+			failCount++;
+		}
+		sPos=ePos;		
+		ePos = Program.find(';',int(sPos));
+	}
+	return failCount;
+}
+
+bool ParseSingleLine(string line){//TODO: kill off
+	resetParserVals();
+	sToks=dbTokens(line);	
+		if(debug==1){
+			cout<<endl<<line<<endl;
+		}else if(debug > 1){
+			cout<<"\n\n***************Input Line***************\n***";
+			cout<<line<<endl<<"***"<<endl;
+			cout<<"***";
+			printSTok();
+			cout<<"****************************************\n";
+		}
+		bool passedParse = ParseTokens();
+		//Print results
+		if(debug>3){ cout<<"****************************************\n"; }
+		if(debug>1){ cout<<"***              "<<(passedParse?"PASSED":"FAILED")<<"              ***\n****************************************\n"; }
+		return passedParse;
+}
+
+bool ParseTokens(){//TODO: kill off
+	bool passedParse;
+	if(isFCommand()){
+		passedParse = isCommand();
+	}else{
+		passedParse = isQuery();
+	}
+	return passedParse;
+}
+
+
+
+private:
+
+//TODO: Rename. 
+vector<string> dbTokens(string commandLine){ //Scanner-Tokenizer
+//FUNCTION DECLARATIONS  
+	string first;
+	string temp="";			//the temp string is needed in order to store tokens produced by tokenizer when it may
+							//be necessary to concatenate them with adjoining tokens to keep appropriate values within
+							//the the command together.
+	bool openSymbol=false,closeSymbol=false,openQuote=false;	//these boolean variable are utilized to keep track of symbols
+																//that may have multiple parts and to ensure that text within 
+																//quotations is held together as one token, regardless of 
+																//punctuation or spaces.
+	boost::char_separator<char> separator(" \n","\"()+<>=-;,!");	//the tokenizer function allows for the declaration of ignored and
+																	//returned symbols with the ignored before the comma
+	vector<string> tokens;	//a vector of type string to store the tokens so they may be returned to the calling program
+	boost::tokenizer< boost::char_separator<char> > possibleTokens(commandLine, separator);	//the boost library supplies this function
+	//END OF FUNCTION DECLARATIONS
+   
+	for( boost::tokenizer< boost::char_separator<char> >::iterator position=possibleTokens.begin();
+		position!=possibleTokens.end();
+		++position){
+	   if(openQuote==true)							//With each pass through this for loop, the position is iterated
+	   {											//If statements are used to check each token against possible 
+			if(*position=="\"")						//conjunctive symbols such as <=, ==, >==, etc.
+			{										//The first priority of the conditional checking is for an open quotation.
+				tokens.push_back(temp);				//If the passed command has quotations around two otherwise separated words,
+				tokens.push_back(*position);		//such as "two words", the openQuote boolean flag will stay true until the
+				temp="";							//quote is finished and the strings within are concatenated into a token.
+				openSymbol=false;
+				closeSymbol=false;
+				openQuote=false;
+			}
+			else
+				if(temp=="")
+					temp=*position;
+				else
 				{
-					tokens.push_back(temp);
-					tokens.push_back(*position);		//Lastely, when the previous string was a closeSymbol and the current string is not 
-					closeSymbol=false;					//a symbol, the previous symbol will be tokenized and the current string will be tokenized.
-					temp="";
-				}
-		   }
+					first=*position;
+					if(!isalpha(first[0]))
+						temp=temp+*position;		//if the current string is a symbol and still within the quotation then
+					else							//no space will be added.
+						temp=temp+" "+*position;	//the temp string is storing the concatenated strings within the quotes,
+				}									//using a space between if both strings are text.
+	   }
+	   else if(openSymbol==true)					//There are four types of data that this chain handles: openSybols, 
+	   {											//closeSymbols, quotations, and strings that would be data or commands.
+			if(*position=="\"")						//When the openSymbol was previously set to true, the current position
+			{										//is then checked for another openSymbol that may need to be joined with the
+				tokens.push_back(temp);				//previous or if the current position requires that a new flag be set to true.
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;
+				openQuote=true;						//In this case a quotation is found and determined to be an opening quote.
+			}
+			else if(*position=="<"||*position=="="||*position=="-")
+			{
+				openSymbol=true;					//In this case an adjoining openSymbol is found and concatenated to the previous.
+				temp=temp+*position;				//This conditional check handles <=, ==, and <- symbols.
+			}
+			else
+			{
+				tokens.push_back(temp);
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;					//when no symbols are found in this case, the previous open symbol is tokenized
+			}										//and the current string is tokenized as well.
+	   }
+	   else if(closeSymbol==true)
+	   {
+		   if(*position=="\"")
+			{
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;		
+				openQuote=true;						//When the prior string was a closeSymbol and a quotation is found it can be
+			}										//assumed this is an open quotation.
+		   else if(*position==">"||*position=="=")
+			{
+				closeSymbol=true;					//Here an adjoining closeSymbol is found and concatenated to the previous symbol.
+				temp=temp+*position;				//This handles the >= symbol.
+			}
+		   else if(*position=="-")
+			{
+				closeSymbol=false;					//If the previous symbol was a closeSymbol then <- will be accounted for.
+				openSymbol=true;
+				tokens.push_back(temp);
+				temp=*position;
+
+			}
+		   else
+			{
+				tokens.push_back(temp);
+				tokens.push_back(*position);		//Lastely, when the previous string was a closeSymbol and the current string is not 
+				closeSymbol=false;					//a symbol, the previous symbol will be tokenized and the current string will be tokenized.
+				temp="";
+			}
+	   }
+	   else
+	   {
+		   if(*position=="\"")
+		   {
+				tokens.push_back(*position);
+				temp="";
+				openSymbol=false;
+				closeSymbol=false;
+				openQuote=true;						//If the previous string was not a symbol and there was no previous openQuote, this quote
+		   }										//will be treated as an opening quote.
+		   else if(*position=="<"||*position=="="||*position=="-"||*position=="!")		//As with the previous conditional checks, this check
+			{																			//accounts for all possible openSymbols.
+				openSymbol=true;
+				temp=temp+*position;
+			}
+		   else if(*position==">")
+			{
+				closeSymbol=true;
+				temp=*position;
+			}
 		   else
 		   {
-			   if(*position=="\"")
-			   {
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;
-					openQuote=true;						//If the previous string was not a symbol and there was no previous openQuote, this quote
-			   }										//will be treated as an opening quote.
-			   else if(*position=="<"||*position=="="||*position=="-"||*position=="!")		//As with the previous conditional checks, this check
-				{																			//accounts for all possible openSymbols.
-					openSymbol=true;
-					temp=temp+*position;
-				}
-			   else if(*position==">")
-				{
-					closeSymbol=true;
-					temp=*position;
-				}
-			   else
-			   {
-					closeSymbol=false;
-					openSymbol=false;
-					tokens.push_back(*position);		//All other strings are tokenized.
-					temp="";
-			   }
+				closeSymbol=false;
+				openSymbol=false;
+				tokens.push_back(*position);		//All other strings are tokenized.
+				temp="";
 		   }
 	   }
-	   return tokens;			//A vector full of the tokens ready for translation by the database engine.
-	}
+   }
+   return tokens;			//A vector full of the tokens ready for translation by the database engine.
+}
 
-	bool ParseSingleLine(string line){
-		resetParserVals();
-		sToks=dbTokens(line);	
-			if(debug==1){
-				cout<<endl<<line<<endl;
-			}else if(debug > 1){
-				cout<<"\n\n***************Input Line***************\n***";
-				cout<<line<<endl<<"***"<<endl;
-				cout<<"***";
-				printSTok();
-				cout<<"****************************************\n";
-			}
-			bool passedParse = ParseTokens();
-			//Print results
-			if(debug>3){ cout<<"****************************************\n"; }
-			if(debug>1){ cout<<"***              "<<(passedParse?"PASSED":"FAILED")<<"              ***\n****************************************\n"; }
-			return passedParse;
-	}
-	bool ParseTokens(){
-		bool passedParse;
-		if(isFCommand()){
-			passedParse = isCommand();
-		}else{
-			passedParse = isQuery();
-		}
-		return passedParse;
-	}
-	
-	
 	
 	
 /*isRelationName(); and doExpr();
@@ -438,208 +586,116 @@ class View{
 */
 
 
-map<string,Relation*> relsInMem;	
 
-int Validate(const string& line);
-/*{
-	if(isCommand(line){
-		return 1; //1 represents a valid command
-	}
-	else if(isQuery(line)){
-		return 2; //2 represents a valid query
-	}
-	else{
-		return 0; //Failed Syntatic Check
-	}
-}*/
-
-Relation* ExecuteQuery(const string& Query){
-	Relation* newRel;
-	//TODO: MOVE IN IMPLEMENTATION
-	return newRel;
+/*bool isRelationName(){
+//relation-name ::= identifier
+	enter("isRelationName");
+	bool isRel = isIdentifier();
+	leave("isRelationName");
+	return isRel;
 }
+*/
 
-bool ExecuteCommand(const string& Command);
-/*{
-	//Create Parser Instance with Debug=0; (no output, silent)
-	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
-	int fails = parserInst.ParseProgramBlock(Command);
-	if(fails!=0){
-		cout<<"Input is not syntactically correct, returning\n";
-		return false;
-	}
-	bool ret=false;
-	
-	int tI=0;
-	
-	vector<string> toks = parserInst.getTokens(Command);
-	if(toks[tI] == "CREATE"){
-		string relName = toks[2];
-		queue<string> attrNames;
-		queue<int> attrTypes;
-		//typed-attribute-list will always start at index=4 (but open paren @ 3) and end when a close-paren follows a data type (instead of a comma)
-		int alI=3; //attribute-list-Index (alI)
-		do{
-			alI++;
-			attrNames.push(toks[alI]);
-			alI++;
-			string typeName = toks[alI];
-			if(typeName=="VARCHAR"){
-				alI+=2;
-				int len = stringToInt(toks[alI]);
-				attrTypes.push(len);
-				alI+=2;			
-			}else if(typeName=="INTEGER"){
-				attrTypes.push(0);
-				alI++;
-			}else{
-				cerr<<"Something terrible happened in ExecuteCommand-Create-TypedAttributeList\n";
-			}
-		}while(toks[alI]==",");
-		alI+=3; //move index to open-paren of 'primary key' attribute-list
-		queue<string> pkNames;
-		do{
-			alI++;
-			pkNames.push(toks[alI]);
-			alI++;
+/*Relation* doExpr() {
+	//expr ::= atomic-expr | selection | projection | renaming | union | difference | product
+		enter("isExpr");
+		int exprI = sI;
+		bool isExp = isSelection();
 			
-		}while(toks[alI]==",");
-		
-		Relation* newRel = new Relation(relName);
-		
-		while(!attrNames.empty()){
-			dataType dt((attrTypes.front()==0?true:false),attrTypes.front());
-			
-			newRel->addAttribute(attrNames.front(),dt);
-			attrNames.pop();
-			attrTypes.pop();
-			
+		if(!isExp){
+			isExp=isProjection();
 		}
-		while(!pkNames.empty()){
-			newRel->primaryKeys.push_back(pkNames.front());
-			pkNames.pop();
+		if(!isExp){
+			isExp=isRenaming();
 		}
-		
-		relsInMem.insert( pair<string,Relation*>(relName,newRel) );
-		
-		ret = true;
-		return ret;
-	}
-	else if(toks[tI] == "INSERT"){
-		string relName = toks[2];
-		vector<string> vals;
-		int intInd=5;
-		do{
-			intInd++;
-			if(toks[intInd]=="\""){
-				intInd++;
-				vals.push_back(toks[intInd]);
-				intInd+=2;
-			}else if(toks[intInd]=="-"){
-				intInd++;
-				vals.push_back("-"+toks[intInd]);
-				intInd++;
-			}else{
-				vals.push_back(toks[intInd]);
-				intInd++;
-			}
-		}while(toks[intInd]==",");
-		cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
-		relsInMem[relName]->addTuple(vals);
-		ret=true;
-		return ret;
-	}
-	else if(toks[tI]=="SHOW"){
-	    string relName=toks[tI+1];
-	    relsInMem[relName]->print();
-	    ret=true;
-	    return ret;
-	}
-	else if(toks[tI]=="WRITE"){
-	    string relName=toks[tI+1];
-	    bool suc = writeRelation(relName);
-	    return suc;
-	}
-	else if(toks[tI]=="OPEN"){
-		string relName = toks[tI+1];
-		bool suc = openRelation(relName);
-		return suc;
-	}
-	else if(toks[tI]=="EXIT"){
-		bool suc = freeMemory();
-		exit(1);
-		return suc;
-	}
-	else if(toks[tI]=="CLOSE"){
-		//delete existing relName.db
-		//write in-memory version of relName to relName.db
-		//free memory of relsInMem[relName] 
-		//remove relName from relsInMem   //int erasedCount = relsInMem.erase(relName); if(erasedCount!=1){errOut("Error removing relName from memory map.");}
-	}
-	else if(toks[tI]=="DELETE"){
-	}
-	else if(toks[tI]=="UPDATE"){
-	}
-	
-
-	
-	
-	return false;
+		if(!isExp){
+			isExp=isUnion();
+		}
+		if(!isExp){
+			sI=exprI;
+			isExp=isDifference();
+		}
+		if(!isExp){
+			sI=exprI;
+			isExp=isProduct();
+		}
+		if(!isExp){
+			sI=exprI;
+			isExp=isAtomicExpr();
+		}
+		if(!isExp){
+			sI=exprI;
+		}
+		leave("isExpr");
+		return isExp;
 }
+*/
+
+/*Questionable Content
+	#define token string
+	class View{
+		vector<token> storedQuery;
+		vector<Attribute*>  
+	};
 */
 
 //TODO: COME BACK AND FINISH!!!
-/*
-Relation* ParserEngine::ExecuteQuery(const string& line){
-
+/*Relation* ExecuteQuery(const string& line){
 }
-
-	
-	Relation* doQuery(int startingIndex){
-	//query ::= relation-name <- expr ;
-		enter("DoQuery");
-		int qI=startingIndex;
-		string relName=toks[qI];
-		Relation* exprRelation = doExpr(qI+2);
-		Relation* queryRelation = new Relation(relName, exprRelation); // constructor that makes new relation (with name relName) whose attribues are coppied from the relation pointed exprRelation
-		leave("doQuery");
-		return queryRelation;
-	}
-	Relation* doSelection(int startingIndex){
-	//selection ::= select ( condition ) atomic-expr
-		enter("doSelection");
-		int selI = startingIndex;
-		int condIndex = selI + 2;
-		condition cond = doCondition(&condIndex); //doCondition will modify condIndex to the last index it evaluates ( condIndex should point to the closing paren when doCondition returns)
-		aeIndex = condIndex+1;// move index from close-paren to atomic-expr
-		Relation* fromRelation = doAtomicExpression(aeIndex);
-		vector<int> matchingTupleIndices;
-		int tupleCount= fromRelation->columns[0].cells.size();
-		for(int i=0; i<tupleCount; i++){
-			if(cond.passes(fromRelation, i)){
-				matchingTupleIndices.push_back(i);
-			}
-		}
-		Relation* selectionRelation = new Relation(fromRelation, matchingTupleIndices); //constructor that makes new relation from pointer to old relation and a vector<int> of indices of tuples to copy
-		leave("doSelection");
-		return selectionRelation;
-	}
-	Relation* doProjection(int startingIndex){
-	// projection ::= project ( attribute-list ) atomic-expr
-		enter("doProjection");
-		int attribListI = startingIndex+2;
-		vector<string> attributes = getAttributeList(&attribListI);//modifies attribListI to last token evaluated 
-		int aeIndex = attribListI++;//move pointer from closeing-paren to atomic-expr
-		Relation* fromRelation = doAtomicExpression(aeIndex);
-		Relation* projectionRelation = new Relation(fromRelation, attributes); //constructor that will copy each attribute in attributes from relation fromRelation to new relation
-		leave("doProjection");
-		return projectionRelation;
-	}
-	
 */
 
+/*Relation* doQuery(int startingIndex){
+//query ::= relation-name <- expr ;
+	enter("DoQuery");
+	int qI=startingIndex;
+	string relName=toks[qI];
+	Relation* exprRelation = doExpr(qI+2);
+	Relation* queryRelation = new Relation(relName, exprRelation); // constructor that makes new relation (with name relName) whose attribues are coppied from the relation pointed exprRelation
+	leave("doQuery");
+	return queryRelation;
+}
+*/
+
+/*Relation* doSelection(int startingIndex){
+//selection ::= select ( condition ) atomic-expr
+	enter("doSelection");
+	int selI = startingIndex;
+	int condIndex = selI + 2;
+	condition cond = doCondition(&condIndex); //doCondition will modify condIndex to the last index it evaluates ( condIndex should point to the closing paren when doCondition returns)
+	aeIndex = condIndex+1;// move index from close-paren to atomic-expr
+	Relation* fromRelation = doAtomicExpression(aeIndex);
+	vector<int> matchingTupleIndices;
+	int tupleCount= fromRelation->columns[0].cells.size();
+	for(int i=0; i<tupleCount; i++){
+		if(cond.passes(fromRelation, i)){
+			matchingTupleIndices.push_back(i);
+		}
+	}
+	Relation* selectionRelation = new Relation(fromRelation, matchingTupleIndices); //constructor that makes new relation from pointer to old relation and a vector<int> of indices of tuples to copy
+	leave("doSelection");
+	return selectionRelation;
+}
+*/
+
+/*Relation* doProjection(int startingIndex){
+// projection ::= project ( attribute-list ) atomic-expr
+	enter("doProjection");
+	int attribListI = startingIndex+2;
+	vector<string> attributes = getAttributeList(&attribListI);//modifies attribListI to last token evaluated 
+	int aeIndex = attribListI++;//move pointer from closeing-paren to atomic-expr
+	Relation* fromRelation = doAtomicExpression(aeIndex);
+	Relation* projectionRelation = new Relation(fromRelation, attributes); //constructor that will copy each attribute in attributes from relation fromRelation to new relation
+	leave("doProjection");
+	return projectionRelation;
+}
+*/
+
+
+
+
+
 	
-//Grammar Functions:
+//Syntatic Grammar Functions:
 	bool isAtomicExpr(){
 	//atomic-expr ::= relation-name | ( expr )
 		enter("isAtomicExpr");
@@ -1066,7 +1122,7 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	}
 	bool isFCommand(){ 
 	//Determines if first token matches a Command
-		string f = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		string f = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		return ( (f=="OPEN") || (f=="CLOSE") || (f=="WRITE") || (f=="EXIT") || (f=="SHOW") || (f=="CREATE") || (f=="UPDATE") || (f=="INSERT") || (f=="DELETE") );
 	}
 	bool isCommand(){
@@ -1087,7 +1143,7 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//open-cmd ::== OPEN relation-name
 		enter("isOpen");
 		bool isOpn=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="OPEN"){
 			sI++;
 			if(isRelationName()){
@@ -1102,7 +1158,7 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//close-cmd ::== CLOSE relation-name
 		enter("isClose");
 		bool isCls=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="CLOSE"){
 			sI++;
 			if(isRelationName()){
@@ -1118,7 +1174,7 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//write-cmd ::== WRITE relation-name
 		enter("isWrite");
 		bool isWrt=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);	
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);	
 		if(sToks[sI]=="WRITE"){
 			sI++;
 			if(isRelationName()){
@@ -1135,7 +1191,7 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//exit-cmd ::== EXIT
 		enter("isExit");
 		bool isExt=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="EXIT"){
 			sI++;
 			isExt=true;
@@ -1147,7 +1203,7 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//show-cmd ::== SHOW atomic-expr
 		enter("isShow");
 		bool isShw=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="SHOW"){
 			sI++;
 			int atomicExprSI=sI;
@@ -1164,10 +1220,10 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//create-cmd ::= CREATE TABLE relation-name ( typed-attribute-list ) PRIMARY KEY ( attribute-list )
 		enter("isCreate");
 		bool isCrt=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="CREATE"){
 			sI++;
-			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+			sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 			if(sToks[sI] == "TABLE"){
 				sI++;
 				if(isRelationName()){
@@ -1180,10 +1236,10 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 							//vector<TypedAttribute> typedAttrs = TypedAttributeList();
 							if(sToks[sI]==")"){
 								sI++;
-								string tempP = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //TODO: IDEA: should we combine 'primary' and 'key' as they should never be apart?
+								string tempP = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //TODO: IDEA: should we combine 'primary' and 'key' as they should never be apart?
 								if(tempP=="PRIMARY"){
 									sI++;
-									string tempK = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+									string tempK = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 									if(tempK=="KEY"){
 										sI++;
 										if(sToks[sI]=="("){
@@ -1210,7 +1266,7 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
 		enter("isUpdate");
 		bool isUpd=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="UPDATE"){
 			sI++;
 			if(isRelationName()){
@@ -1245,23 +1301,23 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 				//  | INSERT INTO relation-name VALUES FROM RELATION expr
 		enter("isInsert");
 		bool isIns=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="INSERT"){
 			sI++;
-			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'INTO'
+			sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'INTO'
 			if(sToks[sI]=="INTO"){
 				sI++;
 				if(isRelationName()){
-					sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'VALUES'
+					sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'VALUES'
 					if(sToks[sI]=="VALUES"){
 						sI++;
-						sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'FROM'
+						sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'FROM'
 						if(sToks[sI] =="FROM"){
 							sI++;
-							string temp= (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for !!possible!! 'RELATION' token
+							string temp= (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for !!possible!! 'RELATION' token
 							if(temp=="RELATION"){
 								//This is < VALUES FROM RELATION expr > case of 'INSERT'
-								sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'RELATION' token
+								sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'RELATION' token
 								sI++; //consume 'RELATION'
 								if(isExpr()){
 									isIns=true;
@@ -1294,14 +1350,14 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 	//delete-cmd ::= DELETE FROM relation-name WHERE condition
 		enter("isDelete");
 		bool isDel=false;
-		sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]);
+		sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]);
 		if(sToks[sI]=="DELETE"){
 			sI++;
-			sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'FROM'
+			sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'FROM'
 			if(sToks[sI]=="FROM"){
 				sI++;
 				if(isRelationName()){
-					sToks[sI] = (allowNonCaps?retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'WHERE'
+					sToks[sI] = (allowNonCaps?Helpers::retUpper(sToks[sI]):sToks[sI]); //mixed-case consideration for 'WHERE'
 					if(sToks[sI]=="WHERE"){
 						sI++;
 						if(isCondition()){
@@ -1340,10 +1396,13 @@ Relation* ParserEngine::ExecuteQuery(const string& line){
 			while (local_level-- > 0) {cout<<"| ";}
 		}
 	}
+	
+	
 };
 
-/*
-int main(){
+
+
+/*int main(){
 	Parser myP(2,true,true);
 	string sampleProg="SHOW set_diff_test; rename_test <- rename (v_fname, v_lname, v_personality, v_bounty) enemies  ; INSERT INTO lifeforms VALUES FROM (\"Martian\", \"Mars\"); UPDATE dots SET x1 = 0 WHERE x1 < 0; INSERT INTO dots VALUES FROM (-1, 0, 20);";
 	string sampleSingle="advanced_query <-       project  (x   )  (select (   y == y2) ( points   * dots_to_points));";
@@ -1395,8 +1454,6 @@ int main(){
 }
 */
 
-
-#endif
 
 
 
