@@ -1,4 +1,4 @@
-﻿Build started 6/10/2012 11:06:18 PM.
+﻿Build started 6/10/2012 11:30:09 PM.
      1>Project "C:\Users\Dad\Desktop\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\dbapp.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -10,7 +10,6 @@
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(283): warning C4390: ';' : empty controlled statement found; is this the intent?
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(435): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(497): warning C4390: ';' : empty controlled statement found; is this the intent?
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(537): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
      1>c:\users\dad\desktop\csce315project\dvd_dbms.cpp(539): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
@@ -31,4 +30,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.65
+Time Elapsed 00:00:02.58

@@ -4,11 +4,11 @@
 #include <string>
 #include <limits>
 #include <time.h>
-//#include <Parser.h>
-//#include <DatabaseEngine.h>
+//#include <DBMS.cpp>
 
 using namespace std;
-bool exec;
+//DBMS exDBMS1(true, 0, "./"); 
+
 void white(string print){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 	cout<<print;
@@ -36,10 +36,10 @@ void title(char* currentTitle){
 }
 
 
-string primaryMenu(char* primaryTitle){
+string primaryMenu(){
 	int selection=NULL;
 	cin.clear();
-	title(primaryTitle);
+	title("DVD Database Management System");
 	green("*");white("(1)");green("Customers");cout<<endl;
 	green("*\tAdd new customer");cout<<endl;
 	green("*\tRemove customer");cout<<endl;
@@ -179,7 +179,7 @@ string addNewCustomerMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");cout<<endl;
-		//Parser("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
+		//exeDBMS1.Execute("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -195,8 +195,8 @@ string removeCustomerMenu(){
 	title("Remove Customer");
 	green("*Enter Customer's User ID:");white("");cin>>idToDelete;
 	green("customerToDelete <- select (userId = "+idToDelete+") customers;");cout<<endl;
-	//Parser("customerToDelete <- select (userId = "+idToDelete+") customers;");
-	//Parser("SHOW customerToDelete;");
+	//exeDBMS1.Execute("customerToDelete <- select (userId = "+idToDelete+") customers;");
+	//exeDBMS1.Execute("SHOW customerToDelete;");
 	cout<<idToDelete<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	green("*");white("1");green(" to Remove the above customer, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -204,7 +204,7 @@ string removeCustomerMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("DELETE FROM customers WHERE (userId = "+idToDelete+");");cout<<endl;
-		//Parser("DELETE FROM customers WHERE (userId = "+idToDelete+");");
+		//exeDBMS1.Execute("DELETE FROM customers WHERE (userId = "+idToDelete+");");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -219,8 +219,8 @@ string updateCustomerMenu(){
 	char choice;
 	title("Update Customer");green("*Enter Customer's User ID:");white("");cin>>idToUpdate;
 	white("*customerToUpdate <- select (userId = "+idToUpdate+") customers;");cout<<endl;
-	//Parser("customerToUpdate <- select (userId = "+idToUpdate+") customers;");
-	//Parser("SHOW customerToUpdate;");
+	//exeDBMS1.Execute("customerToUpdate <- select (userId = "+idToUpdate+") customers;");
+	//exeDBMS1.Execute("SHOW customerToUpdate;");
 	cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	green("*");white("1");green(" to update the customer, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -239,22 +239,22 @@ string updateCustomerMenu(){
 	if(choice=='1'){
 		green("*Enter Customer's First Name:");white("");cin>>firstName;
 		white("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
-		//Parser("UPDATE customers SET lastName = "+firstName+" WHERE userId = "+idToUpdate+";");
-		//Parser("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
+		//exeDBMS1.Execute("UPDATE customers SET lastName = "+firstName+" WHERE userId = "+idToUpdate+";");
+		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Customer's Last Name:");white("");cin>>lastName;
 		white("*UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");cout<<endl;
-		//Parser("UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");
-		//Parser("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
+		//exeDBMS1.Execute("UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");
+		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='3'){
 		green("*Enter Customer's Phone Number:");white("");cin>>phoneNumber;
 		white("*UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");cout<<endl;
-		//Parser("UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");
-		//Parser("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
+		//exeDBMS1.Execute("UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");
+		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else
@@ -274,7 +274,7 @@ string listCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		//Parser("SHOW customers;");
+		//exeDBMS1.Execute("SHOW customers;");
 		white("");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -298,24 +298,24 @@ string searchCustomerMenu(){
 	if(choice=='1'){
 		green("*Enter First Name to search for:");white("");cin>>firstName;
 		green("*searchByFirstName <- select (firstName = "+firstName+") customers;");cout<<endl;
-		//Parser("searchByFirstName <- select (firstName = "+firstName+") customers;");
-		//Parser("SHOW searchByFirstName;");
+		//exeDBMS1.Execute("searchByFirstName <- select (firstName = "+firstName+") customers;");
+		//exeDBMS1.Execute("SHOW searchByFirstName;");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Last Name to search for:");white("");cin>>lastName;
 		green("*searchByFirstName <- select (lastName = "+lastName+") customers;");cout<<endl;
-		//Parser("searchByFirstName <- select (lastName = "+lastName+") customers;");
-		//Parser("SHOW searchByLastName;");
+		//exeDBMS1.Execute("searchByFirstName <- select (lastName = "+lastName+") customers;");
+		//exeDBMS1.Execute("SHOW searchByLastName;");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='3'){
 		green("*Enter Phone Number to search for:");white("");cin>>phoneNumber;
 		green("*searchByFirstName <- select (phoneNumber = "+phoneNumber+") customers;");cout<<endl;
-		//Parser("searchByPhoneNumber <- select (phoneNumber = "+phoneNumber+") customers;");
-		//Parser("SHOW searchByPhoneNumber;");
+		//exeDBMS1.Execute("searchByPhoneNumber <- select (phoneNumber = "+phoneNumber+") customers;");
+		//exeDBMS1.Execute("SHOW searchByPhoneNumber;");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
@@ -338,7 +338,7 @@ string addNewDvdMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("");green("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");");cout<<endl;
-		//Parser("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+title+"\");");
+		//exeDBMS1.Execute("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+title+"\");");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -353,8 +353,8 @@ string removeDvdMenu(){
 	title("Remove DVD");
 	green("*Enter DVD ID to remove:");white("");cin>>idToDelete;
 	white("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");cout<<endl;
-	//Parser("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");
-	//Parser("SHOW dvdToDelete;");
+	//exeDBMS1.Execute("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");
+	//exeDBMS1.Execute("SHOW dvdToDelete;");
 	cout<<idToDelete<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	green("*");white("1");green(" to Remove the above DVD, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -362,7 +362,7 @@ string removeDvdMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		green("DELETE FROM dvds WHERE (dvdId = "+idToDelete+");");cout<<endl;
-		//Parser("DELETE FROM dvds WHERE (dvdId = "+idToDelete+");");
+		//exeDBMS1.Execute("DELETE FROM dvds WHERE (dvdId = "+idToDelete+");");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -378,8 +378,8 @@ string updateDvdMenu(){
 	title("Update DVD");
 	green("*Enter DVD ID:");white("");cin>>idToUpdate;
 	green("*dvdToUpdate <- select (userId = "+idToUpdate+") dvds;");cout<<endl;
-	//Parser("dvdToUpdate <- select (dvdId = "+idToUpdate+") dvds;");
-	//Parser("SHOW dvdToUpdate;");
+	//exeDBMS1.Execute("dvdToUpdate <- select (dvdId = "+idToUpdate+") dvds;");
+	//exeDBMS1.Execute("SHOW dvdToUpdate;");
 	cout<<idToUpdate<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	green("*");white("1");green(" to Update the DVD, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -398,15 +398,15 @@ string updateDvdMenu(){
 	if(choice=='1'){
 		green("*Enter DVD's Inventory Number:");white("");cin>>inventoryNumber;
 		green("*UPDATE dvds SET inventoryNumber = "+inventoryNumber+" WHERE userId = "+idToUpdate+";");cout<<endl;
-		//Parser("UPDATE dvds SET inventoryNumber = "+inventoryNumber+" WHERE userId = "+idToUpdate+";");
-		//Parser("updatedDvd <- select (userId = "+idToUpdate+") dvds;");
+		//exeDBMS1.Execute("UPDATE dvds SET inventoryNumber = "+inventoryNumber+" WHERE userId = "+idToUpdate+";");
+		//exeDBMS1.Execute("updatedDvd <- select (userId = "+idToUpdate+") dvds;");
 		cout<<idToUpdate<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter DVD's Title:");white("");cin.clear();cin.sync();getline(cin,dvdTitle);
 		green("*UPDATE dvds SET dvdTitle = "+dvdTitle+" WHERE userId = "+idToUpdate+";");cout<<endl;
-		//Parser("UPDATE dvds SET dvdTitle = \""+dvdTitle+"\" WHERE userId = "+idToUpdate+";");
-		//Parser("updatedDvd <- select (userId = "+idToUpdate+") dvds;");
+		//exeDBMS1.Execute("UPDATE dvds SET dvdTitle = \""+dvdTitle+"\" WHERE userId = "+idToUpdate+";");
+		//exeDBMS1.Execute("updatedDvd <- select (userId = "+idToUpdate+") dvds;");
 		cout<<idToUpdate<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
 	else
@@ -427,7 +427,7 @@ string listDvdMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("");
-		//Parser("SHOW dvds;");
+		//exeDBMS1.Execute("SHOW dvds;");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 		system("pause");
@@ -450,16 +450,16 @@ string searchDvdMenu(){
 	if(choice=='1'){
 		green("*Enter ID to search for:");white("");cin>>dvdId;
 		white("*searchById <- select (dvdId = "+dvdId+") dvds;");cout<<endl;
-		//Parser("searchById <- select (dvdId = "+dvdId+") dvds;");
-		//Parser("SHOW searchById;");
+		//exeDBMS1.Execute("searchById <- select (dvdId = "+dvdId+") dvds;");
+		//exeDBMS1.Execute("SHOW searchById;");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Title to search for:");white("");cin.clear();cin.sync();getline(cin,dvdTitle);
 		green("*searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds;");cout<<endl;
-		//Parser("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
-		//Parser("SHOW searchByTitle;");
+		//exeDBMS1.Execute("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
+		//exeDBMS1.Execute("SHOW searchByTitle;");
 		white("");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
@@ -485,16 +485,16 @@ string listCustomersByDvdMenu(){
 		green("*Enter DVD to search for:");white("");cin>>dvdId;
 		white("*rentalsByDvd <- select (dvdId = "+dvdId+") rentals;");cout<<endl;
 		white("*customersByIdFromRentals <- select (customersByDvd = customers)????????????????");cout<<endl;
-		//Parser("rentalsByDvd <- select (dvdId = "+dvdId+") rentals;");
-		//Parser("SHOW customersByDvd;");
-		//Parser("customersByIdFromRentals <- select (customersByDvd = customers);");
-		//Parser("SHOW customersByIdFromRentals;");
+		//exeDBMS1.Execute("rentalsByDvd <- select (dvdId = "+dvdId+") rentals;");
+		//exeDBMS1.Execute("SHOW customersByDvd;");
+		//exeDBMS1.Execute("customersByIdFromRentals <- select (customersByDvd = customers);");
+		//exeDBMS1.Execute("SHOW customersByIdFromRentals;");
 		white("");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+dvdId+", "+firstName+", "+lastName+", "+phoneNumber<<endl;
-		system("pause");
-	}else if(choice=='5');
+	}else if(choice=='5')
 		return "dvdMenu";
+	system("pause");
 	return "primaryMenu";
 }
 string searchAvailableDvdMenu(){
@@ -512,16 +512,16 @@ string searchAvailableDvdMenu(){
 	if(choice=='1'){
 		green("*Enter ID to search for:");white("");cin>>dvdId;
 		white("*searchById <- select (dvdId = "+dvdId+") dvds;");cout<<endl;
-		//Parser("searchById <- select (dvdId = "+dvdId+") dvds;");
-		//Parser("SHOW searchById;");
+		//exeDBMS1.Execute("searchById <- select (dvdId = "+dvdId+") dvds;");
+		//exeDBMS1.Execute("SHOW searchById;");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Title to search for:");white("");cin.clear();cin.sync();getline(cin,dvdTitle);
 		white("*searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds;");cout<<endl;
-		//Parser("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
-		//Parser("SHOW searchByTitle;");
+		//exeDBMS1.Execute("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
+		//exeDBMS1.Execute("SHOW searchByTitle;");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
@@ -549,7 +549,7 @@ string checkOutDvdMenu(){
 	if(choice=='1'){
 		white("");
 		white("INSERT INTO rentals VALUES FROM ("+userId+","+dvdId+",\""+checkOutDate+"\", \"out\");");cout<<endl;
-		//Parser("INSERT INTO rentals VALUES FROM ("+userId+","+dvdId+",\""+checkOutDate+"\", \"out\");");
+		//exeDBMS1.Execute("INSERT INTO rentals VALUES FROM ("+userId+","+dvdId+",\""+checkOutDate+"\", \"out\");");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -573,7 +573,7 @@ string checkInDvdMenu(){
 	if(choice=='1'){
 		white("");
 		cout<<"UPDATE rentals SET checkInDate = \""<<checkInDate<<"\" WHERE dvdId = "+dvdId+";"<<endl;
-		//Parser("UPDATE rentals SET checkInDate = \""+checkInDate+"\" WHERE dvdId = "+dvdId+";");
+		//exeDBMS1.Execute("UPDATE rentals SET checkInDate = \""+checkInDate+"\" WHERE dvdId = "+dvdId+";");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -597,8 +597,8 @@ string listRentalsByCustomerMenu(){
 	if(choice=='1'){
 		green("*Enter Customer ID to search for:");white("");cin>>userId;
 		white("*rentalsByCustomer <- select (userId = "+userId+") rentals;");cout<<endl;
-		//Parser("rentalsByCustomer <- select (userId = "+userId+") rentals;");
-		//Parser("SHOW rentalsByCustomer;");
+		//exeDBMS1.Execute("rentalsByCustomer <- select (userId = "+userId+") rentals;");
+		//exeDBMS1.Execute("SHOW rentalsByCustomer;");
 		white("");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+dvdId+", "+checkOutDate+", "+checkInDate<<endl;
@@ -609,7 +609,7 @@ string listRentalsByCustomerMenu(){
 }
 void selectionProcessor(){
 	string choice="";
-	choice=primaryMenu("DVD Database Management System");
+	choice=primaryMenu();
 	while(choice!="close application"){
 		if(choice=="customerMenu")
 			choice=customerMenu();
@@ -648,7 +648,7 @@ void selectionProcessor(){
 		else if(choice=="listRentalsByCustomer")
 			choice=listRentalsByCustomerMenu();
 		else{
-			choice=primaryMenu("DVD Database Management System");
+			choice=primaryMenu();
 		}
 	}
 	system("exit");
