@@ -40,6 +40,11 @@ public:
 		columns.push_back(attr);
 		indices[name] = (columns.size() - 1);
 	}
+	
+	void addAttribute(Attribute attrToAdd) {
+		columns.push_back(attrToAdd);
+		indices[attrToAdd.getName()] = (columns.size() - 1);
+	}
 
 	void addSeveralAttributes(vector<string> name, vector<DataType> type) {
 		for(int i = 0; i < name.size(); i++) {

@@ -1,6 +1,7 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#include <sstream>
 #include <string>
 
 namespace Helpers{
@@ -30,6 +31,15 @@ using namespace std;
 			return false;
 		}
 	}
+	
+	
+	int stringToInt(string str){
+	int i;
+	stringstream ss(str);
+	ss >> i;
+	return i;
+}
+
 
 
 }

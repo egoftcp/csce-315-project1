@@ -1,3 +1,6 @@
+#ifndef CONDCONJCOMPOP_H
+#define CONDCONJCOMPOP_H
+
 #include "Relation.h"
 
 enum Operation { Equality=0, NonEquality, LessThan, GreaterThan, LessThanEqual, GreaterThanEqual }; // ==, !=, <, >, <=, >=
@@ -93,5 +96,5 @@ bool Comparison::passes(Relation* relation, int tupleIndex){
 }
 
 
-
+#endif
 

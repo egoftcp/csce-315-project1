@@ -1,7 +1,8 @@
 /* parser.cpp:
  */
 
-
+#ifndef PARSERENGINE_H
+#define PARSERENGINE_H
  
 #include <string>
 #include <sstream>
@@ -11,9 +12,9 @@
 #include <vector>
 #include<boost/tokenizer.hpp>
 #include "Helpers.h"
+#include "DBMS.h"
 #include "Attribute.h" //
 #include "Relation.h"
-#include "DBEngine.h"
 #include "CondConjCompOp.h"
 
 using namespace std;
@@ -35,14 +36,16 @@ public:
 					2-More pass/fail info
 					3-Show syntax error messages,
 					4-Show enter/leave print statements */
-	map<string,Relation* > * relsInMemP;
-	DBEngine* engineP;
+	//map<string,Relation* > * relsInMemP;
+	//DBEngine* engineP;
+	DBMS* ownerDBMS;
 	vector<string> sToks;
 	int sI;
 	int level;
 	
 	//Constructor
-	ParserEngine(DBEngine* EngineP, map<string, Relation* > * RelsInMemP,int Debug=1, bool AllowNonCapitalCMDs=false):debug(Debug), allowNonCaps(AllowNonCapitalCMDs){
+	ParserEngine(DBMS* OwnerDBMS, int Debug=1, bool AllowNonCapitalCMDs=false):debug(Debug), allowNonCaps(AllowNonCapitalCMDs){
+		ownerDBMS = OwnerDBMS;
 		relsInMemP=RelsInMemP;
 		engineP = EngineP;
 		resetParserVals();
@@ -195,7 +198,7 @@ bool ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 			pkNames.pop();
 		}
 		
-		relsInMemP->insert( pair<string,Relation*>(relName,newRel) );
+		ownerDBMS->relsInMem.insert( pair<string,Relation*>(relName,newRel) );
 		
 		ret = true;
 		return ret;
@@ -220,25 +223,25 @@ bool ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 			}
 		}while(sToks[intInd]==",");
 		//cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
-		(*relsInMemP)[relName]->addTuple(vals);
+		ownerDBMS->relsInMem[relName]->addTuple(vals);
 		ret=true;
 		return ret;
 	}
 	else if(sToks[tI]=="SHOW"){
 	    string relName=sToks[tI+1];
-	    (*relsInMemP)[relName]->print();
+	    ownerDBMS->relsInMem[relName]->print();
 	    ret=true;
 	    return ret;
 	}
 	else if(sToks[tI]=="WRITE"){
 	    string relName=sToks[tI+1];
 	    bool suc = true; // TODO: need new db writing methods to support this
-		engineP->writeToFile((*(*relsInMemP)[relName])); //TODO: change this when DBEngine writing changes
+		ownerDBMS->dbEngine->writeToFile((*(*relsInMemP)[relName])); //TODO: change this when DBEngine writing changes
 	    return suc;
 	}
 	else if(sToks[tI]=="OPEN"){
 		string relName = sToks[tI+1];
-		bool suc = engineP->OpenRelation(relName);
+		bool suc = ownerDBMS->dbEngine->OpenRelation(relName);
 		return suc;
 	}
 	else if(sToks[tI]=="EXIT"){
@@ -1316,4 +1319,5 @@ Relation* doExpr() {
 	
 };
 
+#endif
 

@@ -18,6 +18,7 @@
 #include <cstring> //<-
 //#include "Parser.h"//<-TODO:Remove
 //#include "ParserEngine.h"
+#include "DBMS.h"
 #include "DataType.h"
 #include "Attribute.h" //
 #include "Relation.h"
@@ -69,17 +70,19 @@ class DBEngine{
 
 public:
 	string dbFilePath;
-	map<string, Relation*>* relsInMemP;
+	//map<string, Relation*>* relsInMemP;
+	DBMS* ownerDBMS;
+	
 	DBEngine(){
 		dbFilePath = "./";
 		
 	}
 	
-	DBEngine(string SavePath, map<string,Relation*>* relsInMem ){
+	DBEngine(string SavePath, DBMS* OwnerDBMS ){
 		if(!setPath(SavePath)){
 			dbFilePath = "./";
 		}
-		relsInMemP = relsInMem;
+		ownerDBMS = OwnerDBMS;
 	}
 	
 	bool setPath(string savePath){
@@ -148,14 +151,14 @@ public:
 	}
 	
 	bool OpenRelation(string relationName){
-		if(relsInMemP->count(relationName)!=0){
+		if(ownerDBMS->relsInMem.count(relationName)!=0){
 			//relation already exists in memory!
 			return false;
 		}
 		//TODO: ELSE IF relationName.db does NOT exist, break (return false)
 		else{
 			Relation* readRel = readFromFilePtr(relationName+".db");
-			relsInMemP->insert( pair<string,Relation*>(relationName,readRel) );
+			ownerDBMS->relsInMem.insert( pair<string,Relation*>(relationName,readRel) );
 			return true;
 		}
 		return false;
