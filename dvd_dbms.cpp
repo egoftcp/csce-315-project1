@@ -47,6 +47,7 @@ void title(char* currentTitle){
 	cout<<endl;
 	for(int i=0;i<80;i++)
 		green("*");
+	cout<<endl;
 }
 //Root Menus
 string primaryMenu(){
