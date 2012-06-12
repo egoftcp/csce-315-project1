@@ -135,38 +135,33 @@ Relation* ExecuteQuery(const string& Query){
 	return newRel;
 }
 
-bool ExecuteCommand(const string& Command){
-	bool exeResult=false;
-	return false;
-	
-	
-	/*
-	//Create Parser Instance with Debug=0; (no output, silent)
-	Parser parserInst(0); //This should only be instanciated/constructed once, but this will work for now..
-	int fails = parserInst.ParseProgramBlock(Command);
-	if(fails!=0){
-		cout<<"Input is not syntactically correct, returning\n";
-		return false;
-	}
+bool ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 	bool ret=false;
-	
+	//return false;
 	int tI=0;
 	
-	vector<string> toks = parserInst.getTokens(Command);
-	if(toks[tI] == "CREATE"){
-		string relName = toks[2];
+	resetParserVals();
+	sToks = dbTokens(Command);
+	
+	//vector<string> toks = dbTokens(Command);
+	
+	
+	
+	
+	if(sToks[tI] == "CREATE"){
+		string relName = sToks[2];
 		queue<string> attrNames;
 		queue<int> attrTypes;
 		//typed-attribute-list will always start at index=4 (but open paren @ 3) and end when a close-paren follows a data type (instead of a comma)
 		int alI=3; //attribute-list-Index (alI)
 		do{
 			alI++;
-			attrNames.push(toks[alI]);
+			attrNames.push(sToks[alI]);
 			alI++;
-			string typeName = toks[alI];
+			string typeName = sToks[alI];
 			if(typeName=="VARCHAR"){
 				alI+=2;
-				int len = stringToInt(toks[alI]);
+				int len = stringToInt(sToks[alI]);
 				attrTypes.push(len);
 				alI+=2;			
 			}else if(typeName=="INTEGER"){
@@ -175,15 +170,15 @@ bool ExecuteCommand(const string& Command){
 			}else{
 				cerr<<"Something terrible happened in ExecuteCommand-Create-TypedAttributeList\n";
 			}
-		}while(toks[alI]==",");
+		}while(sToks[alI]==",");
 		alI+=3; //move index to open-paren of 'primary key' attribute-list
 		queue<string> pkNames;
 		do{
 			alI++;
-			pkNames.push(toks[alI]);
+			pkNames.push(sToks[alI]);
 			alI++;
 			
-		}while(toks[alI]==",");
+		}while(sToks[alI]==",");
 		
 		Relation* newRel = new Relation(relName);
 		
@@ -200,68 +195,73 @@ bool ExecuteCommand(const string& Command){
 			pkNames.pop();
 		}
 		
-		relsInMem.insert( pair<string,Relation*>(relName,newRel) );
+		relsInMemP->insert( pair<string,Relation*>(relName,newRel) );
 		
 		ret = true;
 		return ret;
 	}
-	else if(toks[tI] == "INSERT"){
-		string relName = toks[2];
+	else if(sToks[tI] == "INSERT"){
+		string relName = sToks[2];
 		vector<string> vals;
 		int intInd=5;
 		do{
 			intInd++;
-			if(toks[intInd]=="\""){
+			if(sToks[intInd]=="\""){
 				intInd++;
-				vals.push_back(toks[intInd]);
+				vals.push_back(sToks[intInd]);
 				intInd+=2;
-			}else if(toks[intInd]=="-"){
+			}else if(sToks[intInd]=="-"){
 				intInd++;
-				vals.push_back("-"+toks[intInd]);
+				vals.push_back("-"+sToks[intInd]);
 				intInd++;
 			}else{
-				vals.push_back(toks[intInd]);
+				vals.push_back(sToks[intInd]);
 				intInd++;
 			}
-		}while(toks[intInd]==",");
-		cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
-		relsInMem[relName]->addTuple(vals);
+		}while(sToks[intInd]==",");
+		//cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
+		(*relsInMemP)[relName]->addTuple(vals);
 		ret=true;
 		return ret;
 	}
-	else if(toks[tI]=="SHOW"){
-	    string relName=toks[tI+1];
-	    relsInMem[relName]->print();
+	else if(sToks[tI]=="SHOW"){
+	    string relName=sToks[tI+1];
+	    (*relsInMemP)[relName]->print();
 	    ret=true;
 	    return ret;
 	}
-	else if(toks[tI]=="WRITE"){
-	    string relName=toks[tI+1];
-	    bool suc = writeRelation(relName);
+	else if(sToks[tI]=="WRITE"){
+	    string relName=sToks[tI+1];
+	    bool suc = true; // TODO: need new db writing methods to support this
+		engineP->writeToFile((*(*relsInMemP)[relName])); //TODO: change this when DBEngine writing changes
 	    return suc;
 	}
-	else if(toks[tI]=="OPEN"){
-		string relName = toks[tI+1];
-		bool suc = openRelation(relName);
+	else if(sToks[tI]=="OPEN"){
+		string relName = sToks[tI+1];
+		bool suc = engineP->OpenRelation(relName);
 		return suc;
 	}
-	else if(toks[tI]=="EXIT"){
-		bool suc = freeMemory();
+	else if(sToks[tI]=="EXIT"){
+		//bool suc = freeMemory();
+		//TODO: need to fix
+		
+		
 		exit(1);
-		return suc;
+		return false;
 	}
-	else if(toks[tI]=="CLOSE"){
+	else if(sToks[tI]=="CLOSE"){
 		//delete existing relName.db
 		//write in-memory version of relName to relName.db
 		//free memory of relsInMem[relName] 
 		//remove relName from relsInMem   //int erasedCount = relsInMem.erase(relName); if(erasedCount!=1){errOut("Error removing relName from memory map.");}
 	}
-	else if(toks[tI]=="DELETE"){
+	else if(sToks[tI]=="DELETE"){
 	}
-	else if(toks[tI]=="UPDATE"){
+	else if(sToks[tI]=="UPDATE"){
 	}
-	*/
-	return false;
+	
+	
+	return ret;
 }
 
 

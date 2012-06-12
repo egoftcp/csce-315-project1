@@ -36,11 +36,42 @@ public:
 	DBMS(bool CmdPrmptMode=true, int DebugMode=1, string DBPath="./"){
 		debug = DebugMode;
 		consoleMode = CmdPrmptMode;
-		engine = new DBEngine(DBPath);
+		engine = new DBEngine(DBPath, &relsInMem);
 		Parser = new ParserEngine(engine, &relsInMem, DebugMode);
 		if(consoleMode){
 			startConsole();
 		}
+	}
+	
+	//TODO: FOR dbengine testing. remove later
+	Relation readFromFile(string input) { //TODO: Not needed, can remove 
+
+		ifstream inputFile;
+		inputFile.open(input.c_str());
+		
+		Relation r("NULL");
+		if(!inputFile.good()){
+			return r;
+		}
+		string name = input.substr(0, input.size()-3);
+		
+		Relation importedRelation(name);
+		
+		char currentChar;
+		vector<string> parsedInfo;
+		string line;
+
+		getline(inputFile, line);
+		importedRelation.parseHeader(line);
+		
+		while(!inputFile.eof()) {
+			getline(inputFile, line);
+			importedRelation.parseTuples(line);
+		}
+		
+		inputFile.close();
+		
+		return importedRelation;
 	}
 	
 	void Execute(string line){

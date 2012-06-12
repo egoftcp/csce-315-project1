@@ -69,16 +69,17 @@ class DBEngine{
 
 public:
 	string dbFilePath;
-	
+	map<string, Relation*>* relsInMemP;
 	DBEngine(){
 		dbFilePath = "./";
 		
 	}
 	
-	DBEngine(string SavePath){
+	DBEngine(string SavePath, map<string,Relation*>* relsInMem ){
 		if(!setPath(SavePath)){
 			dbFilePath = "./";
 		}
+		relsInMemP = relsInMem;
 	}
 	
 	bool setPath(string savePath){
@@ -124,6 +125,7 @@ public:
 		ifstream inputFile;
 		inputFile.open(input.c_str());
 		
+		
 		string name = input.substr(0, input.size()-3);
 		
 		Relation importedRelation(name);
@@ -144,6 +146,21 @@ public:
 		
 		return importedRelation;
 	}
+	
+	bool OpenRelation(string relationName){
+		if(relsInMemP->count(relationName)!=0){
+			//relation already exists in memory!
+			return false;
+		}
+		//TODO: ELSE IF relationName.db does NOT exist, break (return false)
+		else{
+			Relation* readRel = readFromFilePtr(relationName+".db");
+			relsInMemP->insert( pair<string,Relation*>(relationName,readRel) );
+			return true;
+		}
+		return false;
+	}
+	
 	
 	Relation* readFromFilePtr(string input) {
 		ifstream inputFile;
@@ -272,7 +289,7 @@ int main2(){
 //CREATE - write new relation to file (
 //INSERT - write tuples to relation file
 //OPEN - load relation from file 
-//SHOW -  ? print relation to stdout?
+////SHOW -  ? print relation to stdout?
 //WRITE - add a new relation to a file ???? writes a view to file?
 //CLOSE - save (to file) changes to a relation 
 //EXIT - exit from dml interpreter 
