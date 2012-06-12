@@ -187,8 +187,12 @@ string addNewCustomerMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+",\""+phoneNumber+"\");");cout<<endl;//printSTok();
+		exeDBMS1.Execute("OPEN customers;");
 		exeDBMS1.Execute("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
 		exeDBMS1.Execute("SHOW customers;");
+		//exeDBMS1.Execute("WRITE customers;");
+		exeDBMS1.Execute("CLOSE customers;");
+
 		system("pause");
 	}
 	else if(choice=='5')
@@ -288,10 +292,13 @@ string listCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
+		white("");
+		exeDBMS1.Execute("OPEN customers;");
 		exeDBMS1.Execute("SHOW customers;");
-		white("SHOW customers;");
-		for(int i=0;i<10;i++)
-			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+		exeDBMS1.Execute("CLOSE customers;");
+//		white("SHOW customers;");
+//		for(int i=0;i<10;i++)
+//			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 		system("pause");
 	}else if(choice=='5');
 		return "customerMenu";
@@ -358,7 +365,10 @@ string addNewDvdMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");");cout<<endl;
+		exeDBMS1.Execute("OPEN dvds;");
 		exeDBMS1.Execute("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");");
+		exeDBMS1.Execute("SHOW dvds;");
+		exeDBMS1.Execute("WRITE dvds;");
 		system("pause");
 	}else if(choice=='5')
 		return "addNewDvdMenu";
@@ -450,7 +460,9 @@ string listDvdMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='5');
 	if(choice=='1'){
 		white("SHOW dvds;");cout<<endl;
-		//exeDBMS1.Execute("SHOW dvds;");
+		exeDBMS1.Execute("OPEN dvds;");
+		exeDBMS1.Execute("SHOW dvds;");
+		exeDBMS1.Execute("CLOSE dvds;");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 		system("pause");
@@ -575,7 +587,10 @@ string checkOutDvdMenu(){
 	if(choice=='1'){
 		white("");
 		white("INSERT INTO rentals VALUES FROM ("+userId+","+inventoryNumber+",\""+checkOutDate+"\", \"out\");");cout<<endl;
+		exeDBMS1.Execute("OPEN rentals;");
 		exeDBMS1.Execute("INSERT INTO rentals VALUES FROM ("+userId+","+inventoryNumber+",\""+checkOutDate+"\", \"out\");");
+		exeDBMS1.Execute("SHOW rentals;");
+		exeDBMS1.Execute("CLOSE rentals;");
 		system("pause");
 	}
 	else if(choice=='5')

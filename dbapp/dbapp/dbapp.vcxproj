@@ -64,6 +64,13 @@
   <ItemGroup>
     <ClCompile Include="..\..\dvd_dbms.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Attribute.h" />
+    <ClInclude Include="..\..\DataType.h" />
+    <ClInclude Include="..\..\DBMS.h" />
+    <ClInclude Include="..\..\Helpers.h" />
+    <ClInclude Include="..\..\Relation.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

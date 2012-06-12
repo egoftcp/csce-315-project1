@@ -79,6 +79,14 @@ public:
 		return columns[indices[input_name]];
 	}
 	
+/*	int getIndex(string attribName, string uniqueValue){
+		int col
+		for(int i = 0; i < columns.size(); i++) {
+			output.push_back(columns[i].cells[index]);
+		}
+		return output;
+	}*/
+
 	void setElement(int x, int y, string value) {
 		columns[x].cells[y] = value;
 	}

@@ -416,6 +416,31 @@ Relation* DBEngine::readFromFilePtr(string input) {
 	return importedRelation;
 }
 bool DBEngine::Update(string relationName, vector< pair<string,string> > AttributeNameNewValueList, vector<int> indices){
+	
+/*		ifstream inputFile;
+		inputFile.open(relationName.c_str());
+		
+		
+		string name = relationName.substr(0, input.size()-3);
+		
+		Relation importedRelation(name);
+		
+		char currentChar;
+		vector<string> parsedInfo;
+		string line;
+
+		getline(inputFile, line);
+		importedRelation.parseHeader(line);
+		
+		while(!inputFile.eof()) {
+			getline(inputFile, line);
+			importedRelation.parseTuples(line);
+		}
+		
+		inputFile.close();
+		
+		return importedRelation;*/
+
 	//-read relation file to memory
 	//--for each int i in indices{
 	//----for each pair<string,string> attrPair in AttributeNameNewValueList){
@@ -426,7 +451,7 @@ bool DBEngine::Update(string relationName, vector< pair<string,string> > Attribu
 	//-relase memory
 	return false;
 
-}
+	}
 bool DBEngine::Delete(string relationName, vector<int> indices){
 	//-read relation file to memory
 	//-delete tuple at each indice provided
@@ -613,12 +638,41 @@ bool ParserEngine::ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 	}
 	else if(sToks[tI]=="DELETE"){
 	}
-	else if(sToks[tI]=="UPDATE"){
+//UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";
+//UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";
+//UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";
+//UPDATE dvds SET dvdId = "+dvdId+" WHERE inventoryNumber = "+idToUpdate+";
+//UPDATE dvds SET dvdTitle = "+dvdTitle+" WHERE inventoryNumber = "+idToUpdate+";
+//UPDATE rentals SET checkInDate = \""+checkInDate+"\" WHERE dvdId = "+dvdId+";
+	else if(sToks[tI]=="UPDATE")
+	{
+/*		string relName = sToks[2],attribToChange = sToks[4],valToChangeTo,attribForFinding,valToFind; 
+		vector<string> vals;
+		int intInd=6,rowIndex,colIndex;
+		if(sToks[intInd]=="\""){
+			intInd++;
+			valToChangeTo=sToks[intInd];
+			intInd+=3;
+		}else{
+			valToChangeTo=sToks[intInd];
+			intInd+=2;
+		}
+		attribForFinding=sToks[intInd];
+		intInd+=2;
+		if(sToks[intInd]=="\""){
+			intInd++;
+			valToFind=sToks[intInd];
+		}else{
+			valToFind=sToks[intInd];
+			intInd+=2;
+		}
+	    cout<<"find "+valToFind+" in the "+attribForFinding+" column and update the "+attribToChange+" in that tuple";
+		colIndex= (ownerDBMS->relsInMem[relName]->findAttribute(attribForFinding));
+		colIndex= (ownerDBMS->relsInMem[relName]->
+		return "true";*/
 	}
-	
-	
-	return ret;
 }
+
 int ParserEngine::ParseProgramBlock(string Program){//TODO: kill off
 	int failCount=0;
 	string Sub="";
@@ -887,8 +941,6 @@ Relation* ParserEngine::doRename(int* qStart){
 	ownerDBMS->scratchRels.push_back(newRel);
 	
 	return newRel;
-	
-	
 	
 }
 
