@@ -334,15 +334,20 @@ void DBEngine::writeToFile(string relationName) {
 bool DBEngine::UpdateRelation(Relation* rel){ //aka OverWriteExistingRelation()
 	//If file ' dbFilePath+"//"+rel->getName()+".db" ' does not exist, return false
 	//else, overwrite file. (delete existing file, write rel to file (with same name) )
+	return false;
 }
 bool DBEngine::WriteNewRelation(Relation* newRel){
 	//check to see if file exists
 	//---if so, return false
 	//---else, write relation to file, then return true.
+	return false;
+
 }	
 bool DBEngine::RelationFileExists(string relName){
 	//returns true if file @ dbPath+"//"+relName+".db"  exists
 	//otherwise returns false
+	return false;
+
 }
 Relation DBEngine::readFromFile(string input) { //TODO: Not needed, can remove 
 
@@ -419,6 +424,7 @@ bool DBEngine::Update(string relationName, vector< pair<string,string> > Attribu
 	//--}
 	//-Overwrite relation to file
 	//-relase memory
+	return false;
 
 }
 bool DBEngine::Delete(string relationName, vector<int> indices){
@@ -426,6 +432,8 @@ bool DBEngine::Delete(string relationName, vector<int> indices){
 	//-delete tuple at each indice provided
 	//-save(overwrite) relation file
 	//-release relation from memory
+	return false;
+
 }
 
 
