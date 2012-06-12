@@ -334,7 +334,7 @@ string addNewCustomerMenu(){
 }
 string removeCustomerMenu(){
 	int selection=NULL;
-	string userId,firstName="fNamenotImplemented",lastName="lNamenotImplemented",phoneNumber="phone#notImplemented",idToDelete;
+	string userId,firstName="fNameNA",lastName="lNameNA",phoneNumber="phone#NA",idToDelete;
 	char choice;
 	title("Remove Customer");
 	green("*Enter Customer's User ID:");white("");cin>>idToDelete;
@@ -359,7 +359,7 @@ string removeCustomerMenu(){
 }
 string updateCustomerMenu(){
 	int selection=NULL;
-	string userId,firstName="fNamenotImplemented",lastName="lNamenotImplemented",phoneNumber="phone#notImplemented",idToUpdate;
+	string userId,firstName="fNameNA",lastName="lNameNA",phoneNumber="phone#NA",idToUpdate;
 	char choice;
 	title("Update Customer");green("*Enter Customer's User ID:");white("");cin>>idToUpdate;
 	white("");green("customerToUpdate <- select (userId = "+idToUpdate+") customers;");white("");//printSTok();
@@ -497,7 +497,7 @@ string addNewDvdMenu(){
 }
 string removeDvdMenu(){
 	int selection=NULL;
-	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented",idToDelete;	char choice;
+	string inventoryNumber="inv#NA",dvdId="dvdIdNA",dvdTitle="dvdTitleNA",idToDelete;	char choice;
 	title("Remove DVD");
 	green("*Enter Inventory Number to remove:");white("");cin>>idToDelete;
 	white("dvdToDelete <- select (inventoryNumber = "+idToDelete+") dvds;");cout<<endl;
@@ -521,7 +521,7 @@ string removeDvdMenu(){
 }
 string updateDvdMenu(){
 	int selection=NULL;
-	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented",idToUpdate;
+	string inventoryNumber="inv#NA",dvdId="dvdIdNA",dvdTitle="dvdTitleNA",idToUpdate;
 	char choice;
 	title("Update DVD");
 	green("*Enter Inventory Number:");white("");cin>>idToUpdate;
@@ -564,7 +564,7 @@ string updateDvdMenu(){
 }
 string listDvdMenu(){
 	int selection=NULL;
-	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented";
+	string inventoryNumber="inv#NA",dvdId="dvdIdNA",dvdTitle="dvdTitleNA";
 	char choice;
 	title("List DVDs");
 	green("*");white("(1)");green("List DVDs by ID");cout<<endl;
@@ -585,7 +585,7 @@ string listDvdMenu(){
 }
 string searchDvdMenu(){
 	int selection=NULL;
-	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented";
+	string inventoryNumber="inv#NA",dvdId="dvdIdNA",dvdTitle="dvdTitleNA";
 	char choice;
 	title("Search DVDs");
 	green("*");white("(1)");green("Search by DVD ID");cout<<endl;
@@ -620,7 +620,7 @@ string searchDvdMenu(){
 string listCustomersByDvdMenu(){
 	int selection=NULL;
 	string userId="userId",firstName="fName",lastName="lName",phoneNumber="phone#";
-	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented";
+	string inventoryNumber="inv#NA",dvdId="dvdIdNA",dvdTitle="dvdTitleNA";
 	char choice;
 	title("List Customers by DVD");
 	green("*");white("(1)");green("List customers by DVD");cout<<endl;
@@ -649,7 +649,7 @@ string listCustomersByDvdMenu(){
 }
 string searchAvailableDvdMenu(){
 	int selection=NULL;
-	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented";
+	string inventoryNumber="inv#NA",dvdId="dvdIdNA",dvdTitle="dvdTitleNA";
 	char choice;
 	title("Search available DVDs");
 	green("*");white("(1)");green("Search by DVD ID");cout<<endl;
@@ -683,7 +683,7 @@ string searchAvailableDvdMenu(){
 string checkOutDvdMenu(){
 	time_t seconds = time(NULL);
 	int selection=NULL;
-	string inventoryNumber="inv#NotImplemented",dvdId="dvdIdNotImplemented",dvdTitle="dvdTitleNotImplemented";
+	string inventoryNumber="inv#NA",dvdId="dvdIdNA",dvdTitle="dvdTitleNA";
 	char checkOutDate[21],dueDate[21],choice;
 	strftime(checkOutDate,20,"%Y-%m-%d %H:%M:%S",localtime(&seconds));
 	seconds=seconds+259200;
@@ -735,7 +735,7 @@ string checkInDvdMenu(){
 string listRentalsByCustomerMenu(){
 	int selection=NULL;
 	string userId="userId";
-	string dvdId="dvdIdNotImplemented",checkOutDate="checkOutNotImplemented",checkInDate="checkInNotImplemented";
+	string rentalId="rentalIdNA",dvdId="dvdIdNA",checkOutDate="checkOutNA",checkInDate="checkInNA";
 	char choice;
 	title("List Rentals by Customer");
 	green("*");white("(1)");green("List rentals by Customer ID");cout<<endl;
@@ -751,7 +751,7 @@ string listRentalsByCustomerMenu(){
 		//exeDBMS1.Execute("SHOW rentalsByCustomer;");
 		white("");
 		for(int i=0;i<10;i++)
-			cout<<userId<<", "+dvdId+", "+checkOutDate+", "+checkInDate<<endl;
+			cout<<rentalId<<", "+userId+", "+dvdId+", "+checkOutDate+", "+checkInDate<<endl;
 		system("pause");
 	}else if(choice=='5');
 		return "rentalMenu";
@@ -764,15 +764,15 @@ void selectionProcessor(){
 	ifstream dvds("dvds.db");
 	ifstream rentals("rentals.db");
 	if (!customers.good()){
-		white("CREATE TABLE customers;");cout<<endl;
+		white("CREATE TABLE customers (userId VARCHAR(20), firstName VARCHAR(20), lastName VARCHAR(20), telephoneNumber VARCHAR(20));");cout<<endl;
 	  //exeDBMS1.Execute("CREATE TABLE customers;");
 	}
 	if (!dvds.good()){
-		white("CREATE TABLE dvds;");cout<<endl;
+		white("CREATE TABLE dvds (inventoryNumber VARCHAR(20), dvdId VARCHAR(20), dvdTitle VARCHAR(20));");cout<<endl;
 	  //exeDBMS1.Execute("CREATE TABLE dvds;");
 	}
 	if (!rentals.good()){
-		white("CREATE TABLE rentals;");cout<<endl;
+		white("CREATE TABLE rentals (rentalId VARCHAR(20), userId VARCHAR(20), inventoryNumber VARCHAR(20), checkOutDate VARCHAR(20), checkInDate VARCHAR(20));");cout<<endl;
 	  //exeDBMS1.Execute("CREATE TABLE rentals;");
 	}
 	system("pause");
