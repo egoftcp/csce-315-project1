@@ -1,52 +1,25 @@
-﻿Build started 6/11/2012 7:10:43 PM.
+﻿Build started 6/11/2012 11:11:48 PM.
      1>Project "H:\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\dbapp.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\dvd_dbms.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\dvd_dbms.cpp
          dvd_dbms.cpp
-     1>h:\csce315project\attribute.h(68): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\attribute.h(69): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(48): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(62): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(70): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(103): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(115): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(141): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(146): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(147): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(159): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(197): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(232): warning C4101: 'equal' : unreferenced local variable
-     1>h:\csce315project\relation.h(247): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(251): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(267): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(271): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbengine.h(131): warning C4101: 'currentChar' : unreferenced local variable
-     1>h:\csce315project\dbengine.h(158): warning C4101: 'currentChar' : unreferenced local variable
-     1>h:\csce315project\condconjcompop.h(39): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\condconjcompop.h(48): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\parserengine.h(642): warning C4018: '>=' : signed/unsigned mismatch
-     1>h:\csce315project\parserengine.h(805): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\parserengine.h(881): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\parserengine.h(1297): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\parserengine.h(1304): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dvd_dbms.cpp(313): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
-     1>h:\csce315project\dvd_dbms.cpp(313): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(183): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
+     1>h:\csce315project\dvd_dbms.cpp(183): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
-     1>h:\csce315project\dvd_dbms.cpp(428): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>h:\csce315project\dvd_dbms.cpp(477): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
-     1>h:\csce315project\dvd_dbms.cpp(477): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(302): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>h:\csce315project\dvd_dbms.cpp(354): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
+     1>h:\csce315project\dvd_dbms.cpp(354): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
-     1>h:\csce315project\dvd_dbms.cpp(583): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>h:\csce315project\dvd_dbms.cpp(688): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(463): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>h:\csce315project\dvd_dbms.cpp(569): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>h:\csce315project\dvd_dbms.cpp(690): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(571): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>h:\csce315project\dvd_dbms.cpp(715): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(596): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>h:\csce315project\dvd_dbms.cpp(757): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>h:\csce315project\condconjcompop.h(93): warning C4715: 'Comparison::passes' : not all control paths return a value
+     1>h:\csce315project\dvd_dbms.cpp(639): warning C4390: ';' : empty controlled statement found; is this the intent?
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\CSCE315Project\dbapp\Debug\dbapp.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\dbapp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"H:\CSCE315Project\dbapp\Debug\dbapp.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\CSCE315Project\dbapp\Debug\dbapp.lib" /MACHINE:X86 Debug\dvd_dbms.obj
          LINK : H:\CSCE315Project\dbapp\Debug\dbapp.exe not found or not built by the last incremental link; performing full link
@@ -60,4 +33,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.40
+Time Elapsed 00:00:06.18

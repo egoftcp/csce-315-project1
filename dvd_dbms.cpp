@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <istream>
-//#include <string>
+#include <string>
 #include <limits>
 #include <time.h>
 //#include <vector>
@@ -11,13 +11,18 @@
 //#include "Attribute.h"
 //#include "Relation.h"
 //#include "DBEngine.h"
-#include "DBMS.h"
+//#include "DBMS.h"
 
 using namespace std;
-vector<string> sToks;
 //DBMS exDBMS1(false, 0, "./"); 
 
 //Formating functions
+void pressAnyKey(){
+    char in;
+	cout << "Press any key to continue."<<endl;
+    cin.clear();
+    cin>>in;
+}
 void white(string print){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 	cout<<print;//simply takes a string to print and ensures it is white font
@@ -43,141 +48,6 @@ void title(char* currentTitle){
 	for(int i=0;i<80;i++)
 		green("*");
 }
-/*	void printSTok(){
-		//cout<<"*******Scanner Tokens:\n";
-		for(vector<string>::iterator it=sToks.begin(); it!=sToks.end(); ++it){
-			cout<<"["<<(*it)<<"] ";
-		}cout<<endl;
-	}
-	vector<string> dbTokens(string commandLine){
-	//FUNCTION DECLARATIONS  
-		string first;
-		string temp="";			//the temp string is needed in order to store tokens produced by tokenizer when it may
-								//be necessary to concatenate them with adjoining tokens to keep appropriate values within
-								//the the command together.
-		bool openSymbol=false,closeSymbol=false,openQuote=false;	//these boolean variable are utilized to keep track of symbols
-																	//that may have multiple parts and to ensure that text within 
-																	//quotations is held together as one token, regardless of 
-																	//punctuation or spaces.
-		boost::char_separator<char> separator(" \n","\"()+<>=-;,!");	//the tokenizer function allows for the declaration of ignored and
-																		//returned symbols with the ignored before the comma
-		vector<string> tokens;	//a vector of type string to store the tokens so they may be returned to the calling program
-		boost::tokenizer< boost::char_separator<char> > possibleTokens(commandLine, separator);	//the boost library supplies this function
-		//END OF FUNCTION DECLARATIONS
-	   
-		for( boost::tokenizer< boost::char_separator<char> >::iterator position=possibleTokens.begin();
-			position!=possibleTokens.end();
-			++position){
-		   if(openQuote==true)							//With each pass through this for loop, the position is iterated
-		   {											//If statements are used to check each token against possible 
-				if(*position=="\"")						//conjunctive symbols such as <=, ==, >==, etc.
-				{										//The first priority of the conditional checking is for an open quotation.
-					tokens.push_back(temp);				//If the passed command has quotations around two otherwise separated words,
-					tokens.push_back(*position);		//such as "two words", the openQuote boolean flag will stay true until the
-					temp="";							//quote is finished and the strings within are concatenated into a token.
-					openSymbol=false;
-					closeSymbol=false;
-					openQuote=false;
-				}
-				else
-					if(temp=="")
-						temp=*position;
-					else
-					{
-						first=*position;
-						if(!isalpha(first[0]))
-							temp=temp+*position;		//if the current string is a symbol and still within the quotation then
-						else							//no space will be added.
-							temp=temp+" "+*position;	//the temp string is storing the concatenated strings within the quotes,
-					}									//using a space between if both strings are text.
-		   }
-		   else if(openSymbol==true)					//There are four types of data that this chain handles: openSybols, 
-		   {											//closeSymbols, quotations, and strings that would be data or commands.
-				if(*position=="\"")						//When the openSymbol was previously set to true, the current position
-				{										//is then checked for another openSymbol that may need to be joined with the
-					tokens.push_back(temp);				//previous or if the current position requires that a new flag be set to true.
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;
-					openQuote=true;						//In this case a quotation is found and determined to be an opening quote.
-				}
-				else if(*position=="<"||*position=="="||*position=="-")
-				{
-					openSymbol=true;					//In this case an adjoining openSymbol is found and concatenated to the previous.
-					temp=temp+*position;				//This conditional check handles <=, ==, and <- symbols.
-				}
-				else
-				{
-					tokens.push_back(temp);
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;					//when no symbols are found in this case, the previous open symbol is tokenized
-				}										//and the current string is tokenized as well.
-		   }
-		   else if(closeSymbol==true)
-		   {
-			   if(*position=="\"")
-				{
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;		
-					openQuote=true;						//When the prior string was a closeSymbol and a quotation is found it can be
-				}										//assumed this is an open quotation.
-			   else if(*position==">"||*position=="=")
-				{
-					closeSymbol=true;					//Here an adjoining closeSymbol is found and concatenated to the previous symbol.
-					temp=temp+*position;				//This handles the >= symbol.
-				}
-			   else if(*position=="-")
-				{
-					closeSymbol=false;					//If the previous symbol was a closeSymbol then <- will be accounted for.
-					openSymbol=true;
-					tokens.push_back(temp);
-					temp=*position;
-
-				}
-			   else
-				{
-					tokens.push_back(temp);
-					tokens.push_back(*position);		//Lastely, when the previous string was a closeSymbol and the current string is not 
-					closeSymbol=false;					//a symbol, the previous symbol will be tokenized and the current string will be tokenized.
-					temp="";
-				}
-		   }
-		   else
-		   {
-			   if(*position=="\"")
-			   {
-					tokens.push_back(*position);
-					temp="";
-					openSymbol=false;
-					closeSymbol=false;
-					openQuote=true;						//If the previous string was not a symbol and there was no previous openQuote, this quote
-			   }										//will be treated as an opening quote.
-			   else if(*position=="<"||*position=="="||*position=="-"||*position=="!")		//As with the previous conditional checks, this check
-				{																			//accounts for all possible openSymbols.
-					openSymbol=true;
-					temp=temp+*position;
-				}
-			   else if(*position==">")
-				{
-					closeSymbol=true;
-					temp=*position;
-				}
-			   else
-			   {
-					closeSymbol=false;
-					openSymbol=false;
-					tokens.push_back(*position);		//All other strings are tokenized.
-					temp="";
-			   }
-		   }
-	   }
-	   return tokens;			//A vector full of the tokens ready for translation by the database engine.
-	}*/
 //Root Menus
 string primaryMenu(){
 	int selection=NULL;
@@ -322,7 +192,7 @@ string addNewCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		green("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+",\""+phoneNumber+"\");");white("");//printSTok();
+		white("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+",\""+phoneNumber+"\");");cout<<endl;//printSTok();
 		//exeDBMS1.Execute("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
 		system("pause");
 	}
@@ -338,7 +208,8 @@ string removeCustomerMenu(){
 	char choice;
 	title("Remove Customer");
 	green("*Enter Customer's User ID:");white("");cin>>idToDelete;
-	white("");green("customerToDelete <- select (userId = "+idToDelete+") customers;");white("");//printSTok();
+	white("customerToDelete <- select (userId = "+idToDelete+") customers;");cout<<endl;//printSTok();
+	white("SHOW customerToDelete;");cout<<endl;
 	//exeDBMS1.Execute("customerToDelete <- select (userId = "+idToDelete+") customers;");
 	//exeDBMS1.Execute("SHOW customerToDelete;");
 	cout<<idToDelete<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -347,7 +218,7 @@ string removeCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		white("");green("DELETE FROM customers WHERE (userId = "+idToDelete+");");white("");//printSTok();
+		white("DELETE FROM customers WHERE (userId = "+idToDelete+");");white("");cout<<endl;//printSTok();
 		//exeDBMS1.Execute("DELETE FROM customers WHERE (userId = "+idToDelete+");");
 		system("pause");
 	}
@@ -362,8 +233,8 @@ string updateCustomerMenu(){
 	string userId,firstName="fNameNA",lastName="lNameNA",phoneNumber="phone#NA",idToUpdate;
 	char choice;
 	title("Update Customer");green("*Enter Customer's User ID:");white("");cin>>idToUpdate;
-	white("");green("customerToUpdate <- select (userId = "+idToUpdate+") customers;");white("");//printSTok();
-	white("");green("SHOW customerToUpdate;");white("");//printSTok();
+	white("customerToUpdate <- select (userId = "+idToUpdate+") customers;");cout<<endl;//printSTok();
+	white("SHOW customerToUpdate;");cout<<endl;//printSTok();
 	//exeDBMS1.Execute("customerToUpdate <- select (userId = "+idToUpdate+") customers;");
 	//exeDBMS1.Execute("SHOW customerToUpdate;");
 	cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -383,21 +254,24 @@ string updateCustomerMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='3');
 	if(choice=='1'){
 		green("*Enter Customer's First Name:");white("");cin>>firstName;
-		green("*UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("UPDATE customers SET firstName = "+firstName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("updatedCustomer <- select (userId = "+idToUpdate+") customers;");cout<<endl;
 		//exeDBMS1.Execute("UPDATE customers SET lastName = "+firstName+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Customer's Last Name:");white("");cin>>lastName;
-		white("*UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("updatedCustomer <- select (userId = "+idToUpdate+") customers;");cout<<endl;
 		//exeDBMS1.Execute("UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='3'){
 		green("*Enter Customer's Phone Number:");white("");cin>>phoneNumber;
-		white("*UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");cout<<endl;
+		white("updatedCustomer <- select (userId = "+idToUpdate+") customers;");cout<<endl;
 		//exeDBMS1.Execute("UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -420,7 +294,7 @@ string listCustomerMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		//exeDBMS1.Execute("SHOW customers;");
-		white("");
+		white("SHOW customers;");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 		system("pause");
@@ -442,7 +316,8 @@ string searchCustomerMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='3'&&choice!='5');
 	if(choice=='1'){
 		green("*Enter First Name to search for:");white("");cin>>firstName;
-		green("*searchByFirstName <- select (firstName = "+firstName+") customers;");cout<<endl;
+		white("searchByFirstName <- select (firstName = "+firstName+") customers;");cout<<endl;
+		white("SHOW searchByFirstName;");cout<<endl;
 		//exeDBMS1.Execute("searchByFirstName <- select (firstName = "+firstName+") customers;");
 		//exeDBMS1.Execute("SHOW searchByFirstName;");
 		for(int i=0;i<10;i++)
@@ -450,7 +325,8 @@ string searchCustomerMenu(){
 	}
 	else if(choice=='2'){
 		green("*Enter Last Name to search for:");white("");cin>>lastName;
-		green("*searchByFirstName <- select (lastName = "+lastName+") customers;");cout<<endl;
+		white("searchByLastName <- select (lastName = "+lastName+") customers;");cout<<endl;
+		white("SHOW searchByLastName;");cout<<endl;
 		//exeDBMS1.Execute("searchByFirstName <- select (lastName = "+lastName+") customers;");
 		//exeDBMS1.Execute("SHOW searchByLastName;");
 		for(int i=0;i<10;i++)
@@ -458,7 +334,8 @@ string searchCustomerMenu(){
 	}
 	else if(choice=='3'){
 		green("*Enter Phone Number to search for:");white("");cin>>phoneNumber;
-		green("*searchByFirstName <- select (phoneNumber = "+phoneNumber+") customers;");cout<<endl;
+		white("searchByPhoneNumber <- select (phoneNumber = "+phoneNumber+") customers;");cout<<endl;
+		white("SHOW searchByPhoneNumber;");cout<<endl;
 		//exeDBMS1.Execute("searchByPhoneNumber <- select (phoneNumber = "+phoneNumber+") customers;");
 		//exeDBMS1.Execute("SHOW searchByPhoneNumber;");
 		for(int i=0;i<10;i++)
@@ -485,11 +362,10 @@ string addNewDvdMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		white("");green("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");");cout<<endl;
+		white("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");");cout<<endl;
 		//exeDBMS1.Execute("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+title+"\");");
 		system("pause");
-	}
-	else if(choice=='5')
+	}else if(choice=='5')
 		return "addNewDvdMenu";
 	else
 		return "dvdMenu";
@@ -501,6 +377,7 @@ string removeDvdMenu(){
 	title("Remove DVD");
 	green("*Enter Inventory Number to remove:");white("");cin>>idToDelete;
 	white("dvdToDelete <- select (inventoryNumber = "+idToDelete+") dvds;");cout<<endl;
+	white("SHOW dvdToDelete;");cout<<endl;
 	//exeDBMS1.Execute("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");
 	//exeDBMS1.Execute("SHOW dvdToDelete;");
 	cout<<idToDelete<<", "+dvdId+", "+dvdTitle<<endl;
@@ -509,7 +386,7 @@ string removeDvdMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		green("DELETE FROM dvds WHERE (inventoryNumber = "+idToDelete+");");cout<<endl;
+		white("DELETE FROM dvds WHERE (inventoryNumber = "+idToDelete+");");cout<<endl;
 		//exeDBMS1.Execute("DELETE FROM dvds WHERE (inventoryNumber = "+idToDelete+");");
 		system("pause");
 	}
@@ -525,7 +402,8 @@ string updateDvdMenu(){
 	char choice;
 	title("Update DVD");
 	green("*Enter Inventory Number:");white("");cin>>idToUpdate;
-	green("*dvdToUpdate <- select (inventoryNUmber = "+idToUpdate+") dvds;");cout<<endl;
+	white("dvdToUpdate <- select (inventoryNUmber = "+idToUpdate+") dvds;");cout<<endl;
+	white("SHOW dvdToUpdate;");cout<<endl;
 	//exeDBMS1.Execute("dvdToUpdate <- select (inventoryNumber = "+idToUpdate+") dvds;");
 	//exeDBMS1.Execute("SHOW dvdToUpdate;");
 	cout<<idToUpdate<<", "+dvdId+", "+dvdTitle<<endl;
@@ -545,14 +423,16 @@ string updateDvdMenu(){
 	}while(choice!='1'&&choice!='2');
 	if(choice=='1'){
 		green("*Enter DVD's ID:");white("");cin>>dvdId;
-		green("*UPDATE dvds SET dvdId = "+dvdId+" WHERE inventoryNumber = "+idToUpdate+";");cout<<endl;
+		white("UPDATE dvds SET dvdId = "+dvdId+" WHERE inventoryNumber = "+idToUpdate+";");cout<<endl;
+		white("updatedDvd <- select (inventoryNumber = "+idToUpdate+") dvds;");cout<<endl;
 		//exeDBMS1.Execute("UPDATE dvds SET dvdId = "+dvdId+" WHERE inventoryNumber = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedDvd <- select (inventoryNumber = "+idToUpdate+") dvds;");
 		cout<<inventoryNumber<<", "+dvdId+", "+dvdTitle<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter DVD's Title:");white("");cin.clear();cin.sync();getline(cin,dvdTitle);
-		green("*UPDATE dvds SET dvdTitle = "+dvdTitle+" WHERE inventoryNumber = "+idToUpdate+";");cout<<endl;
+		white("UPDATE dvds SET dvdTitle = "+dvdTitle+" WHERE inventoryNumber = "+idToUpdate+";");cout<<endl;
+		white("updatedDvd <- select (inventoryNumber = "+idToUpdate+") dvds;");cout<<endl;
 		//exeDBMS1.Execute("UPDATE dvds SET dvdTitle = \""+dvdTitle+"\" WHERE inventoryNumber = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedDvd <- select (inventoryNumber = "+idToUpdate+") dvds;");
 		cout<<inventoryNumber<<", "+dvdId+", "+dvdTitle<<endl;
@@ -574,7 +454,7 @@ string listDvdMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='2'&&choice!='5');
 	if(choice=='1'){
-		white("");
+		white("SHOW dvds;");cout<<endl;
 		//exeDBMS1.Execute("SHOW dvds;");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
@@ -597,7 +477,7 @@ string searchDvdMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='5');
 	if(choice=='1'){
 		green("*Enter ID to search for:");white("");cin>>dvdId;
-		white("*searchById <- select (dvdId = "+dvdId+") dvds;");cout<<endl;
+		white("searchById <- select (dvdId = "+dvdId+") dvds;");cout<<endl;
 		//exeDBMS1.Execute("searchById <- select (dvdId = "+dvdId+") dvds;");
 		//exeDBMS1.Execute("SHOW searchById;");
 		for(int i=0;i<10;i++)
@@ -605,7 +485,8 @@ string searchDvdMenu(){
 	}
 	else if(choice=='2'){
 		green("*Enter Title to search for:");white("");cin.clear();cin.sync();getline(cin,dvdTitle);
-		green("*searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds;");cout<<endl;
+		white("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds;");cout<<endl;
+		white("SHOW searchByTitle");cout<<endl;
 		//exeDBMS1.Execute("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
 		//exeDBMS1.Execute("SHOW searchByTitle;");
 		white("");
@@ -661,7 +542,7 @@ string searchAvailableDvdMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='5');
 	if(choice=='1'){
 		green("*Enter ID to search for:");white("");cin>>dvdId;
-		white("*searchById <- select (dvdId = "+dvdId+") dvds;");cout<<endl;
+		white("searchById <- select (dvdId = "+dvdId+") dvds;");cout<<endl;
 		//exeDBMS1.Execute("searchById <- select (dvdId = "+dvdId+") dvds;");
 		//exeDBMS1.Execute("SHOW searchById;");
 		for(int i=0;i<10;i++)
@@ -669,7 +550,7 @@ string searchAvailableDvdMenu(){
 	}
 	else if(choice=='2'){
 		green("*Enter Title to search for:");white("");cin.clear();cin.sync();getline(cin,dvdTitle);
-		white("*searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds;");cout<<endl;
+		white("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds;");cout<<endl;
 		//exeDBMS1.Execute("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
 		//exeDBMS1.Execute("SHOW searchByTitle;");
 		for(int i=0;i<10;i++)
@@ -746,7 +627,8 @@ string listRentalsByCustomerMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		green("*Enter Customer ID to search for:");white("");cin>>userId;
-		white("*rentalsByCustomer <- select (userId = "+userId+") rentals;");cout<<endl;
+		white("rentalsByCustomer <- select (userId = "+userId+") rentals;");cout<<endl;
+		white("SHOW rentalsByCustomer;");cout<<endl;
 		//exeDBMS1.Execute("rentalsByCustomer <- select (userId = "+userId+") rentals;");
 		//exeDBMS1.Execute("SHOW rentalsByCustomer;");
 		white("");
@@ -760,24 +642,10 @@ string listRentalsByCustomerMenu(){
 //User choice handler
 void selectionProcessor(){
 	string choice="";
-	ifstream customers("customers.db");
-	ifstream dvds("dvds.db");
-	ifstream rentals("rentals.db");
-	if (!customers.good()){
-		white("CREATE TABLE customers (userId VARCHAR(20), firstName VARCHAR(20), lastName VARCHAR(20), telephoneNumber VARCHAR(20));");cout<<endl;
-	  //exeDBMS1.Execute("CREATE TABLE customers;");
-	}
-	if (!dvds.good()){
-		white("CREATE TABLE dvds (inventoryNumber VARCHAR(20), dvdId VARCHAR(20), dvdTitle VARCHAR(20));");cout<<endl;
-	  //exeDBMS1.Execute("CREATE TABLE dvds;");
-	}
-	if (!rentals.good()){
-		white("CREATE TABLE rentals (rentalId VARCHAR(20), userId VARCHAR(20), inventoryNumber VARCHAR(20), checkOutDate VARCHAR(20), checkInDate VARCHAR(20));");cout<<endl;
-	  //exeDBMS1.Execute("CREATE TABLE rentals;");
-	}
-	system("pause");
+	char exitChoice;
+
 	choice=primaryMenu();
-	while(choice!="close application"){
+	while(choice!=""){
 		if(choice=="customerMenu")
 			choice=customerMenu();
 		else if(choice=="dvdMenu")
@@ -814,15 +682,23 @@ void selectionProcessor(){
 			choice=checkInDvdMenu();
 		else if(choice=="listRentalsByCustomer")
 			choice=listRentalsByCustomerMenu();
-		else{
-			choice=primaryMenu();
+		else if(choice=="close application"){
+			system("cls");
+			centerstring("Are you sure you wish to exit the Database Application?");
+			centerstring("Enter Y to exit and N to continue");cout<<endl;
+			do{
+				cin>>exitChoice;
+			}while(exitChoice!='y'&&exitChoice!='Y'&&exitChoice!='n'&&exitChoice!='N');
+			if(exitChoice=='y'||exitChoice=='Y')
+				exit(1);
 		}
+		else
+			choice=primaryMenu();
 	}
-	system("exit");
 }
+
 //db_application main function
 int main(){
-	string choice;
 	selectionProcessor();
 	return 0;
 }
