@@ -11,10 +11,10 @@
 //#include "Attribute.h"
 //#include "Relation.h"
 //#include "DBEngine.h"
-//#include "DBMS.h"
+#include "DBMS.h"
 
 using namespace std;
-//DBMS exDBMS1(false, 0, "./"); 
+DBMS exeDBMS1(false, 0, "./"); 
 
 //Formating functions
 void pressAnyKey(){
@@ -644,7 +644,22 @@ string listRentalsByCustomerMenu(){
 void selectionProcessor(){
 	string choice="";
 	char exitChoice;
-
+	ifstream customers("customers.db");
+	ifstream dvds("dvds.db");
+	ifstream rentals("rentals.db");
+	if (!customers.good()){
+		white("CREATE TABLE customers;");cout<<endl;
+		exeDBMS1.Execute("CREATE TABLE customers (userId VARCHAR(20), firstName VARCHAR(20), lastName VARCHAR(20), phoneNumber VARCHAR(20)) PRIMARY KEY (userId);");
+	}
+	if (!dvds.good()){
+		white("CREATE TABLE dvds;");cout<<endl;
+		exeDBMS1.Execute("CREATE TABLE dvds (inventoryNumber VARCHAR(20), dvdId VARCHAR(20), title VARCHAR(20)) PRIMARY KEY (inventoryNumber);");
+	}
+	if (!rentals.good()){
+		white("CREATE TABLE rentals;");cout<<endl;
+		exeDBMS1.Execute("CREATE TABLE rentals (rentalId VARCHAR(20), userId VARCHAR(20), inventoryNumber VARCHAR(20), checkOutDate VARCHAR(20), checkInDate VARCHAR(20)) PRIMARY KEY (rentalId);");
+	}
+	system("pause");
 	choice=primaryMenu();
 	while(choice!=""){
 		if(choice=="customerMenu")
