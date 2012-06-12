@@ -1,4 +1,4 @@
-(First VARCHAR(20), Second INTEGER, Asshole VARCHAR(20))
+(First VARCHAR(20), Second INTEGER, Third VARCHAR(20))
 ("hello", 343, "dog")
 ("bye", 404, "cat")
 

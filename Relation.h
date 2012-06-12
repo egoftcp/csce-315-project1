@@ -11,9 +11,6 @@ using namespace std;
 
 //TODO: move to utility class, looow priority 
 
-
-
-
 class Relation {
 
 public:
@@ -109,25 +106,27 @@ public:
 			}
 		}
 	
-		for(int i = 0; i < columns[0].getSize(); i++) {
+		for(int i = 0; i < getHeight(); i++) {
 			table = table + "(";	
-			j = 0;
-			for(int k = 0; k < columns.size(); k++) {
-				if(j == columns[0].getSize()) {
-					if( columns[k].isInt() ) {
-						table = table + columns[k].getElement(i) + ")\n";
+			
+			for(int j = 0; j < columns.size(); j++) {
+			
+				if(j == (columns.size()-1)) {
+					if( columns[j].isInt() ) {
+						table = table + columns[j].cells[i] + ")";
 					} else {
-						table = table + "\"" + columns[k].getElement(i) + "\")\n";
+						table = table + "\"" + columns[j].cells[i] + "\")";
 					}
 				} else {
-					if( columns[k].isInt() ) {
-						table = table + columns[k].getElement(i) + ", ";
+					if( columns[j].isInt() ) {
+						table = table + columns[j].cells[i] + ", ";
 					} else {
-						table = table + "\"" + columns[k].getElement(i) + "\", ";
+						table = table + "\"" + columns[j].cells[i] + "\", ";
 					}
-				}	
-				j++;
+				}				
+			
 			}
+			table = table + '\n';
 		}
 		table = table + "\n";
 		return table;
@@ -281,7 +280,7 @@ public:
 		}
 	}
 	
-		void deleteTuple(int index) {
+	void deleteTuple(int index) {
 		
 		for(int i = 0; i < columns.size(); i++) {
 			vector<string>::iterator iter = columns[i].cells.begin() + index;
