@@ -321,12 +321,12 @@ public:
 			tuple.push_back(columns[i].cells[index]);
 		}
 		
-		/*
+		
 		cout << "***constructTupleFromIndex***\n";
 		for(int i = 0; i < tuple.size(); i++) {
 			cout << tuple[i] << '\t';
 		}
-		cout << "\n========================\n";*/
+		cout << "\n========================\n";
 		
 		return tuple;
 	}
@@ -355,16 +355,32 @@ public:
 		}
 	}
 	
+	
 	int tableUnion(Relation table1, Relation table2) {
 		if(!matchingAttributes(table1, table2)) {
 			cout << "Incompatible tables for Union operation\n";
 			return -1;
 		} else {
-
-			for(int i = 0; i < table1.getHeight(); i++) {
-				addTuple(table1.constructTupleFromIndex(i));
-			}
 			
+			cout << "Made it here!\n";
+			char a;
+			cin >> a;
+			
+			vector<string> tuple1;
+			for(int i = 0; i < table1.getHeight(); i++) {
+				//addTuple(table1.constructTupleFromIndex(i));
+				
+				for(int j = 0; j < table1.columns.size(); j++) {
+					
+					tuple1.push_back( table1.columns[j].cells[i] );
+				}
+				for(int k = 0; k < tuple1.size(); k++) {
+					cout << tuple1[k] << '\t';
+				}
+				addTuple(tuple1);
+				tuple1.clear();
+			}
+						
 			bool alreadyInTable1;
 			int index;
 
@@ -408,7 +424,6 @@ public:
 			}
 		}
 	}
-
 };
 
 #endif

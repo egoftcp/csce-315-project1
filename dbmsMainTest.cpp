@@ -70,15 +70,7 @@ int main(){
 	blah.addAttribute("REDDIT", charType);
 	blah.addAttribute("BAR", charType);
 	
-	/*
-	blah.addTuple( table.constructTupleFromIndex(0) );
-	vector<string> kop = table.constructTupleFromIndex(0);
-	cout << ">>>>>>>>>>>>><<<<<<<<<<<<<\n";
-	for(int i = 0; i < kop.size(); i++) {
-		cout << kop[i] << '\t';
-	}
-	cout << ">>>>>>>>>>>>><<<<<<<<<<<<<\n";	
-	wait(); */
+
 
 	table.addTuple(table1_input);
 	table.addTuple(table1_input2);
@@ -87,8 +79,8 @@ int main(){
 	table2.addTuple(table2_input);
 
 	crossTable.crossProduct(table, importedTable);
-	unionTable.tableUnion(table, table2);
-	diffTable.tableUnion(table, table2);
+	//unionTable.tableUnion(table, table2);
+	//diffTable.tableUnion(table, table2);
 	
 
 	cout << "Table:\n";
@@ -112,10 +104,6 @@ int main(){
 
 	//writeToFile<Relation>(crossTable);
 	
-	cout << "o4ifjal;sefjaw;efljas\n";
-	cout << crossTable.stringify() << '\n';
-	cout << "o4ifjal;sefjaw;efljas\n";
-	
 	table.deleteTuple(1);
 	cout << "Table after deleting index 1 (2nd row)\n";
 	table.print();
@@ -130,7 +118,7 @@ int main(){
 	cout << "----------------------------------------------\n";	
 	
 	cout << "Table + Table2\n";
-	unionTable.print();
+	//unionTable.print();
 	cout << "----------------------------------------------\n";	
 	
 	//wait();
