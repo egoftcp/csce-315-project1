@@ -12,7 +12,7 @@ using namespace std;
 	string retUpper(string inStr){
 			string upp = inStr;
 			for(string::iterator it = upp.begin(); it!=upp.end(); ++it){
-				*it = std::toupper((unsigned char)(*it));
+				*it = toupper((unsigned char)(*it));
 			}
 			return upp;
 	}
