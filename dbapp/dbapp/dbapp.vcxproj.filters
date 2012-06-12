@@ -19,15 +19,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\dvds.db">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\customers.db">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\rentals.db">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
 </Project>

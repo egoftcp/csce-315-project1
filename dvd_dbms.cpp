@@ -4,13 +4,6 @@
 #include <string>
 #include <limits>
 #include <time.h>
-//#include <vector>
-//#include <boost/tokenizer.hpp>
-//#include "ParserEngine.h"
-//#include "DataType.h"
-//#include "Attribute.h"
-//#include "Relation.h"
-//#include "DBEngine.h"
 #include "DBMS.h"
 
 using namespace std;
@@ -194,7 +187,8 @@ string addNewCustomerMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+",\""+phoneNumber+"\");");cout<<endl;//printSTok();
-		//exeDBMS1.Execute("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
+		exeDBMS1.Execute("INSERT INTO customers VALUES FROM ("+userId+","+firstName+","+lastName+","+phoneNumber+");");
+		exeDBMS1.Execute("SHOW customers;");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -294,7 +288,7 @@ string listCustomerMenu(){
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		//exeDBMS1.Execute("SHOW customers;");
+		exeDBMS1.Execute("SHOW customers;");
 		white("SHOW customers;");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -364,7 +358,7 @@ string addNewDvdMenu(){
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
 		white("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");");cout<<endl;
-		//exeDBMS1.Execute("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+title+"\");");
+		exeDBMS1.Execute("INSERT INTO dvds VALUES FROM ("+inventoryNumber+","+dvdId+",\""+dvdTitle+"\");");
 		system("pause");
 	}else if(choice=='5')
 		return "addNewDvdMenu";
@@ -581,7 +575,7 @@ string checkOutDvdMenu(){
 	if(choice=='1'){
 		white("");
 		white("INSERT INTO rentals VALUES FROM ("+userId+","+inventoryNumber+",\""+checkOutDate+"\", \"out\");");cout<<endl;
-		//exeDBMS1.Execute("INSERT INTO rentals VALUES FROM ("+userId+","+inventoryNumber+",\""+checkOutDate+"\", \"out\");");
+		exeDBMS1.Execute("INSERT INTO rentals VALUES FROM ("+userId+","+inventoryNumber+",\""+checkOutDate+"\", \"out\");");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -644,20 +638,23 @@ string listRentalsByCustomerMenu(){
 void selectionProcessor(){
 	string choice="";
 	char exitChoice;
-	ifstream customers("customers.db");
-	ifstream dvds("dvds.db");
-	ifstream rentals("rentals.db");
+	ifstream customers("./customers.db");
+	ifstream dvds("./dvds.db");
+	ifstream rentals("./rentals.db");
 	if (!customers.good()){
 		white("CREATE TABLE customers;");cout<<endl;
 		exeDBMS1.Execute("CREATE TABLE customers (userId VARCHAR(20), firstName VARCHAR(20), lastName VARCHAR(20), phoneNumber VARCHAR(20)) PRIMARY KEY (userId);");
+		exeDBMS1.Execute("WRITE customers;");
 	}
 	if (!dvds.good()){
 		white("CREATE TABLE dvds;");cout<<endl;
 		exeDBMS1.Execute("CREATE TABLE dvds (inventoryNumber VARCHAR(20), dvdId VARCHAR(20), title VARCHAR(20)) PRIMARY KEY (inventoryNumber);");
+		exeDBMS1.Execute("WRITE dvds;");
 	}
 	if (!rentals.good()){
 		white("CREATE TABLE rentals;");cout<<endl;
 		exeDBMS1.Execute("CREATE TABLE rentals (rentalId VARCHAR(20), userId VARCHAR(20), inventoryNumber VARCHAR(20), checkOutDate VARCHAR(20), checkInDate VARCHAR(20)) PRIMARY KEY (rentalId);");
+		exeDBMS1.Execute("WRITE rentals;");
 	}
 	system("pause");
 	choice=primaryMenu();

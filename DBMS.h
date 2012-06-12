@@ -570,7 +570,7 @@ bool ParserEngine::ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 				intInd++;
 			}
 		}while(sToks[intInd]==",");
-		//cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
+		cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
 		ownerDBMS->relsInMem[relName]->addTuple(vals);
 		ret=true;
 		return ret;

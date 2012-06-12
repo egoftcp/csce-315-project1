@@ -64,11 +64,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\dvd_dbms.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\customers.db" />
-    <None Include="..\..\dvds.db" />
-    <None Include="..\..\rentals.db" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
