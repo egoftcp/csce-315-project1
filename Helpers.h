@@ -6,7 +6,7 @@
 
 namespace Helpers{
 
-using namespace std;
+	using namespace std;
 
 
 	string retUpper(string inStr){
@@ -34,15 +34,13 @@ using namespace std;
 	
 	
 	int stringToInt(string str){
-	int i;
-	stringstream ss(str);
-	ss >> i;
-	return i;
+		int i;
+		stringstream ss(str);
+		ss >> i;
+		return i;
+	}
 }
 
-
-
-}
 
 
 #endif

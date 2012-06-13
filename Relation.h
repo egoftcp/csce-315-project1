@@ -2,6 +2,7 @@
 #define RELATION_H
 
 #include <string>
+#include <iomanip>
 #include "Attribute.h"
 
 using namespace std;
@@ -151,15 +152,15 @@ public:
 		
 		//Prints the header (name of attributes)
 		for(int i = 0; i < columns.size(); i++) {
-			cout << columns[i].getName() << '\t';
+			cout << setw (18)<<columns[i].getName();
 		}
-		cout << '\n';
-
+		cout << endl;
+		//Prints the tuples (elements/cells)
 		for(int i = 0; i < columns[0].cells.size(); i++) {
 			for(int j = 0; j < columns.size(); j++) {
-				cout << columns[j].cells[i] << '\t';
+				cout << setw (18)<<columns[j].cells[i];
 			}
-			cout << '\n';
+			cout << endl;
 		}
 	}
 	

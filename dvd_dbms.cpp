@@ -1,21 +1,17 @@
-#include <Windows.h>
-#include <iostream>
-#include <istream>
-#include <string>
-#include <limits>
-#include <time.h>
-#include "DBMS.h"
+/********************************************
+ * Laramie Goode, Chris Voss, Curtis Franks	*
+ * CSCE-315-Project_1						*
+ * Database DBMS (WIP)						*
+ ********************************************/
+#include <Windows.h>//provides for SetConsoleTextAttribute() used in formatting
+#include <time.h>//definitions of functions to get and manipulate date and time info.
+#include "DBMS.h"//provides <iostream><string> and DBMS Class
 
 using namespace std;
-DBMS exeDBMS1(false, 0, "./"); 
 
-//Formating functions
-void pressAnyKey(){
-    char in;
-	cout << "Press any key to continue."<<endl;
-    cin.clear();
-    cin>>in;
-}
+DBMS exeDBMS1(false, 0, "./");//global dbms declaration
+
+//Formating functions: used to save space with simple repetitive format code
 void white(string print){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 	cout<<print;//simply takes a string to print and ensures it is white font
@@ -24,25 +20,30 @@ void green(string print){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 	cout<<print;//simply takes a string to print and ensures it is green font
 }
+void red(string print){
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+	cout<<print;//simply takes a string to print and ensures it is green font
+}
 void centerstring(char* s)
 {
    int l=strlen(s);
    int pos=(int)((80-l)/2);
    for(int i=0;i<pos;i++)
-    white(" ");	//adds an appropriate amount of spaces before the passed string so that it 
-   cout<<s;		//centers on a normal 80 character wide console
+		cout<<" ";	//adds an appropriate amount of spaces before the passed string so that it 
+   cout<<s<<endl;		//centers on a normal 80 character wide console
 }
 void title(char* currentTitle){
 	system("cls");
 	for(int i=0;i<80;i++)
 		green("*");
-	centerstring(currentTitle);
-	cout<<endl;
+	white("");centerstring(currentTitle);
 	for(int i=0;i<80;i++)
 		green("*");
 	cout<<endl;
 }
-//Root Menus
+//Root Menus: basic root menus that only accept certain numerical input
+//for the next available menu options.  Each returns a menu option string
+//to selectionProcessor()
 string primaryMenu(){
 	int selection=NULL;
 	cin.clear();
@@ -168,7 +169,9 @@ string rentalMenu(){
 	else if(selection==0)return "close application";
 	else return "primaryMenu";
 }
-//Database Command Menus
+//Database Command Menus:use simple cin and getline to accept user options
+//and data input.  Each sends a strings to the dbms.Execute() based on the 
+//user input and finally returns a menu option string to selectionProcessor()
 string addNewCustomerMenu(){
 	time_t seconds = time(NULL);
 	int selection=NULL;
@@ -208,22 +211,24 @@ string removeCustomerMenu(){
 	green("*Enter Customer's User ID:");white("");cin>>idToDelete;
 	white("customerToDelete <- select (userId = "+idToDelete+") customers;");cout<<endl;//printSTok();
 	white("SHOW customerToDelete;");cout<<endl;
+	red("");centerstring("NOT YET IMPLEMENTED");
 	//exeDBMS1.Execute("OPEN customers;");
 	//exeDBMS1.Execute("customerToDelete <- select (userId = "+idToDelete+") customers;");
 	//exeDBMS1.Execute("SHOW customerToDelete;");
 	//exeDBMS1.Execute("CLOSE customers;");
-	cout<<idToDelete<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+	white("");cout<<idToDelete<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	green("*");white("1");green(" to Remove the above customer, ");white("5");green(" to change, any key to go back:");
 	do{
 		cin>>choice;
 	}while(choice!='1'&&choice!='5');
 	if(choice=='1'){
-		white("DELETE FROM customers WHERE (userId = "+idToDelete+");");white("");cout<<endl;//printSTok();
+		white("DELETE FROM customers WHERE (userId = "+idToDelete+");");white("");cout<<endl;
+		red("");centerstring("NOT YET IMPLEMENTED");
 		//exeDBMS1.Execute("OPEN customers;");
 		//exeDBMS1.Execute("DELETE FROM customers WHERE (userId = "+idToDelete+");");
 		//exeDBMS1.Execute("SHOW customers;");
 		//exeDBMS1.Execute("CLOSE customers;");
-		system("pause");
+		white("");system("pause");
 	}
 	else if(choice=='5')
 		return "removeCustomerMenu";
@@ -242,7 +247,8 @@ string updateCustomerMenu(){
 	//exeDBMS1.Execute("customerToUpdate <- select (userId = "+idToUpdate+") customers;");
 	//exeDBMS1.Execute("SHOW customerToUpdate;");
 	//exeDBMS1.Execute("CLOSE customers;");
-	cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+	red("");centerstring("NOT YET IMPLEMENTED");
+	white("");cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	green("*");white("1");green(" to update the customer, ");white("5");green(" to change, any key to go back:");
 	do{
 		cin>>choice;
@@ -265,7 +271,8 @@ string updateCustomerMenu(){
 		//exeDBMS1.Execute("UPDATE customers SET lastName = "+firstName+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		//exeDBMS1.Execute("CLOSE customers;");
-		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+		red("");centerstring("NOT YET IMPLEMENTED");
+		white("");cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Customer's Last Name:");white("");cin>>lastName;
@@ -275,6 +282,7 @@ string updateCustomerMenu(){
 		//exeDBMS1.Execute("UPDATE customers SET lastName = "+lastName+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		//exeDBMS1.Execute("CLOSE customers;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='3'){
@@ -285,6 +293,7 @@ string updateCustomerMenu(){
 		//exeDBMS1.Execute("UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedCustomer <- select (userId = "+idToUpdate+") customers;");
 		//exeDBMS1.Execute("CLOSE customers;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else
@@ -308,9 +317,6 @@ string listCustomerMenu(){
 		exeDBMS1.Execute("OPEN customers;");
 		exeDBMS1.Execute("SHOW customers;");
 		exeDBMS1.Execute("CLOSE customers;");
-//		white("SHOW customers;");
-//		for(int i=0;i<10;i++)
-//			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 		system("pause");
 	}else if(choice=='5');
 		return "customerMenu";
@@ -336,6 +342,7 @@ string searchCustomerMenu(){
 		//exeDBMS1.Execute("searchByFirstName <- select (firstName = "+firstName+") customers;");
 		//exeDBMS1.Execute("SHOW searchByFirstName;");
 		//exeDBMS1.Execute("CLOSE customers;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
@@ -347,6 +354,7 @@ string searchCustomerMenu(){
 		//exeDBMS1.Execute("searchByFirstName <- select (lastName = "+lastName+") customers;");
 		//exeDBMS1.Execute("SHOW searchByLastName;");
 		//exeDBMS1.Execute("CLOSE customers;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
@@ -358,6 +366,7 @@ string searchCustomerMenu(){
 		//exeDBMS1.Execute("searchByPhoneNumber <- select (phoneNumber = "+phoneNumber+") customers;");
 		//exeDBMS1.Execute("SHOW searchByPhoneNumber;");
 		//exeDBMS1.Execute("CLOSE customers;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
@@ -405,6 +414,7 @@ string removeDvdMenu(){
 	//exeDBMS1.Execute("dvdToDelete <- select (dvdId = "+idToDelete+") dvds;");
 	//exeDBMS1.Execute("SHOW dvdToDelete;");
 	//exeDBMS1.Execute("CLOSE dvds;");
+	red("");centerstring("NOT YET IMPLEMENTED");white("");
 	cout<<idToDelete<<", "+dvdId+", "+dvdTitle<<endl;
 	green("*");white("1");green(" to Remove the above DVD, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -415,6 +425,7 @@ string removeDvdMenu(){
 		//exeDBMS1.Execute("OPEN dvds;");
 		//exeDBMS1.Execute("DELETE FROM dvds WHERE (inventoryNumber = "+idToDelete+");");
 		//exeDBMS1.Execute("CLOSE dvds;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -435,6 +446,7 @@ string updateDvdMenu(){
 	//exeDBMS1.Execute("dvdToUpdate <- select (inventoryNumber = "+idToUpdate+") dvds;");
 	//exeDBMS1.Execute("SHOW dvdToUpdate;");
 	//exeDBMS1.Execute("CLOSE dvds;");
+	red("");centerstring("NOT YET IMPLEMENTED");white("");
 	cout<<idToUpdate<<", "+dvdId+", "+dvdTitle<<endl;
 	green("*");white("1");green(" to Update the DVD, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -458,6 +470,7 @@ string updateDvdMenu(){
 		//exeDBMS1.Execute("UPDATE dvds SET dvdId = "+dvdId+" WHERE inventoryNumber = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedDvd <- select (inventoryNumber = "+idToUpdate+") dvds;");
 		//exeDBMS1.Execute("CLOSE dvds;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		cout<<inventoryNumber<<", "+dvdId+", "+dvdTitle<<endl;
 	}
 	else if(choice=='2'){
@@ -468,6 +481,7 @@ string updateDvdMenu(){
 		//exeDBMS1.Execute("UPDATE dvds SET dvdTitle = \""+dvdTitle+"\" WHERE inventoryNumber = "+idToUpdate+";");
 		//exeDBMS1.Execute("updatedDvd <- select (inventoryNumber = "+idToUpdate+") dvds;");
 		//exeDBMS1.Execute("CLOSE dvds;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		cout<<inventoryNumber<<", "+dvdId+", "+dvdTitle<<endl;
 	}
 	else
@@ -517,6 +531,7 @@ string searchDvdMenu(){
 		//exeDBMS1.Execute("searchById <- select (dvdId = "+dvdId+") dvds;");
 		//exeDBMS1.Execute("SHOW searchById;");
 		//exeDBMS1.Execute("CLOSE dvds;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		for(int i=0;i<10;i++)
 			cout<<inventoryNumber<<", "+dvdId+", "+dvdTitle<<endl;
 	}
@@ -528,7 +543,7 @@ string searchDvdMenu(){
 		//exeDBMS1.Execute("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
 		//exeDBMS1.Execute("SHOW searchByTitle;");
 		//exeDBMS1.Execute("CLOSE dvds;");
-		white("");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		for(int i=0;i<10;i++)
 			cout<<inventoryNumber<<", "+dvdId+", "+dvdTitle<<endl;
 	}
@@ -561,6 +576,7 @@ string listCustomersByDvdMenu(){
 		//exeDBMS1.Execute("customersByIdFromRentals <- customers * retnalsByInventoryNUmber;");
 		//exeDBMS1.Execute("customerListByDvdId <- project (dvdId, firstName, lastName, checkOutDate, checkInDate) customersByIdFromRentals;");
 		//exeDBMS1.Execute("CLOSE dvds;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		white("");
 		for(int i=0;i<10;i++)
 			cout<<userId<<", "+dvdId+", "+firstName+", "+lastName+", "+phoneNumber<<endl;
@@ -588,6 +604,7 @@ string searchAvailableDvdMenu(){
 		//exeDBMS1.Execute("searchById <- select (dvdId = "+dvdId+") dvds;");
 		//exeDBMS1.Execute("SHOW searchById;");
 		//exeDBMS1.Execute("CLOSE dvds;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
@@ -598,6 +615,7 @@ string searchAvailableDvdMenu(){
 		//exeDBMS1.Execute("searchByTitle <- select (dvdTitle = "+dvdTitle+") dvds");
 		//exeDBMS1.Execute("SHOW searchByTitle;");
 		//exeDBMS1.Execute("CLOSE dvds;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		for(int i=0;i<10;i++)
 			cout<<dvdId<<", "+inventoryNumber+", "+dvdTitle<<endl;
 	}
@@ -655,6 +673,7 @@ string checkInDvdMenu(){
 		//exeDBMS1.Execute("OPEN rentals;");
 		//exeDBMS1.Execute("UPDATE rentals SET checkInDate = \""+checkInDate+"\" WHERE dvdId = "+dvdId+";");
 		//exeDBMS1.Execute("CLOSE rentals;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		system("pause");
 	}
 	else if(choice=='5')
@@ -683,6 +702,7 @@ string listRentalsByCustomerMenu(){
 		//exeDBMS1.Execute("rentalsByCustomer <- select (userId = "+userId+") rentals;");
 		//exeDBMS1.Execute("SHOW rentalsByCustomer;");
 		//exeDBMS1.Execute("CLOSE rentals;");
+		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		white("");
 		for(int i=0;i<10;i++)
 			cout<<rentalId<<", "+userId+", "+dvdId+", "+checkOutDate+", "+checkInDate<<endl;
@@ -691,10 +711,9 @@ string listRentalsByCustomerMenu(){
 		return "rentalMenu";
 	return "primaryMenu";
 }
-//User choice handler
-void selectionProcessor(){
-	string choice="";
-	char exitChoice;
+//Initial Database Creation: looks for the DVD Rental datbases and creates
+//them if they are not available.
+void createDatabases(){
 	ifstream customers("./customers.db");
 	ifstream dvds("./dvds.db");
 	ifstream rentals("./rentals.db");
@@ -714,6 +733,13 @@ void selectionProcessor(){
 		exeDBMS1.Execute("WRITE rentals;");
 	}
 	system("pause");
+}
+//User choice handler: all of the above Command Menus are called from here
+//and the strings they return, determine which next Command Menu is called.
+void selectionProcessor(){
+	string choice="";
+	char exitChoice;
+	createDatabases();
 	choice=primaryMenu();
 	while(choice!=""){
 		if(choice=="customerMenu")
@@ -754,8 +780,10 @@ void selectionProcessor(){
 			choice=listRentalsByCustomerMenu();
 		else if(choice=="close application"){
 			system("cls");
-			centerstring("Are you sure you wish to exit the Database Application?");
-			centerstring("Enter Y to exit and N to continue");cout<<endl;
+			for(int i=0;i<5;i++)
+				cout<<endl;
+			white("");centerstring("Are you sure you wish to exit the Database Application?");
+			white("");centerstring("Enter Y to exit and N to continue");cout<<endl;
 			do{
 				cin>>exitChoice;
 			}while(exitChoice!='y'&&exitChoice!='Y'&&exitChoice!='n'&&exitChoice!='N');
@@ -766,8 +794,7 @@ void selectionProcessor(){
 			choice=primaryMenu();
 	}
 }
-
-//db_application main function
+//db_application main function: simply calls the above selectionProcessor
 int main(){
 	selectionProcessor();
 	return 0;
