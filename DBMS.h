@@ -15,9 +15,11 @@
 #include <sstream>
 #include <queue>
 //#include "ParserEngine.h"
+
 #include "DataType.h"
 #include "Attribute.h"
 #include "Relation.h"
+#include "CondConjCompOp.h"
 #include<boost/tokenizer.hpp>
 //#include "DBEngine.h"
 //TODO: Determine if we need all headers
@@ -97,6 +99,14 @@ public:
 	bool ParseTokens();
 	
 private:
+	string getLiteral(int* litS);
+	string getAttributeName(int* attS);
+	Conjunction getConjunction(int* conJ);
+	Comparison getComparison(int* comP);
+	Operation getOp(int* opI);
+	Operand getOperand(int* opandI);
+	Condition getCondition(int* conS);
+	Relation* doSelect(int* selStart);
 	Relation* doExpr(int* qStart);
 	bool isProjection1(int pS);
 	Relation* doProjection(int* pS);
@@ -507,10 +517,8 @@ int ParserEngine::Validate(const string& line){
 		}
 	}
 }
-
-
 Relation* ParserEngine::ExecuteQuery(const string& Query){
-
+	enter("EXECUTEQUERY");
 	resetParserVals();
 	sToks = dbTokens(Query);
 	
@@ -522,7 +530,7 @@ Relation* ParserEngine::ExecuteQuery(const string& Query){
 	queryRel->name=relName;
 	
 	ownerDBMS->relsInMem[relName] = queryRel;
-	
+	leave("EXECUTEQUERY");
 	//TODO: MOVE IN IMPLEMENTATION
 	return queryRel;
 }
@@ -672,7 +680,6 @@ bool ParserEngine::ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 		return "true";*/
 	}
 }
-
 int ParserEngine::ParseProgramBlock(string Program){//TODO: kill off
 	int failCount=0;
 	string Sub="";
@@ -846,23 +853,27 @@ vector<string> ParserEngine::dbTokens(string commandLine){ //Scanner-Tokenizer
    }
    return tokens;			//A vector full of the tokens ready for translation by the database engine.
 }
-
-
 Relation* ParserEngine::doExpr(int* qStart){
+	enter("doExpr");
 	int qS=(*qStart);
+	
+	Relation* expRel;
+	
+	cout<<"qS:"<<qS<<endl;
 	if(isProjection1(qS)){
-		return doProjection(&qS);
+		expRel = doProjection(&qS);
 	
 	}
 	else if(sToks[qS] == "rename"){
-		return doRename(&qS);
+		expRel = doRename(&qS);
 	}
-	
-	
-	Relation* nul;
-	return nul;	
+	else if(sToks[qS] == "select"){
+		expRel = doSelect(&qS);
+	}
+	(*qStart) = qS;
+	leave("doExpr");
+	return expRel;	
 }
-
 vector<string> ParserEngine::getAttributeList(int* attrListS){
 	enter("getATTRLIST");
 	vector<string> attrs;
@@ -888,15 +899,185 @@ vector<string> ParserEngine::getAttributeList(int* attrListS){
 
 }
 
+
+
+Condition ParserEngine::getCondition(int* conS){
+//condition ::= conjunction { || conjunction }
+	enter("doCondition");
+	int cS = (*conS);
+	Condition cond;
+	Conjunction conj=getConjunction(&cS);
+	cond.conjunctions.push_back(conj);
+	while(sToks[cS]=="||"){
+		cS++;
+		conj = getConjunction(&cS);
+		cond.conjunctions.push_back(conj);
+	}
+	(*conS) = cS;
+	leave("doCondition");
+	return cond;
+}
+Conjunction ParserEngine::getConjunction(int* conJ){
+//conjunction ::= comparison { && comparison }
+	enter("getConjunction");
+	int cS = (*conJ);
+	Conjunction conj;
+	Comparison comp = getComparison(&cS);
+	conj.comparisons.push_back(comp);
+	while(sToks[cS]=="&&"){
+		cS++;
+		comp = getComparison(&cS);
+		conj.comparisons.push_back(comp);
+	}
+	(*conJ) = cS;
+	leave("getConjunction");
+	return conj;
+}
+Comparison ParserEngine::getComparison(int* comP){
+//comparison ::= operand op operand | ( condition )
+	enter("getComparison");
+	int cS = (*comP);
+	Comparison comp;
+	
+	
+	if(sToks[cS]=="("){
+		cS++;
+		comp.isCondition=true;
+		comp.cond=getCondition(&cS);
+		cS++;
+	}else{
+		comp.isCondition=false;
+		comp.operand1=getOperand(&cS);
+		comp.op=getOp(&cS);
+		comp.operand2=getOperand(&cS);
+	}
+	
+	(*comP) = cS;
+	leave("getComparison");
+	return comp;
+}
+Operation ParserEngine::getOp(int* opI){
+//enum opEnum {"=="=0, "!=", "<" , ">", "<=", ">="}
+//enum Operation { Equality=0, NonEquality, LessThan, GreaterThan, LessThanEqual, GreaterThanEqual }; // ==, !=, <, >, <=, >=
+	enter("getOp");
+	int oI = (*opI);
+	Operation oper;
+	if(sToks[oI] == "=="){
+		oper=Equality;
+	}else if(sToks[oI] == "!="){
+		oper=NonEquality;
+	}else if(sToks[oI] == "<"){
+		oper=LessThan;
+	}else if(sToks[oI] == ">"){
+		oper=GreaterThan;
+	}else if(sToks[oI] == "<="){
+		oper=LessThanEqual;
+	}else if(sToks[oI] == ">="){
+		oper=GreaterThanEqual;
+	}
+	oI++;
+	(*opI) = oI;
+	leave("getOp");
+	return oper;
+}
+Operand ParserEngine::getOperand(int* opandI){
+//operand ::= attribute-name | literal
+	enter("getOperand");
+	int opI = (*opandI);
+	Operand opernd;
+	
+	string firstTok = sToks[opI];
+	if(firstTok=="\"" || firstTok=="-" || isdigit(firstTok[0])){
+		opernd.isAttribute = false;
+		string lit = getLiteral(&opI);
+		opernd.val=lit;
+	}else{
+		opernd.isAttribute = true;
+		string aN = getAttributeName(&opI);
+		opernd.val=aN;
+	}
+	(*opandI) = opI;
+	leave("getOperand");
+	return opernd;
+}
+string ParserEngine::getLiteral(int* litS){
+	enter("getLiteral");
+	int lS = (*litS);
+	string litt="";
+	if(sToks[lS]=="\""){
+		lS++;
+		while(sToks[lS] != "\""){
+			litt+=sToks[lS];
+			lS++;
+		}
+		lS++;
+	}else if(sToks[lS]=="-"){
+		litt+=sToks[lS];
+		lS++;
+		litt+=sToks[lS];
+		lS++;
+	}else{
+		litt=sToks[lS];
+		lS++;
+	}
+	(*litS) = lS;
+	leave("getLiteral");
+	return litt;
+}
+string ParserEngine::getAttributeName(int* attS){
+	enter("getAttributeName");
+	string nm=sToks[(*attS)];
+	(*attS)++;
+	leave("getAttributeName");
+	return nm;
+}
+
+Relation* ParserEngine::doSelect(int* selStart){
+	//high_hitters <- select (homeruns >= 40) baseball_players;
+	//selection ::= select ( condition ) atomic-expr
+	enter("doSelect");
+	int ss = (*selStart);
+	ss+=2;
+	Condition cond = getCondition(&ss);
+	ss++;
+	Relation* frmRel = doAtomicExpr(&ss);
+	Relation* newRel = new Relation("select");
+	for(int i=0; i<frmRel->columns.size(); i++){
+		newRel->addAttribute(frmRel->columns[i].name, frmRel->columns[i].type);
+	}
+		
+	vector<int> passedTupInds();
+	cout<<"1!!!!!!!!!!!!!\n";
+	for(int i=0; i<frmRel->columns[0].cells.size(); i++){
+		cout<<"2!!!!!!!!!!!!!\n";
+			if(cond.passes(frmRel, i)){
+				cout<<"3!!!!!!!!!!!!!\n";
+				newRel->addTuple(frmRel->getTuple(i));
+			}
+	}
+	
+	(*selStart) = ss;
+	ownerDBMS->scratchRels.push_back(newRel);
+	
+	
+	leave("doSelect");
+	return newRel;
+	
+	
+	
+}
 Relation* ParserEngine::doAtomicExpr(int* aeStart){
+	printSTok();
+	cout<<"aeSTART+++++="<<(*aeStart)<<endl;
+	enter("doAE");
 	int aeS = (*aeStart);
 	//TODO: IMPLEMENT REST!
-	string relName=sToks[aeS];
+	string relName=sToks[aeS];	
+	leave("doAE");
 	return ownerDBMS->relsInMem[relName];
 	//if rel not in mem, open
 
 }
-
 Relation* ParserEngine::doProjection(int* qStart){
 
 	int pS = (*qStart);
@@ -921,7 +1102,6 @@ Relation* ParserEngine::doProjection(int* qStart){
 	return newRel;
 	
 }
-
 Relation* ParserEngine::doRename(int* qStart){
 	int rS = (*qStart);
 	rS+=2;
@@ -943,12 +1123,9 @@ Relation* ParserEngine::doRename(int* qStart){
 	return newRel;
 	
 }
-
-
 bool ParserEngine::isProjection1(int pS){
 	return sToks[pS] == "project";
 }
-
 bool ParserEngine::isAtomicExpr(){
 //atomic-expr ::= relation-name | ( expr )
 	enter("isAtomicExpr");
