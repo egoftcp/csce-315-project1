@@ -153,7 +153,8 @@ public:
 	//void update(vector< pair<string colName, string newVal> > setList, condition_tree/list)
 	
 	void print() {
-		
+		cout<<getHeight()<<endl;
+		system("pause");
 		//Prints the header (name of attributes)
 		for(int i = 0; i < columns.size(); i++) {
 			cout << setw (18)<<columns[i].getName();

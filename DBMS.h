@@ -1147,7 +1147,8 @@ Relation* ParserEngine::doSelect(int* selStart){
 	for(int i=0; i<frmRel->columns.size(); i++){
 		newRel->addAttribute(frmRel->columns[i].name, frmRel->columns[i].type);
 	}
-		
+	newRel->getHeight();
+	system("pause");
 	vector<int> passedTupInds();
 	for(int i=0; i<frmRel->columns[0].cells.size(); i++){
 			if(cond.passes(frmRel, i)){
