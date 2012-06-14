@@ -79,6 +79,10 @@ public:
 	Attribute findAttribute(string input_name) {
 		return columns[indices[input_name]];
 	}
+	Attribute* findAttributeP(string input_name) {
+		return &columns[indices[input_name]];
+	}
+	
 	
 /*	int getIndex(string attribName, string uniqueValue){
 		int col

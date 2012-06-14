@@ -99,6 +99,9 @@ public:
 	bool ParseTokens();
 	
 private:
+	Relation* doProduct();
+	string getRelationName(int* relS);
+	Relation* doUpdate(int* upStart);
 	string getLiteral(int* litS);
 	string getAttributeName(int* attS);
 	Conjunction getConjunction(int* conJ);
@@ -537,6 +540,7 @@ Relation* ParserEngine::ExecuteQuery(const string& Query){
 bool ParserEngine::ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 	bool ret=false;
 	int tI=0;
+	int* cmdI = &tI;
 	resetParserVals();
 	sToks = dbTokens(Command);
 	if(sToks[tI] == "CREATE"){
@@ -654,6 +658,11 @@ bool ParserEngine::ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 //UPDATE rentals SET checkInDate = \""+checkInDate+"\" WHERE dvdId = "+dvdId+";
 	else if(sToks[tI]=="UPDATE")
 	{
+		int upI = (*cmdI);
+		Relation* newRel = doUpdate(&upI);
+		(*cmdI) = upI;
+		return true;
+		
 /*		string relName = sToks[2],attribToChange = sToks[4],valToChangeTo,attribForFinding,valToFind; 
 		vector<string> vals;
 		int intInd=6,rowIndex,colIndex;
@@ -854,22 +863,52 @@ vector<string> ParserEngine::dbTokens(string commandLine){ //Scanner-Tokenizer
    return tokens;			//A vector full of the tokens ready for translation by the database engine.
 }
 Relation* ParserEngine::doExpr(int* qStart){
+/*bool isExp = isSelection();
+		
+	if(!isExp){
+		isExp=isProjection();
+	}
+	if(!isExp){
+		isExp=isRenaming();
+	}
+	if(!isExp){
+		isExp=isUnion();
+	}
+	if(!isExp){
+		sI=exprI;
+		isExp=isDifference();
+	}
+	if(!isExp){
+		sI=exprI;
+		isExp=isProduct();
+	}
+	if(!isExp){
+		sI=exprI;
+		isExp=isAtomicExpr();
+	}
+	if(!isExp){
+		sI=exprI;
+	}*/
+	
+
+
 	enter("doExpr");
 	int qS=(*qStart);
 	
 	Relation* expRel;
 	
 	cout<<"qS:"<<qS<<endl;
-	if(isProjection1(qS)){
+	if(sToks[qS] == "select"){
+		expRel = doSelect(&qS);
+	}
+	else if(isProjection1(qS)){
 		expRel = doProjection(&qS);
 	
 	}
 	else if(sToks[qS] == "rename"){
 		expRel = doRename(&qS);
 	}
-	else if(sToks[qS] == "select"){
-		expRel = doSelect(&qS);
-	}
+
 	(*qStart) = qS;
 	leave("doExpr");
 	return expRel;	
@@ -1031,6 +1070,69 @@ string ParserEngine::getAttributeName(int* attS){
 	leave("getAttributeName");
 	return nm;
 }
+string ParserEngine::getRelationName(int* relS){
+	enter("getRelationName");
+	string rN=sToks[(*relS)];
+	(*relS)++;
+	leave("getRelationName");
+	return rN;
+}
+
+Relation* ParserEngine::doUpdate(int* upStart){
+	//UPDATE dots SET x1 = 0 WHERE x1 < 0;
+	//update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
+	enter("doUpdate");
+	int upI = (*upStart);
+	upI++; //consume UPDATE token
+	string relName = getRelationName(&upI);
+	vector<string> attribNames;
+	vector<string> lits;
+	do{
+		upI++; //consumer "SET" or "," token
+		attribNames.push_back(getAttributeName(&upI));
+		upI++; //consume "=" token
+		lits.push_back(getLiteral(&upI));
+	}while(sToks[upI]==",");
+	upI++; //consume "WHERE" token
+	Condition cond = getCondition(&upI);
+	
+	Relation* updateRel = ownerDBMS->relsInMem[relName];
+	vector<int> updateTuples;
+	int cellCnt = updateRel->columns[0].cells.size();
+	for(int i=0; i<cellCnt; i++){
+		if(cond.passes(updateRel,i)){
+			updateTuples.push_back(i);
+		}
+	}
+
+	for(vector<int>::iterator it = updateTuples.begin(); it!=updateTuples.end(); ++it){
+		int tupleI = (*it);
+		for(int at = 0; at<attribNames.size(); at++){
+			cout<<"****"<<updateRel->findAttributeP(attribNames[at])->cells[tupleI]<<" : "<<lits[at]<<endl;
+			updateRel->findAttributeP(attribNames[at])->cells[tupleI] = lits[at];
+		}		
+	}
+	(*upStart)=upI;
+	leave("doUpdate");
+	return updateRel;
+	
+}
+Relation* ParserEngine::doProduct(){
+//product ::= atomic-expr * atomic-expr 
+	/*enter("isProduct");
+	bool isProd=false;
+	if(isAtomicExpr()){
+		if(sToks[sI]=="*"){
+			sI++;
+			if(isAtomicExpr()){
+				isProd=true;
+			}else{errOut("Expected <atomic-expr> to follow \"<atomic-expr> * \"");}
+		}
+	}		
+	leave("isProduct");
+	return isProd;*/
+}
+
 
 Relation* ParserEngine::doSelect(int* selStart){
 	//high_hitters <- select (homeruns >= 40) baseball_players;
@@ -1047,11 +1149,8 @@ Relation* ParserEngine::doSelect(int* selStart){
 	}
 		
 	vector<int> passedTupInds();
-	cout<<"1!!!!!!!!!!!!!\n";
 	for(int i=0; i<frmRel->columns[0].cells.size(); i++){
-		cout<<"2!!!!!!!!!!!!!\n";
 			if(cond.passes(frmRel, i)){
-				cout<<"3!!!!!!!!!!!!!\n";
 				newRel->addTuple(frmRel->getTuple(i));
 			}
 	}
@@ -1699,6 +1798,7 @@ bool ParserEngine::isCreate(){
 	return isCrt;
 }
 bool ParserEngine::isUpdate(){
+//UPDATE dots SET x1 = 0 WHERE x1 < 0;
 //update-cmd ::= UPDATE relation-name SET attribute-name = literal { , attribute-name = literal } WHERE condition
 	enter("isUpdate");
 	bool isUpd=false;
