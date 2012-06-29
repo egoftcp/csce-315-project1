@@ -299,8 +299,6 @@ int DBMS::ExecuteTxtFile(string fileName){
 }
 
 
-	
-
 DBEngine::DBEngine(){
 	dbFilePath = "./";
 	
@@ -512,7 +510,7 @@ int ParserEngine::Validate(const string& line){
 	}else{
 		resetParserVals();
 		sToks= dbTokens(line);
-		cout<<"stoks.size()"<<sToks.size()<<endl;
+		//cout<<"stoks.size()"<<sToks.size()<<endl;
 		if(isQuery()){
 			return 2; //2 represents a valid query
 		}else{
@@ -607,7 +605,7 @@ bool ParserEngine::ExecuteCommand(const string& Command){ //ASSUMES VALID INPUT
 				intInd++;
 			}
 		}while(sToks[intInd]==",");
-		cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
+		//cout<<"tuple("<<vals.size()<<"):"<<vals[0]<<":"<<vals[1]<<":"<<vals[2]<<endl;
 		ownerDBMS->relsInMem[relName]->addTuple(vals);
 		ret=true;
 		return ret;
@@ -897,7 +895,7 @@ Relation* ParserEngine::doExpr(int* qStart){
 	
 	Relation* expRel;
 	
-	cout<<"qS:"<<qS<<endl;
+	//cout<<"qS:"<<qS<<endl;
 	if(sToks[qS] == "select"){
 		expRel = doSelect(&qS);
 	}
@@ -1131,6 +1129,7 @@ Relation* ParserEngine::doProduct(){
 	}		
 	leave("isProduct");
 	return isProd;*/
+	return false;
 }
 
 
@@ -1148,7 +1147,6 @@ Relation* ParserEngine::doSelect(int* selStart){
 		newRel->addAttribute(frmRel->columns[i].name, frmRel->columns[i].type);
 	}
 	newRel->getHeight();
-	system("pause");
 	vector<int> passedTupInds();
 	for(int i=0; i<frmRel->columns[0].cells.size(); i++){
 			if(cond.passes(frmRel, i)){
@@ -1167,8 +1165,8 @@ Relation* ParserEngine::doSelect(int* selStart){
 	
 }
 Relation* ParserEngine::doAtomicExpr(int* aeStart){
-	printSTok();
-	cout<<"aeSTART+++++="<<(*aeStart)<<endl;
+	//printSTok();
+	//cout<<"aeSTART+++++="<<(*aeStart)<<endl;
 	enter("doAE");
 	int aeS = (*aeStart);
 	//TODO: IMPLEMENT REST!

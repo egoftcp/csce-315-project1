@@ -182,7 +182,7 @@ string addNewCustomerMenu(){
 	green("*Enter Customer's First Name:");white("");cin>>firstName;
 	green("*Enter Customer's Last Name:");white("");cin>>lastName;
 	green("*Enter Customer's Phone Number:");white("");cin>>phoneNumber;
-	userId=firstName.substr(0,3)+lastName.substr(0,3)+id[4]+id[5]+id[7]+id[8]+id[9];
+	userId=firstName.substr(0,3)+lastName.substr(0,3)+id[7]+id[8]+id[9];
 	green("*Customer's user ID will be:");white("");cout<<userId<<endl;
 	green("*");white("1");green(" to accept above information, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -241,14 +241,14 @@ string updateCustomerMenu(){
 	string userId,firstName="fNameNA",lastName="lNameNA",phoneNumber="phone#NA",idToUpdate;
 	char choice;
 	title("Update Customer");green("*Enter Customer's User ID:");white("");cin>>idToUpdate;
-	white("customerToUpdate <- select (userId == "+idToUpdate+") customers;");cout<<endl;//printSTok();
+	white("customerToUpdate <- select (userId == \""+idToUpdate+"\") customers;");cout<<endl;//printSTok();
 	white("SHOW customerToUpdate;");cout<<endl;//printSTok();
 	exeDBMS1.Execute("OPEN customers;");
-	exeDBMS1.Execute("customerToUpdate <- select (userId == "+idToUpdate+") customers;");
+	exeDBMS1.Execute("customerToUpdate <- select (userId == \""+idToUpdate+"\") customers;");
 	exeDBMS1.Execute("SHOW customerToUpdate;");
 	exeDBMS1.Execute("CLOSE customers;");
 	//red("");centerstring("NOT YET IMPLEMENTED");
-	white("");cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+	//white("");cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	green("*");white("1");green(" to update the customer, ");white("5");green(" to change, any key to go back:");
 	do{
 		cin>>choice;
@@ -265,34 +265,35 @@ string updateCustomerMenu(){
 	}while(choice!='1'&&choice!='2'&&choice!='3');
 	if(choice=='1'){
 		green("*Enter Customer's First Name:");white("");cin>>firstName;
-		white("UPDATE customers SET firstName == "+firstName+" WHERE userId == "+idToUpdate+";");cout<<endl;
-		white("updatedCustomer <- select (userId == "+idToUpdate+") customers;");cout<<endl;
-		//exeDBMS1.Execute("OPEN customers;");
-		//exeDBMS1.Execute("UPDATE customers SET lastName == "+firstName+" WHERE userId == "+idToUpdate+";");
-		//exeDBMS1.Execute("updatedCustomer <- select (userId == "+idToUpdate+") customers;");
-		//exeDBMS1.Execute("CLOSE customers;");
-		red("");centerstring("NOT YET IMPLEMENTED");
-		white("");cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+		white("UPDATE customers SET firstName = \""+firstName+"\" WHERE userId == \""+idToUpdate+"\";");cout<<endl;
+		white("updatedCustomer <- select (userId == \""+idToUpdate+"\") customers;");cout<<endl;
+		exeDBMS1.Execute("OPEN customers;");
+		exeDBMS1.Execute("UPDATE customers SET firstName = \""+firstName+"\" WHERE userId == \""+idToUpdate+"\";");
+		exeDBMS1.Execute("updatedCustomer <- select (userId == \""+idToUpdate+"\") customers;");
+		exeDBMS1.Execute("SHOW updatedCustomer;");
+		exeDBMS1.Execute("CLOSE customers;");
+		//red("");centerstring("NOT YET IMPLEMENTED");
+		//white("");cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Customer's Last Name:");white("");cin>>lastName;
-		white("UPDATE customers SET lastName == "+lastName+" WHERE userId == "+idToUpdate+";");cout<<endl;
-		white("updatedCustomer <- select (userId == "+idToUpdate+") customers;");cout<<endl;
-		//exeDBMS1.Execute("OPEN customers;");
-		//exeDBMS1.Execute("UPDATE customers SET lastName == "+lastName+" WHERE userId == "+idToUpdate+";");
-		//exeDBMS1.Execute("updatedCustomer <- select (userId == "+idToUpdate+") customers;");
-		//exeDBMS1.Execute("CLOSE customers;");
+		white("UPDATE customers SET lastName == \""+lastName+"\" WHERE userId == \""+idToUpdate+"\";");cout<<endl;
+		white("updatedCustomer <- select (userId == \""+idToUpdate+"\") customers;");cout<<endl;
+		exeDBMS1.Execute("OPEN customers;");
+		exeDBMS1.Execute("UPDATE customers SET lastName = \""+lastName+"\" WHERE userId == \""+idToUpdate+"\";");
+		exeDBMS1.Execute("updatedCustomer <- select (userId == \""+idToUpdate+"\") customers;");
+		exeDBMS1.Execute("CLOSE customers;");
 		red("");centerstring("NOT YET IMPLEMENTED");white("");
-		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+		//cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='3'){
 		green("*Enter Customer's Phone Number:");white("");cin>>phoneNumber;
-		white("UPDATE customers SET phoneNumber == "+phoneNumber+" WHERE userId == "+idToUpdate+";");cout<<endl;
-		white("updatedCustomer <- select (userId == "+idToUpdate+") customers;");cout<<endl;
-		//exeDBMS1.Execute("OPEN customers;");
-		//exeDBMS1.Execute("UPDATE customers SET phoneNumber == "+phoneNumber+" WHERE userId == "+idToUpdate+";");
-		//exeDBMS1.Execute("updatedCustomer <- select (userId == "+idToUpdate+") customers;");
-		//exeDBMS1.Execute("CLOSE customers;");
+		white("UPDATE customers SET phoneNumber == \""+phoneNumber+"\" WHERE userId == \""+idToUpdate+"\";");cout<<endl;
+		white("updatedCustomer <- select (userId == \""+idToUpdate+"\") customers;");cout<<endl;
+		exeDBMS1.Execute("OPEN customers;");
+		exeDBMS1.Execute("UPDATE customers SET phoneNumber = "+phoneNumber+" WHERE userId == "+idToUpdate+";");
+		exeDBMS1.Execute("updatedCustomer <- select (userId == "+idToUpdate+") customers;");
+		exeDBMS1.Execute("CLOSE customers;");
 		red("");centerstring("NOT YET IMPLEMENTED");white("");
 		cout<<idToUpdate<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
@@ -344,8 +345,8 @@ string searchCustomerMenu(){
 		//red("");centerstring("NOT YET IMPLEMENTED");white("");
 		exeDBMS1.Execute("CLOSE customers;");
 		
-		for(int i=0;i<10;i++)
-			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+		//for(int i=0;i<10;i++)
+			//cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='2'){
 		green("*Enter Last Name to search for:");white("");cin>>lastName;
@@ -356,8 +357,8 @@ string searchCustomerMenu(){
 		exeDBMS1.Execute("SHOW searchByLastName;");
 		exeDBMS1.Execute("CLOSE customers;");
 		//red("");centerstring("NOT YET IMPLEMENTED");white("");
-		for(int i=0;i<10;i++)
-			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+		//for(int i=0;i<10;i++)
+			//cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='3'){
 		green("*Enter Phone Number to search for:");white("");cin>>phoneNumber;
@@ -368,8 +369,8 @@ string searchCustomerMenu(){
 		exeDBMS1.Execute("SHOW searchByPhoneNumber;");
 		exeDBMS1.Execute("CLOSE customers;");
 		//red("");centerstring("NOT YET IMPLEMENTED");white("");
-		for(int i=0;i<10;i++)
-			cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
+		//for(int i=0;i<10;i++)
+			//cout<<userId<<", "+firstName+", "+lastName+", "+phoneNumber<<endl;
 	}
 	else if(choice=='5')
 		return "customerMenu";
@@ -385,7 +386,7 @@ string addNewDvdMenu(){
 	title("Add New DVD");
 	green("*Enter DVD ID:");white("");cin>>dvdId;
 	green("*Enter DVD Title:");white("");cin.clear();cin.sync();getline(cin,dvdTitle);
-	inventoryNumber=id;
+	inventoryNumber=dvdId.substr(4,1)+id[8]+id[7]+id[6]+id[5]+id[4];
 	green("*Inventory Number will be:");white("");cout<<inventoryNumber<<endl;
 	green("*");white("1");green(" to accept above information, ");white("5");green(" to change, any key to go back:");
 	do{
@@ -662,7 +663,8 @@ string checkInDvdMenu()
 	int selection=NULL;
 	char checkInDate[21],choice;
 	strftime(checkInDate,20,"%Y-%m-%d %H:%M:%S",localtime(&seconds));
-	string userId,dvdId,inventoryNumber;
+	string userId,dvdId,inventoryNumber,checkInDateStr;
+	checkInDateStr=checkInDate;
 	title("Check In DVD");
 	green("*Enter Inventory Number:");white("");cin>>inventoryNumber;
 	green("*Enter Customer ID:");white("");cin>>userId;
@@ -672,10 +674,10 @@ string checkInDvdMenu()
 	if(choice=='1'){
 		white("");
 		cout<<"UPDATE rentals SET checkInDate == \""<<checkInDate<<"\" WHERE dvdId == "+dvdId+";"<<endl;
-		//exeDBMS1.Execute("OPEN rentals;");
-		//exeDBMS1.Execute("UPDATE rentals SET checkInDate == \""+checkInDate+"\" WHERE dvdId == \""+dvdId+"\";");
-		//exeDBMS1.Execute("CLOSE rentals;");
-		red("");centerstring("NOT YET IMPLEMENTED");white("");
+		exeDBMS1.Execute("OPEN rentals;");
+		exeDBMS1.Execute("UPDATE rentals SET checkInDate = \""+checkInDateStr+"\" WHERE dvdId == \""+dvdId+"\";");
+		exeDBMS1.Execute("CLOSE rentals;");
+		//red("");centerstring("NOT YET IMPLEMENTED");white("");
 		system("pause");
 	}
 	else if(choice=='5')

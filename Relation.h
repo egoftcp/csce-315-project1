@@ -153,17 +153,15 @@ public:
 	//void update(vector< pair<string colName, string newVal> > setList, condition_tree/list)
 	
 	void print() {
-		cout<<getHeight()<<endl;
-		system("pause");
 		//Prints the header (name of attributes)
 		for(int i = 0; i < columns.size(); i++) {
-			cout << setw (18)<<columns[i].getName();
+			cout << setw (19)<<columns[i].getName();
 		}
 		cout << endl;
 		//Prints the tuples (elements/cells)
 		for(int i = 0; i < columns[0].cells.size(); i++) {
 			for(int j = 0; j < columns.size(); j++) {
-				cout << setw (18)<<columns[j].cells[i];
+				cout << setw (19)<<columns[j].cells[i];
 			}
 			cout << endl;
 		}

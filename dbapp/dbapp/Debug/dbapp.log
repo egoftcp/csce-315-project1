@@ -1,4 +1,4 @@
-﻿Build started 6/14/2012 5:30:25 PM.
+﻿Build started 6/14/2012 6:49:34 PM.
      1>Project "H:\CSCE315Project\dbapp\dbapp\dbapp.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\dbapp.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -10,65 +10,66 @@
      1>h:\csce315project\relation.h(51): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project\relation.h(65): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project\relation.h(73): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(114): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(126): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(155): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(160): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(161): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(173): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(211): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(247): warning C4101: 'equal' : unreferenced local variable
-     1>h:\csce315project\relation.h(262): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(266): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(282): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(286): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(300): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(312): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(118): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(130): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(157): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(162): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(163): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(175): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(213): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(249): warning C4101: 'equal' : unreferenced local variable
+     1>h:\csce315project\relation.h(264): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(268): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(284): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(288): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(302): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project\relation.h(314): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(335): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(341): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(352): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(316): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(337): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(343): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project\relation.h(354): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(388): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(392): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\relation.h(400): warning C4101: 'index' : unreferenced local variable
+     1>h:\csce315project\relation.h(356): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(390): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(394): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\relation.h(402): warning C4101: 'index' : unreferenced local variable
      1>h:\csce315project\condconjcompop.h(43): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project\condconjcompop.h(52): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(186): warning C4101: 'currentChar' : unreferenced local variable
-     1>h:\csce315project\dbms.h(232): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(372): warning C4101: 'currentChar' : unreferenced local variable
-     1>h:\csce315project\dbms.h(412): warning C4101: 'currentChar' : unreferenced local variable
-     1>h:\csce315project\dbms.h(1045): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1052): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1050): warning C4930: 'std::vector<_Ty> passedTupInds(void)': prototyped function not called (was a variable definition intended?)
+     1>h:\csce315project\dbms.h(189): warning C4101: 'currentChar' : unreferenced local variable
+     1>h:\csce315project\dbms.h(235): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(373): warning C4101: 'currentChar' : unreferenced local variable
+     1>h:\csce315project\dbms.h(413): warning C4101: 'currentChar' : unreferenced local variable
+     1>h:\csce315project\dbms.h(1108): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1146): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1151): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1150): warning C4930: 'std::vector<_Ty> passedTupInds(void)': prototyped function not called (was a variable definition intended?)
                  with
                  [
                      _Ty=int
                  ]
-     1>h:\csce315project\dbms.h(1095): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1115): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1162): warning C4018: '>=' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1326): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1402): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1818): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project\dbms.h(1825): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1192): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1212): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1259): warning C4018: '>=' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1423): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1499): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1916): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project\dbms.h(1923): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project\dvd_dbms.cpp(180): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
      1>h:\csce315project\dvd_dbms.cpp(180): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
-     1>h:\csce315project\dvd_dbms.cpp(322): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>h:\csce315project\dvd_dbms.cpp(384): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
-     1>h:\csce315project\dvd_dbms.cpp(384): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(323): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>h:\csce315project\dvd_dbms.cpp(385): warning C4244: 'argument' : conversion from 'time_t' to 'int', possible loss of data
+     1>h:\csce315project\dvd_dbms.cpp(385): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _itoa. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdlib.h(867) : see declaration of 'itoa'
-     1>h:\csce315project\dvd_dbms.cpp(513): warning C4390: ';' : empty controlled statement found; is this the intent?
-     1>h:\csce315project\dvd_dbms.cpp(633): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(514): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>h:\csce315project\dvd_dbms.cpp(634): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>h:\csce315project\dvd_dbms.cpp(635): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(636): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>h:\csce315project\dvd_dbms.cpp(664): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>h:\csce315project\dvd_dbms.cpp(665): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\time.inl(112) : see declaration of 'localtime'
-     1>h:\csce315project\dvd_dbms.cpp(713): warning C4390: ';' : empty controlled statement found; is this the intent?
+     1>h:\csce315project\dvd_dbms.cpp(715): warning C4390: ';' : empty controlled statement found; is this the intent?
      1>h:\csce315project\condconjcompop.h(125): warning C4715: 'Comparison::passes' : not all control paths return a value
-     1>h:\csce315project\dbms.h(682): warning C4715: 'ParserEngine::ExecuteCommand' : not all control paths return a value
+     1>h:\csce315project\dbms.h(689): warning C4715: 'ParserEngine::ExecuteCommand' : not all control paths return a value
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\CSCE315Project\dbapp\Debug\dbapp.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\dbapp.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"H:\CSCE315Project\dbapp\Debug\dbapp.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\CSCE315Project\dbapp\Debug\dbapp.lib" /MACHINE:X86 Debug\dvd_dbms.obj
          LINK : H:\CSCE315Project\dbapp\Debug\dbapp.exe not found or not built by the last incremental link; performing full link
@@ -82,4 +83,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.02
+Time Elapsed 00:00:08.03
