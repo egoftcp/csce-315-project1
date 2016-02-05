@@ -1,0 +1,1 @@
+A database management system. Includes a parser to interpret commands. The database engine itself will accept SQL commands. Will include a database application that uses this database engine.
